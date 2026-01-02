@@ -2,7 +2,6 @@
 #include <wlr/util/log.h>
 #include <wlr/types/wlr_subcompositor.h>
 #include <wlr/types/wlr_data_device.h>
-#include <wlr/types/wlr_screencopy_v1.h>
 #include <wlr/types/wlr_xcursor_manager.h>
 
 #include "types.h"
@@ -44,7 +43,6 @@ int main(int argc, char **argv)
     wlr_compositor_create(server.display, 5, server.renderer);
     wlr_subcompositor_create(server.display);
     wlr_data_device_manager_create(server.display);
-    wlr_screencopy_manager_v1_create(server.display);
 
     server.output_layout = wlr_output_layout_create(server.display);
 
