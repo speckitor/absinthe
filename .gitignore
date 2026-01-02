@@ -1,0 +1,4 @@
+absinthe
+.cache/
+compile_commands.json
+xdg-shell-protocol.h
