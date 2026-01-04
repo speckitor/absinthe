@@ -16,8 +16,8 @@ static void process_cursor_move(struct absinthe_server *server) {
     if (!toplevel) return;
 
     uint32_t new_x, new_y;
-    new_x = server->cursor->x - server->grab_x + server->grabbed_toplevel_x;
-    new_y = server->cursor->y - server->grab_y + server->grabbed_toplevel_y;
+    new_x = server->cursor->x - server->grab_x + server->grabbed_box.x;
+    new_y = server->cursor->y - server->grab_y + server->grabbed_box.y;
     wlr_scene_node_set_position(&toplevel->scene_tree->node, new_x, new_y);
 }
 
@@ -27,10 +27,10 @@ static void process_cursor_resize(struct absinthe_server *server) {
     if (!toplevel) return;
 
     int32_t new_x, new_y, new_width, new_height;
-    new_x = server->grabbed_toplevel_x;
-    new_y = server->grabbed_toplevel_y;
-    new_width = server->grabbed_toplevel_width;
-    new_height = server->grabbed_toplevel_height;
+    new_x = server->grabbed_box.x;
+    new_y = server->grabbed_box.y;
+    new_width = server->grabbed_box.width;
+    new_height = server->grabbed_box.height;
 
     switch (server->cursor_resize_corner) {
     case ABSINTHE_CURSOR_RESIZE_CORNER_TOP_LEFT:

@@ -3,6 +3,20 @@
 #include <wayland-server-core.h>
 
 #include "types.h"
+#include "xdg-decoration.h"
+
+void xdg_toplevel_commit(struct wl_listener *listener, void *data)
+{
+    struct absinthe_toplevel *toplevel = wl_container_of(listener, toplevel, commit);
+
+    if (toplevel->xdg_toplevel->base->initial_commit) {
+        wlr_xdg_toplevel_set_size(toplevel->xdg_toplevel, 0, 0);
+
+        if (toplevel->decoration) {
+            xdg_decoration_request_mode(&toplevel->decoration_request_mode, toplevel->decoration);
+        }
+    }
+}
 
 void xdg_toplevel_map(struct wl_listener *listener, void *data)
 {
@@ -16,15 +30,6 @@ void xdg_toplevel_unmap(struct wl_listener *listener, void *data)
     struct absinthe_toplevel *toplevel = wl_container_of(listener, toplevel, unmap);
 
     wl_list_remove(&toplevel->link);
-}
-
-void xdg_toplevel_commit(struct wl_listener *listener, void *data)
-{
-    struct absinthe_toplevel *toplevel = wl_container_of(listener, toplevel, commit);
-
-    if (toplevel->xdg_toplevel->base->initial_commit) {
-        wlr_xdg_toplevel_set_size(toplevel->xdg_toplevel, 0, 0);
-    }
 }
 
 void xdg_toplevel_destroy(struct wl_listener *listener, void *data)

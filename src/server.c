@@ -7,6 +7,7 @@
 #include "output.h"
 #include "xdg-toplevel.h"
 #include "xdg-popup.h"
+#include "xdg-decoration.h"
 #include "absinthe-toplevel.h"
 #include "focus.h"
 #include "keyboard.h"
@@ -59,7 +60,7 @@ void server_new_xdg_toplevel(struct wl_listener *listener, void *data)
     toplevel->xdg_toplevel = xdg_toplevel;
     toplevel->scene_tree = wlr_scene_xdg_surface_create(&toplevel->server->scene->tree, xdg_toplevel->base);
     toplevel->scene_tree->node.data = toplevel;
-    xdg_toplevel->base->data = toplevel->scene_tree;
+    xdg_toplevel->base->data = toplevel;
 
     toplevel->map.notify = xdg_toplevel_map;
     wl_signal_add(&xdg_toplevel->base->surface->events.map, &toplevel->map);
@@ -101,6 +102,20 @@ void server_new_xdg_popup(struct wl_listener *listener, void *data)
     wl_signal_add(&xdg_popup->base->surface->events.destroy, &popup->destroy);
 }
 
+void server_new_xdg_decoration(struct wl_listener *listener, void *data)
+{
+    struct wlr_xdg_toplevel_decoration_v1 *xdg_decoration = data;
+    struct absinthe_toplevel *toplevel = xdg_decoration->toplevel->base->data;
+    toplevel->decoration = xdg_decoration;
+
+    toplevel->decoration_request_mode.notify = xdg_decoration_request_mode;
+    wl_signal_add(&xdg_decoration->events.request_mode, &toplevel->decoration_request_mode);
+    toplevel->decoration_destroy.notify = xdg_decoration_destroy;
+    wl_signal_add(&xdg_decoration->events.destroy, &toplevel->decoration_destroy);
+
+    xdg_decoration_request_mode(&toplevel->decoration_request_mode, xdg_decoration);
+}
+
 void server_cursor_motion(struct wl_listener *listener, void *data)
 {
     struct absinthe_server *server = wl_container_of(listener, server, cursor_motion);
@@ -122,7 +137,7 @@ void server_cursor_button(struct wl_listener *listener, void *data)
     struct absinthe_server *server = wl_container_of(listener, server, cursor_button);
     struct wlr_pointer_button_event *event = data;
 
-    wlr_seat_pointer_notify_button(server->seat, event->time_msec, event->button, event->state);
+    bool handled = false;
     if (event->state == WL_POINTER_BUTTON_STATE_RELEASED) {
         reset_cursor_mode(server);
     } else {
@@ -136,8 +151,10 @@ void server_cursor_button(struct wl_listener *listener, void *data)
         if (mods & ABSINTHE_CURSOR_MOD) {
             if (event->button == ABSINTHE_CURSOR_MOVE_BUTTON) {
                 server->cursor_mode = ABSINTHE_CURSOR_MOVE;
+                handled = true;
             } else if (event->button == ABSINTHE_CURSOR_RESIZE_BUTTON) {
                 server->cursor_mode = ABSINTHE_CURSOR_RESIZE;
+                handled = true;
             }
         }
         if (toplevel) {
@@ -146,11 +163,11 @@ void server_cursor_button(struct wl_listener *listener, void *data)
 
             int lx, ly;
             wlr_scene_node_coords(&toplevel->scene_tree->node, &lx, &ly);
-            server->grabbed_toplevel_x = lx;
-            server->grabbed_toplevel_y = ly;
-            server->grabbed_toplevel_width = toplevel->xdg_toplevel->base->geometry.width;
-            server->grabbed_toplevel_height = toplevel->xdg_toplevel->base->geometry.height;
-            wlr_log(WLR_DEBUG, "%d, %d", server->grabbed_toplevel_width, server->grabbed_toplevel_width);
+            server->grabbed_box.x = lx;
+            server->grabbed_box.y = ly;
+            server->grabbed_box.width = toplevel->xdg_toplevel->base->geometry.width;
+            server->grabbed_box.height = toplevel->xdg_toplevel->base->geometry.height;
+            wlr_log(WLR_DEBUG, "%d, %d", server->grabbed_box.width, server->grabbed_box.height);
             server->grabbed_toplevel = toplevel;
 
             int width = toplevel->xdg_toplevel->base->geometry.width;
@@ -166,6 +183,10 @@ void server_cursor_button(struct wl_listener *listener, void *data)
                 server->cursor_resize_corner = ABSINTHE_CURSOR_RESIZE_CORNER_TOP_LEFT;
             }
         }
+    }
+
+    if (!handled) {
+        wlr_seat_pointer_notify_button(server->seat, event->time_msec, event->button, event->state);
     }
 }
 

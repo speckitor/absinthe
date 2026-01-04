@@ -3,10 +3,23 @@
 #include <wlr/types/wlr_subcompositor.h>
 #include <wlr/types/wlr_data_device.h>
 #include <wlr/types/wlr_xcursor_manager.h>
+#include <wlr/types/wlr_screencopy_v1.h>
+#include <wlr/types/wlr_data_control_v1.h>
+#include <wlr/types/wlr_viewporter.h>
+#include <wlr/types/wlr_single_pixel_buffer_v1.h>
+#include <wlr/types/wlr_fractional_scale_v1.h>
+#include <wlr/types/wlr_presentation_time.h>
+#include <wlr/types/wlr_alpha_modifier_v1.h>
+#include <wlr/types/wlr_export_dmabuf_v1.h>
+#include <wlr/types/wlr_ext_foreign_toplevel_list_v1.h>
+#include <wlr/types/wlr_server_decoration.h>
+#include <wlr/types/wlr_output_management_v1.h>
+#include <wlr/types/wlr_xdg_output_v1.h>
 
 #include "types.h"
 #include "server.h"
 #include "seat.h"
+#include "output.h"
 
 int main(int argc, char **argv)
 {
@@ -40,15 +53,37 @@ int main(int argc, char **argv)
         return 1;
     }
 
-    wlr_compositor_create(server.display, 5, server.renderer);
+    server.compositor = wlr_compositor_create(server.display, 6, server.renderer);
     wlr_subcompositor_create(server.display);
     wlr_data_device_manager_create(server.display);
+    wlr_screencopy_manager_v1_create(server.display);
+    wlr_data_control_manager_v1_create(server.display);
+    wlr_viewporter_create(server.display);
+    wlr_single_pixel_buffer_manager_v1_create(server.display);
+    wlr_fractional_scale_manager_v1_create(server.display, 1);
+    wlr_presentation_create(server.display, server.backend, 2);
+    wlr_alpha_modifier_v1_create(server.display);
+    wlr_export_dmabuf_manager_v1_create(server.display);
+    wlr_ext_foreign_toplevel_list_v1_create(server.display, 1);
 
-    server.output_layout = wlr_output_layout_create(server.display);
+    wlr_server_decoration_manager_set_default_mode(
+        wlr_server_decoration_manager_create(server.display),
+        WLR_SERVER_DECORATION_MANAGER_MODE_SERVER);
+    server.xdg_decoration_mgr = wlr_xdg_decoration_manager_v1_create(server.display);
+    server.new_xdg_decoration.notify = server_new_xdg_decoration;
+    wl_signal_add(&server.xdg_decoration_mgr->events.new_toplevel_decoration, &server.new_xdg_decoration);
 
     wl_list_init(&server.outputs);
     server.new_output.notify = server_new_output;
     wl_signal_add(&server.backend->events.new_output, &server.new_output);
+
+    server.output_layout = wlr_output_layout_create(server.display);
+    server.output_layout_change.notify = output_layout_change;
+    wl_signal_add(&server.output_layout->events.change, &server.output_layout_change);
+
+    server.output_mgr = wlr_output_manager_v1_create(server.display);
+
+    wlr_xdg_output_manager_v1_create(server.display, server.output_layout);
 
     server.scene = wlr_scene_create();
     server.scene_layout = wlr_scene_attach_output_layout(server.scene, server.output_layout);
@@ -111,6 +146,7 @@ int main(int argc, char **argv)
 
     wl_list_remove(&server.new_xdg_toplevel.link);
     wl_list_remove(&server.new_xdg_popup.link);
+    wl_list_remove(&server.new_xdg_decoration.link);
 
     wl_list_remove(&server.cursor_motion.link);
     wl_list_remove(&server.cursor_motion_absolute.link);

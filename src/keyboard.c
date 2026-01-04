@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <unistd.h>
 
 #include <wayland-server-core.h>
 #include <xkbcommon/xkbcommon.h>
@@ -18,6 +19,16 @@ static bool keyboard_handle_keybind(struct absinthe_server *server, xkb_keysym_t
     switch (keysym) {
     case XKB_KEY_Escape:
         wl_display_terminate(server->display);
+        break;
+    case XKB_KEY_Q:
+        if (fork() == 0) {
+            execl("/bin/sh", "sh", "-c", "wofi --show drun", NULL);
+        }
+        break;
+    case XKB_KEY_Return:
+        if (fork() == 0) {
+            execl("/bin/sh", "sh", "-c", "alacritty", NULL);
+        }
         break;
     default:
         return false;

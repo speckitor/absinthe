@@ -13,6 +13,8 @@
 #include <wlr/types/wlr_cursor.h>
 #include <wlr/types/wlr_seat.h>
 #include <wlr/types/wlr_keyboard.h>
+#include <wlr/types/wlr_output_management_v1.h>
+#include <wlr/types/wlr_xdg_decoration_v1.h>
 
 #define ABSINTHE_CURSOR_MOD WLR_MODIFIER_ALT
 #define ABSINTHE_CURSOR_MOVE_BUTTON BTN_LEFT
@@ -36,6 +38,7 @@ struct absinthe_server {
     struct wlr_backend *backend;
     struct wlr_renderer *renderer;
     struct wlr_allocator *allocator;
+    struct wlr_compositor *compositor;
     struct wlr_scene *scene;
     struct wlr_scene_output_layout *scene_layout;
 
@@ -43,6 +46,8 @@ struct absinthe_server {
     struct wl_listener new_xdg_toplevel;
     struct wl_listener new_xdg_popup;
     struct wl_list toplevels;
+    struct wlr_xdg_decoration_manager_v1 *xdg_decoration_mgr;
+    struct wl_listener new_xdg_decoration;
 
     struct wlr_cursor *cursor;
     struct wlr_xcursor_manager *cursor_mgr;
@@ -60,14 +65,17 @@ struct absinthe_server {
     struct wl_list keyboards;
     enum absinthe_cursor_mode cursor_mode;
     struct absinthe_toplevel *grabbed_toplevel;
-    uint32_t grabbed_toplevel_x, grabbed_toplevel_y; 
-    uint32_t grabbed_toplevel_width, grabbed_toplevel_height; 
+    struct wlr_box grabbed_box;
     uint32_t grab_x, grab_y;
     enum absinthe_cursor_resize_corner cursor_resize_corner;
 
-    struct wlr_output_layout *output_layout;
     struct wl_list outputs;
     struct wl_listener new_output;
+    struct wlr_output_layout *output_layout;
+    struct wl_listener output_layout_change;
+    struct wlr_output_manager_v1 *output_mgr;
+    struct wl_listener output_mgr_apply;
+    struct wl_listener output_mgr_test;
 };
 
 struct absinthe_output {
@@ -82,8 +90,8 @@ struct absinthe_output {
 struct absinthe_toplevel {
     struct wl_list link;
     struct absinthe_server *server;
-    struct wlr_xdg_toplevel *xdg_toplevel;
     struct wlr_scene_tree *scene_tree;
+    struct wlr_xdg_toplevel *xdg_toplevel;
     struct wl_listener map;
     struct wl_listener unmap;
     struct wl_listener commit;
@@ -92,6 +100,9 @@ struct absinthe_toplevel {
     struct wl_listener request_resize;
     struct wl_listener request_maximize;
     struct wl_listener request_fullscreen;
+    struct wlr_xdg_toplevel_decoration_v1 *decoration;
+    struct wl_listener decoration_request_mode;
+    struct wl_listener decoration_destroy;
 };
 
 struct absinthe_popup {

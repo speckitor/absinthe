@@ -33,3 +33,26 @@ void output_destroy(struct wl_listener *listener, void *data)
     wl_list_remove(&output->link);
     free(output);
 }
+
+void output_layout_change(struct wl_listener *listener, void *data)
+{
+    struct absinthe_server *server = wl_container_of(listener, server, output_layout_change);
+    struct wlr_output_configuration_v1 *config = wlr_output_configuration_v1_create();
+
+    struct wlr_output_configuration_head_v1 *config_head;
+    struct absinthe_output *output;
+    wl_list_for_each(output, &server->outputs, link) {
+        if (output->wlr_output->enabled) continue;
+
+        config_head = wlr_output_configuration_head_v1_create(config, output->wlr_output);
+        config_head->state.enabled = false;
+        wlr_output_layout_remove(server->output_layout, output->wlr_output);
+    }
+
+    wl_list_for_each(output, &server->outputs, link) {
+        if (!output->wlr_output->enabled || !wlr_output_layout_get(server->output_layout, output->wlr_output)) continue;
+        wlr_output_layout_add_auto(server->output_layout, output->wlr_output);
+    }
+
+    wlr_output_manager_v1_set_configuration(server->output_mgr, config);
+}
