@@ -4,6 +4,7 @@
 
 #include "types.h"
 #include "xdg-decoration.h"
+#include "absinthe-toplevel.h"
 
 void xdg_toplevel_commit(struct wl_listener *listener, void *data)
 {
@@ -21,6 +22,16 @@ void xdg_toplevel_commit(struct wl_listener *listener, void *data)
 void xdg_toplevel_map(struct wl_listener *listener, void *data)
 {
     struct absinthe_toplevel *toplevel = wl_container_of(listener, toplevel, map);
+
+    for (int i = 0; i < 4; ++i) {
+        toplevel->border[i] = wlr_scene_rect_create(toplevel->scene_tree, 0, 0, bordercolor);
+        toplevel->border[i]->node.data = toplevel;
+    }
+
+    absinthe_toplevel_update_border_geometry(toplevel);
+
+    absinthe_toplevel_set_border_color(toplevel, bordercolor);
+
 
     wl_list_insert(&toplevel->server->toplevels, &toplevel->link);
 }

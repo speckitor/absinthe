@@ -78,8 +78,6 @@ int main(int argc, char **argv)
     wl_signal_add(&server.backend->events.new_output, &server.new_output);
 
     server.output_layout = wlr_output_layout_create(server.display);
-    server.output_layout_change.notify = output_layout_change;
-    wl_signal_add(&server.output_layout->events.change, &server.output_layout_change);
 
     server.output_mgr = wlr_output_manager_v1_create(server.display);
 
@@ -100,6 +98,7 @@ int main(int argc, char **argv)
 
     server.cursor_mgr = wlr_xcursor_manager_create(NULL, 24);
 
+    server.last_pointer_motion_time_msec = 0;
     server.cursor_mode = ABSINTHE_CURSOR_PASSTHROUGH;
     server.cursor_motion.notify = server_cursor_motion;
     wl_signal_add(&server.cursor->events.motion, &server.cursor_motion);

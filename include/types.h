@@ -16,9 +16,15 @@
 #include <wlr/types/wlr_output_management_v1.h>
 #include <wlr/types/wlr_xdg_decoration_v1.h>
 
+// Configuration, later will be moved
+
 #define ABSINTHE_CURSOR_MOD WLR_MODIFIER_ALT
 #define ABSINTHE_CURSOR_MOVE_BUTTON BTN_LEFT
 #define ABSINTHE_CURSOR_RESIZE_BUTTON BTN_RIGHT
+
+#define ABSINTHE_BORDER_WIDTH 2
+
+static const float bordercolor[4] = {0.88, 0.18, 0.18, 1.0};
 
 enum absinthe_cursor_mode {
     ABSINTHE_CURSOR_PASSTHROUGH,
@@ -63,9 +69,10 @@ struct absinthe_server {
     struct wl_listener pointer_focus_change;
     struct wl_listener request_set_selection;
     struct wl_list keyboards;
+    uint32_t last_pointer_motion_time_msec;
     enum absinthe_cursor_mode cursor_mode;
     struct absinthe_toplevel *grabbed_toplevel;
-    struct wlr_box grabbed_box;
+    struct wlr_box grabbed_geometry;
     uint32_t grab_x, grab_y;
     enum absinthe_cursor_resize_corner cursor_resize_corner;
 
@@ -91,6 +98,8 @@ struct absinthe_toplevel {
     struct wl_list link;
     struct absinthe_server *server;
     struct wlr_scene_tree *scene_tree;
+    struct wlr_scene_rect *border[4];
+    struct wlr_box geometry;
     struct wlr_xdg_toplevel *xdg_toplevel;
     struct wl_listener map;
     struct wl_listener unmap;

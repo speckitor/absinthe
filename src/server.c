@@ -60,6 +60,10 @@ void server_new_xdg_toplevel(struct wl_listener *listener, void *data)
     toplevel->xdg_toplevel = xdg_toplevel;
     toplevel->scene_tree = wlr_scene_xdg_surface_create(&toplevel->server->scene->tree, xdg_toplevel->base);
     toplevel->scene_tree->node.data = toplevel;
+    toplevel->geometry.x = 0;
+    toplevel->geometry.y = 0;
+    toplevel->geometry.width = 100;
+    toplevel->geometry.height = 100;
     xdg_toplevel->base->data = toplevel;
 
     toplevel->map.notify = xdg_toplevel_map;
@@ -120,16 +124,22 @@ void server_cursor_motion(struct wl_listener *listener, void *data)
 {
     struct absinthe_server *server = wl_container_of(listener, server, cursor_motion);
     struct wlr_pointer_motion_event *event = data;
-    wlr_cursor_move(server->cursor, &event->pointer->base, event->delta_x, event->delta_y);
-    process_cursor_motion(server, event->time_msec);
+    if (event->time_msec - server->last_pointer_motion_time_msec > 5) {
+        wlr_cursor_move(server->cursor, &event->pointer->base, event->delta_x, event->delta_y);
+        process_cursor_motion(server, event->time_msec);
+        server->last_pointer_motion_time_msec = event->time_msec;
+    }
 }
 
 void server_cursor_motion_absolute(struct wl_listener *listener, void *data)
 {
     struct absinthe_server *server = wl_container_of(listener, server, cursor_motion_absolute);
     struct wlr_pointer_motion_absolute_event *event = data;
-    wlr_cursor_warp_absolute(server->cursor, &event->pointer->base, event->x, event->y);
-    process_cursor_motion(server, event->time_msec);
+    if (event->time_msec - server->last_pointer_motion_time_msec > 5) {
+        wlr_cursor_warp_absolute(server->cursor, &event->pointer->base, event->x, event->y);
+        process_cursor_motion(server, event->time_msec);
+        server->last_pointer_motion_time_msec = event->time_msec;
+    }
 }
 
 void server_cursor_button(struct wl_listener *listener, void *data)
@@ -163,11 +173,10 @@ void server_cursor_button(struct wl_listener *listener, void *data)
 
             int lx, ly;
             wlr_scene_node_coords(&toplevel->scene_tree->node, &lx, &ly);
-            server->grabbed_box.x = lx;
-            server->grabbed_box.y = ly;
-            server->grabbed_box.width = toplevel->xdg_toplevel->base->geometry.width;
-            server->grabbed_box.height = toplevel->xdg_toplevel->base->geometry.height;
-            wlr_log(WLR_DEBUG, "%d, %d", server->grabbed_box.width, server->grabbed_box.height);
+            server->grabbed_geometry.x = lx;
+            server->grabbed_geometry.y = ly;
+            server->grabbed_geometry.width = toplevel->xdg_toplevel->base->geometry.width;
+            server->grabbed_geometry.height = toplevel->xdg_toplevel->base->geometry.height;
             server->grabbed_toplevel = toplevel;
 
             int width = toplevel->xdg_toplevel->base->geometry.width;
