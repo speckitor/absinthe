@@ -11,11 +11,16 @@ void xdg_toplevel_commit(struct wl_listener *listener, void *data)
     struct absinthe_toplevel *toplevel = wl_container_of(listener, toplevel, commit);
 
     if (toplevel->xdg_toplevel->base->initial_commit) {
-        wlr_xdg_toplevel_set_size(toplevel->xdg_toplevel, 0, 0);
+        int bw = ABSINTHE_BORDER_WIDTH;
+
+        wlr_xdg_toplevel_set_size(toplevel->xdg_toplevel, toplevel->geometry.width - 2 * bw, toplevel->geometry.height - 2 * bw);
 
         if (toplevel->decoration) {
             xdg_decoration_request_mode(&toplevel->decoration_request_mode, toplevel->decoration);
         }
+    } else {
+        absinthe_toplevel_update_border_geometry(toplevel);
+        absinthe_toplevel_set_position(toplevel, toplevel->geometry.x, toplevel->geometry.y);
     }
 }
 
@@ -31,7 +36,6 @@ void xdg_toplevel_map(struct wl_listener *listener, void *data)
     absinthe_toplevel_update_border_geometry(toplevel);
 
     absinthe_toplevel_set_border_color(toplevel, bordercolor);
-
 
     wl_list_insert(&toplevel->server->toplevels, &toplevel->link);
 }
@@ -59,8 +63,21 @@ void xdg_toplevel_destroy(struct wl_listener *listener, void *data)
     free(toplevel);
 }
 
-void xdg_toplevel_request_move(struct wl_listener *listener, void *data) {}
-void xdg_toplevel_request_resize(struct wl_listener *listener, void *data) {}
+void xdg_toplevel_request_move(struct wl_listener *listener, void *data)
+{
+    struct absinthe_toplevel *toplevel = wl_container_of(listener, toplevel, request_maximize);
+    if (toplevel->xdg_toplevel->base->initialized) {
+        wlr_xdg_surface_schedule_configure(toplevel->xdg_toplevel->base);
+    }
+}
+
+void xdg_toplevel_request_resize(struct wl_listener *listener, void *data)
+{
+    struct absinthe_toplevel *toplevel = wl_container_of(listener, toplevel, request_maximize);
+    if (toplevel->xdg_toplevel->base->initialized) {
+        wlr_xdg_surface_schedule_configure(toplevel->xdg_toplevel->base);
+    }
+}
 
 void xdg_toplevel_request_maximize(struct wl_listener *listener, void *data)
 {

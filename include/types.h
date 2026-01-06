@@ -22,7 +22,7 @@
 #define ABSINTHE_CURSOR_MOVE_BUTTON BTN_LEFT
 #define ABSINTHE_CURSOR_RESIZE_BUTTON BTN_RIGHT
 
-#define ABSINTHE_BORDER_WIDTH 2
+#define ABSINTHE_BORDER_WIDTH 1
 
 static const float bordercolor[4] = {0.88, 0.18, 0.18, 1.0};
 
@@ -69,7 +69,6 @@ struct absinthe_server {
     struct wl_listener pointer_focus_change;
     struct wl_listener request_set_selection;
     struct wl_list keyboards;
-    uint32_t last_pointer_motion_time_msec;
     enum absinthe_cursor_mode cursor_mode;
     struct absinthe_toplevel *grabbed_toplevel;
     struct wlr_box grabbed_geometry;
@@ -98,6 +97,7 @@ struct absinthe_toplevel {
     struct wl_list link;
     struct absinthe_server *server;
     struct wlr_scene_tree *scene_tree;
+    struct wlr_scene_tree *scene_surface;
     struct wlr_scene_rect *border[4];
     struct wlr_box geometry;
     struct wlr_xdg_toplevel *xdg_toplevel;

@@ -98,7 +98,6 @@ int main(int argc, char **argv)
 
     server.cursor_mgr = wlr_xcursor_manager_create(NULL, 24);
 
-    server.last_pointer_motion_time_msec = 0;
     server.cursor_mode = ABSINTHE_CURSOR_PASSTHROUGH;
     server.cursor_motion.notify = server_cursor_motion;
     wl_signal_add(&server.cursor->events.motion, &server.cursor_motion);

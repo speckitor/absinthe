@@ -14,6 +14,10 @@ void xdg_decoration_destroy(struct wl_listener *listener, void *data)
 {
     struct absinthe_toplevel *toplevel = wl_container_of(listener, toplevel, decoration_destroy);
 
+    for (int i = 0; i < 4; ++i) {
+        wlr_scene_node_destroy(&toplevel->border[i]->node);
+    }
+
     wl_list_remove(&toplevel->decoration_request_mode.link);
     wl_list_remove(&toplevel->decoration_destroy.link);
 }

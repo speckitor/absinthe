@@ -58,10 +58,10 @@ static void process_cursor_resize(struct absinthe_server *server) {
     }
 
     if (new_width > 0 && new_height > 0) {
-        wlr_scene_node_set_position(&toplevel->scene_tree->node, new_x, new_y);
-        absinthe_toplevel_set_size(toplevel, new_width, new_height);
+        toplevel->geometry.x = new_x;
+        toplevel->geometry.y = new_y;
 
-        absinthe_toplevel_update_border_geometry(toplevel);
+        absinthe_toplevel_set_size(toplevel, new_width, new_height);
     }
 }
 

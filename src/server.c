@@ -58,8 +58,9 @@ void server_new_xdg_toplevel(struct wl_listener *listener, void *data)
     struct absinthe_toplevel *toplevel = calloc(1, sizeof(*toplevel));
     toplevel->server = server;
     toplevel->xdg_toplevel = xdg_toplevel;
-    toplevel->scene_tree = wlr_scene_xdg_surface_create(&toplevel->server->scene->tree, xdg_toplevel->base);
+    toplevel->scene_tree = wlr_scene_tree_create(&toplevel->server->scene->tree);
     toplevel->scene_tree->node.data = toplevel;
+    toplevel->scene_surface = wlr_scene_xdg_surface_create(toplevel->scene_tree, xdg_toplevel->base);
     toplevel->geometry.x = 0;
     toplevel->geometry.y = 0;
     toplevel->geometry.width = 100;
@@ -124,22 +125,16 @@ void server_cursor_motion(struct wl_listener *listener, void *data)
 {
     struct absinthe_server *server = wl_container_of(listener, server, cursor_motion);
     struct wlr_pointer_motion_event *event = data;
-    if (event->time_msec - server->last_pointer_motion_time_msec > 5) {
-        wlr_cursor_move(server->cursor, &event->pointer->base, event->delta_x, event->delta_y);
-        process_cursor_motion(server, event->time_msec);
-        server->last_pointer_motion_time_msec = event->time_msec;
-    }
+    wlr_cursor_move(server->cursor, &event->pointer->base, event->delta_x, event->delta_y);
+    process_cursor_motion(server, event->time_msec);
 }
 
 void server_cursor_motion_absolute(struct wl_listener *listener, void *data)
 {
     struct absinthe_server *server = wl_container_of(listener, server, cursor_motion_absolute);
     struct wlr_pointer_motion_absolute_event *event = data;
-    if (event->time_msec - server->last_pointer_motion_time_msec > 5) {
-        wlr_cursor_warp_absolute(server->cursor, &event->pointer->base, event->x, event->y);
-        process_cursor_motion(server, event->time_msec);
-        server->last_pointer_motion_time_msec = event->time_msec;
-    }
+    wlr_cursor_warp_absolute(server->cursor, &event->pointer->base, event->x, event->y);
+    process_cursor_motion(server, event->time_msec);
 }
 
 void server_cursor_button(struct wl_listener *listener, void *data)
