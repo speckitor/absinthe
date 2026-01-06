@@ -18,13 +18,19 @@ static void process_cursor_move(struct absinthe_server *server) {
     uint32_t new_x, new_y;
     new_x = server->cursor->x - server->grab_x + server->grabbed_geometry.x;
     new_y = server->cursor->y - server->grab_y + server->grabbed_geometry.y;
-    wlr_scene_node_set_position(&toplevel->scene_tree->node, new_x, new_y);
+    toplevel->geometry.x = new_x;
+    toplevel->geometry.y = new_y;
+    absinthe_toplevel_set_position(toplevel, new_x, new_y);
 }
 
 static void process_cursor_resize(struct absinthe_server *server) {
     struct absinthe_toplevel *toplevel = server->grabbed_toplevel;
 
+    if (toplevel->performing_resize == true) return;
+
     if (!toplevel) return;
+
+    int bw = ABSINTHE_BORDER_WIDTH;
 
     int32_t new_x, new_y, new_width, new_height;
     new_x = server->grabbed_geometry.x;
@@ -32,26 +38,33 @@ static void process_cursor_resize(struct absinthe_server *server) {
     new_width = server->grabbed_geometry.width;
     new_height = server->grabbed_geometry.height;
 
+    int32_t dx = server->cursor->x - server->grab_x;
+    int32_t dy = server->cursor->y - server->grab_y;
+
+    if (dx == 0 && dy == 0) {
+        return;
+    }
+
     switch (server->cursor_resize_corner) {
     case ABSINTHE_CURSOR_RESIZE_CORNER_TOP_LEFT:
-        new_x += server->cursor->x - server->grab_x;
-        new_y += server->cursor->y - server->grab_y;
-        new_width -= server->cursor->x - server->grab_x;
-        new_height -= server->cursor->y - server->grab_y;
+        new_x += dx;
+        new_y += dy;
+        new_width -= dx;
+        new_height -= dy;
         break;
     case ABSINTHE_CURSOR_RESIZE_CORNER_TOP_RIGHT:
-        new_y += server->cursor->y - server->grab_y;
-        new_width += server->cursor->x - server->grab_x;
-        new_height -= server->cursor->y - server->grab_y;
+        new_y += dy;
+        new_width += dx;
+        new_height -= dy;
         break;
     case ABSINTHE_CURSOR_RESIZE_CORNER_BOTTOM_LEFT:
-        new_x += server->cursor->x - server->grab_x;
-        new_width -= server->cursor->x - server->grab_x;
-        new_height += server->cursor->y - server->grab_y;
+        new_x += dx;
+        new_width -= dx;
+        new_height += dy;
         break;
     case ABSINTHE_CURSOR_RESIZE_CORNER_BOTTOM_RIGHT:
-        new_width += server->cursor->x - server->grab_x;
-        new_height += server->cursor->y - server->grab_y;
+        new_width += dx;
+        new_height += dy;
         break;
     default: // unreachable
         break;
@@ -62,6 +75,8 @@ static void process_cursor_resize(struct absinthe_server *server) {
         toplevel->geometry.y = new_y;
 
         absinthe_toplevel_set_size(toplevel, new_width, new_height);
+
+        toplevel->performing_resize = true;
     }
 }
 

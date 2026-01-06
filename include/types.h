@@ -99,6 +99,7 @@ struct absinthe_toplevel {
     struct wlr_scene_tree *scene_tree;
     struct wlr_scene_tree *scene_surface;
     struct wlr_scene_rect *border[4];
+    bool performing_resize;
     struct wlr_box geometry;
     struct wlr_xdg_toplevel *xdg_toplevel;
     struct wl_listener map;

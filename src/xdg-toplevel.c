@@ -13,14 +13,15 @@ void xdg_toplevel_commit(struct wl_listener *listener, void *data)
     if (toplevel->xdg_toplevel->base->initial_commit) {
         int bw = ABSINTHE_BORDER_WIDTH;
 
-        wlr_xdg_toplevel_set_size(toplevel->xdg_toplevel, toplevel->geometry.width - 2 * bw, toplevel->geometry.height - 2 * bw);
+        absinthe_toplevel_set_size(toplevel, toplevel->geometry.width - 2 * bw, toplevel->geometry.height - 2 * bw);
 
         if (toplevel->decoration) {
             xdg_decoration_request_mode(&toplevel->decoration_request_mode, toplevel->decoration);
         }
     } else {
-        absinthe_toplevel_update_border_geometry(toplevel);
         absinthe_toplevel_set_position(toplevel, toplevel->geometry.x, toplevel->geometry.y);
+        absinthe_toplevel_update_borders_geometry(toplevel);
+        toplevel->performing_resize = false;
     }
 }
 
@@ -33,7 +34,9 @@ void xdg_toplevel_map(struct wl_listener *listener, void *data)
         toplevel->border[i]->node.data = toplevel;
     }
 
-    absinthe_toplevel_update_border_geometry(toplevel);
+    int bw = ABSINTHE_BORDER_WIDTH;
+
+    absinthe_toplevel_set_size(toplevel, toplevel->geometry.width - 2 * bw, toplevel->geometry.height - 2 * bw);
 
     absinthe_toplevel_set_border_color(toplevel, bordercolor);
 
