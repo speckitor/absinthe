@@ -61,10 +61,6 @@ void server_new_xdg_toplevel(struct wl_listener *listener, void *data)
     toplevel->scene_tree = wlr_scene_tree_create(&toplevel->server->scene->tree);
     toplevel->scene_tree->node.data = toplevel;
     toplevel->scene_surface = wlr_scene_xdg_surface_create(toplevel->scene_tree, xdg_toplevel->base);
-    toplevel->geometry.x = 0;
-    toplevel->geometry.y = 0;
-    toplevel->geometry.width = 100;
-    toplevel->geometry.height = 100;
     xdg_toplevel->base->data = toplevel;
 
     toplevel->map.notify = xdg_toplevel_map;

@@ -24,7 +24,13 @@
 
 #define ABSINTHE_BORDER_WIDTH 1
 
+#define ABSINTHE_WINDOW_MIN_WIDTH 200
+#define ABSINTHE_WINDOW_MIN_HEIGHT 200
+
 static const float bordercolor[4] = {0.88, 0.18, 0.18, 1.0};
+
+#define MAX(a, b) a > b ? a : b
+#define MIN(a, b) a < b ? a : b
 
 enum absinthe_cursor_mode {
     ABSINTHE_CURSOR_PASSTHROUGH,
@@ -87,6 +93,7 @@ struct absinthe_server {
 struct absinthe_output {
     struct wl_list link;
     struct absinthe_server *server;
+    struct wlr_box geometry;
     struct wlr_output *wlr_output;
     struct wl_listener frame;
     struct wl_listener request_state;

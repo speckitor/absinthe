@@ -51,7 +51,9 @@ void output_layout_change(struct wl_listener *listener, void *data)
 
     wl_list_for_each(output, &server->outputs, link) {
         if (!output->wlr_output->enabled || !wlr_output_layout_get(server->output_layout, output->wlr_output)) continue;
+
         wlr_output_layout_add_auto(server->output_layout, output->wlr_output);
+        wlr_output_layout_get_box(server->output_layout, output->wlr_output, &output->geometry);
     }
 
     wlr_output_manager_v1_set_configuration(server->output_mgr, config);

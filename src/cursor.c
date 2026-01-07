@@ -13,7 +13,8 @@ void reset_cursor_mode(struct absinthe_server *server)
 static void process_cursor_move(struct absinthe_server *server) {
     struct absinthe_toplevel *toplevel = server->grabbed_toplevel;
 
-    if (!toplevel) return;
+    if (!toplevel)
+        return;
 
     uint32_t new_x, new_y;
     new_x = server->cursor->x - server->grab_x + server->grabbed_geometry.x;
@@ -26,9 +27,11 @@ static void process_cursor_move(struct absinthe_server *server) {
 static void process_cursor_resize(struct absinthe_server *server) {
     struct absinthe_toplevel *toplevel = server->grabbed_toplevel;
 
-    if (toplevel->performing_resize == true) return;
+    if (toplevel->performing_resize == true)
+        return;
 
-    if (!toplevel) return;
+    if (!toplevel)
+        return;
 
     int bw = ABSINTHE_BORDER_WIDTH;
 
@@ -41,9 +44,8 @@ static void process_cursor_resize(struct absinthe_server *server) {
     int32_t dx = server->cursor->x - server->grab_x;
     int32_t dy = server->cursor->y - server->grab_y;
 
-    if (dx == 0 && dy == 0) {
+    if (dx == 0 && dy == 0)
         return;
-    }
 
     switch (server->cursor_resize_corner) {
     case ABSINTHE_CURSOR_RESIZE_CORNER_TOP_LEFT:
@@ -94,9 +96,10 @@ void process_cursor_motion(struct absinthe_server *server, uint32_t time)
     struct wlr_seat *seat = server->seat;
     struct wlr_surface *surface = NULL;
     struct absinthe_toplevel *toplevel = absinthe_toplevel_at(server, server->cursor->x, server->cursor->y, &surface, &sx, &sy);
-    if (!toplevel) {
+
+    if (!toplevel)
         wlr_cursor_set_xcursor(server->cursor, server->cursor_mgr, "default");
-    }
+
     if (surface) {
         wlr_seat_pointer_notify_enter(seat, surface, sx, sy);
         wlr_seat_pointer_notify_motion(seat, time, sx, sy);
