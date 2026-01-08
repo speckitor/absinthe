@@ -12,17 +12,17 @@ void xdg_toplevel_commit(struct wl_listener *listener, void *data)
     struct absinthe_toplevel *toplevel = wl_container_of(listener, toplevel, commit);
 
     if (toplevel->xdg_toplevel->base->initial_commit) {
-        int32_t cw = toplevel->xdg_toplevel->current.min_width;
-        int32_t ch = toplevel->xdg_toplevel->current.min_height;
-
-        int32_t w = MAX(cw, ABSINTHE_WINDOW_MIN_WIDTH);
-        int32_t h = MAX(ch, ABSINTHE_WINDOW_MIN_HEIGHT);
-        
-        absinthe_toplevel_set_size(toplevel, w, h);
+        wlr_xdg_toplevel_set_size(toplevel->xdg_toplevel, 0, 0);
 
         if (toplevel->decoration)
             xdg_decoration_request_mode(&toplevel->decoration_request_mode, toplevel->decoration);
     } else {
+        if (toplevel->geometry.width == 0 || toplevel->geometry.height == 0) {
+            int bw = ABSINTHE_WINDOW_BORDER_WIDTH;
+            toplevel->geometry.width = toplevel->xdg_toplevel->base->geometry.width + 2 * bw;
+            toplevel->geometry.height = toplevel->xdg_toplevel->base->geometry.height + 2 * bw;
+        }
+
         absinthe_toplevel_set_position(toplevel, toplevel->geometry.x, toplevel->geometry.y);
         absinthe_toplevel_update_borders_geometry(toplevel);
         toplevel->performing_resize = false;
@@ -48,6 +48,8 @@ void xdg_toplevel_unmap(struct wl_listener *listener, void *data)
 {
     struct absinthe_toplevel *toplevel = wl_container_of(listener, toplevel, unmap);
 
+    wlr_scene_node_destroy(&toplevel->scene_tree->node);
+    
     wl_list_remove(&toplevel->link);
 }
 

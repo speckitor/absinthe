@@ -1,5 +1,7 @@
 #include <stdlib.h>
 
+#include <wlr/util/log.h>
+
 #include "types.h"
 
 void output_frame(struct wl_listener *listener, void *data)

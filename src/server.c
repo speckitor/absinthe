@@ -48,6 +48,7 @@ void server_new_output(struct wl_listener *listener, void *data)
     struct wlr_output_layout_output *l_layout = wlr_output_layout_add_auto(server->output_layout, output->wlr_output);
     struct wlr_scene_output *scene_output = wlr_scene_output_create(server->scene, wlr_output);
     wlr_scene_output_layout_add_output(server->scene_layout, l_layout, scene_output);
+    wlr_output_layout_get_box(server->output_layout, output->wlr_output, &output->geometry);
 }
 
 void server_new_xdg_toplevel(struct wl_listener *listener, void *data)
@@ -166,8 +167,8 @@ void server_cursor_button(struct wl_listener *listener, void *data)
             wlr_scene_node_coords(&toplevel->scene_tree->node, &lx, &ly);
             server->grabbed_geometry.x = lx;
             server->grabbed_geometry.y = ly;
-            server->grabbed_geometry.width = toplevel->xdg_toplevel->base->geometry.width;
-            server->grabbed_geometry.height = toplevel->xdg_toplevel->base->geometry.height;
+            server->grabbed_geometry.width = toplevel->geometry.width;
+            server->grabbed_geometry.height = toplevel->geometry.height;
             server->grabbed_toplevel = toplevel;
 
             int width = toplevel->xdg_toplevel->base->geometry.width;
@@ -182,6 +183,8 @@ void server_cursor_button(struct wl_listener *listener, void *data)
             } else {
                 server->cursor_resize_corner = ABSINTHE_CURSOR_RESIZE_CORNER_TOP_LEFT;
             }
+
+            wlr_xdg_toplevel_set_resizing(toplevel->xdg_toplevel, true);
         }
     }
 

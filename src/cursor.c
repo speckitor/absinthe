@@ -7,7 +7,11 @@
 void reset_cursor_mode(struct absinthe_server *server)
 {
     server->cursor_mode = ABSINTHE_CURSOR_PASSTHROUGH;
-    server->grabbed_toplevel = NULL;
+
+    if (server->grabbed_toplevel) {
+        wlr_xdg_toplevel_set_resizing(server->grabbed_toplevel->xdg_toplevel, false);
+        server->grabbed_toplevel = NULL;
+    }
 }
 
 static void process_cursor_move(struct absinthe_server *server) {
@@ -24,16 +28,46 @@ static void process_cursor_move(struct absinthe_server *server) {
     absinthe_toplevel_set_position(toplevel, new_x, new_y);
 }
 
+static void apply_resize(struct absinthe_toplevel *toplevel, struct wlr_box *new_geometry)
+{
+    int32_t bw = ABSINTHE_WINDOW_BORDER_WIDTH;
+
+    int32_t min_width = toplevel->xdg_toplevel->current.min_width;
+    int32_t min_height = toplevel->xdg_toplevel->current.min_height;
+
+    int32_t max_width = toplevel->xdg_toplevel->current.max_width;
+    int32_t max_height = toplevel->xdg_toplevel->current.max_height;
+
+    if (max_width == 0)
+        max_width = 10000;
+
+    if (max_height == 0)
+        max_height = 10000;
+    
+    if (new_geometry->width - 2 * bw >= min_width && new_geometry->width - 2 * bw <= max_width) {
+        toplevel->geometry.x = new_geometry->x;
+        toplevel->geometry.width = new_geometry->width;
+        toplevel->performing_resize = true;
+    }
+
+    if (new_geometry->height - 2 * bw >= min_height && new_geometry->height - 2 * bw <= max_height) {
+        toplevel->geometry.y = new_geometry->y;
+        toplevel->geometry.height = new_geometry->height;
+        toplevel->performing_resize = true;
+    }
+
+    if (toplevel->performing_resize)
+        absinthe_toplevel_set_size(toplevel, toplevel->geometry.width - 2 * bw, toplevel->geometry.height - 2 * bw);
+}
+
 static void process_cursor_resize(struct absinthe_server *server) {
     struct absinthe_toplevel *toplevel = server->grabbed_toplevel;
-
-    if (toplevel->performing_resize == true)
-        return;
 
     if (!toplevel)
         return;
 
-    int bw = ABSINTHE_BORDER_WIDTH;
+    if (toplevel->performing_resize == true)
+        return;
 
     int32_t new_x, new_y, new_width, new_height;
     new_x = server->grabbed_geometry.x;
@@ -73,12 +107,14 @@ static void process_cursor_resize(struct absinthe_server *server) {
     }
 
     if (new_width > 0 && new_height > 0) {
-        toplevel->geometry.x = new_x;
-        toplevel->geometry.y = new_y;
+        struct wlr_box new_geometry = {
+            .x = new_x,
+            .y = new_y,
+            .width = new_width,
+            .height = new_height,
+        };
 
-        absinthe_toplevel_set_size(toplevel, new_width, new_height);
-
-        toplevel->performing_resize = true;
+        apply_resize(server->grabbed_toplevel, &new_geometry);
     }
 }
 

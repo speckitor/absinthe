@@ -32,13 +32,10 @@ void absinthe_toplevel_set_position(struct absinthe_toplevel *toplevel, int32_t 
 
 void absinthe_toplevel_set_size(struct absinthe_toplevel *toplevel, int32_t width, int32_t height)
 {
-    int bw = ABSINTHE_BORDER_WIDTH;
+    int bw = ABSINTHE_WINDOW_BORDER_WIDTH;
 
     if (width < 0 || height < 0)
         return;
-
-    toplevel->geometry.width = width;
-    toplevel->geometry.height = height;
 
     wlr_xdg_toplevel_set_size(toplevel->xdg_toplevel, width, height);
     wlr_xdg_surface_schedule_configure(toplevel->xdg_toplevel->base);
@@ -53,7 +50,7 @@ void absinthe_toplevel_set_border_color(struct absinthe_toplevel *toplevel, cons
 
 void absinthe_toplevel_update_borders_geometry(struct absinthe_toplevel *toplevel)
 {
-    int bw = ABSINTHE_BORDER_WIDTH;
+    int bw = ABSINTHE_WINDOW_BORDER_WIDTH;
 
     if (toplevel->geometry.width - 2 * bw < 0 || toplevel->geometry.height - 2 * bw < 0)
         return;
