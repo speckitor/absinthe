@@ -24,7 +24,8 @@
 
 #define ABSINTHE_WINDOW_BORDER_WIDTH 2
 
-static const float bordercolor[4] = {0.88, 0.18, 0.18, 1.0};
+static const float focused_border_color[4] = {0.88, 0.18, 0.18, 1.0};
+static const float unfocused_border_color[4] = {0.18, 0.18, 0.18, 1.0};
 
 enum absinthe_cursor_mode {
     ABSINTHE_CURSOR_PASSTHROUGH,

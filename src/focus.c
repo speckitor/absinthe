@@ -1,6 +1,7 @@
 #include <wayland-server-core.h>
 
 #include "types.h"
+#include "absinthe-toplevel.h"
 
 void focus_toplevel(struct absinthe_toplevel *toplevel)
 {
@@ -17,7 +18,10 @@ void focus_toplevel(struct absinthe_toplevel *toplevel)
 
     if (prev_surface) {
         struct wlr_xdg_toplevel *prev_toplevel = wlr_xdg_toplevel_try_from_wlr_surface(prev_surface);
-        if (prev_toplevel) wlr_xdg_toplevel_set_activated(prev_toplevel, false);
+        if (prev_toplevel) {
+            wlr_xdg_toplevel_set_activated(prev_toplevel, false);
+            absinthe_toplevel_set_border_color(prev_toplevel->base->data, unfocused_border_color);
+        }
     }
 
     struct wlr_keyboard *keyboard = wlr_seat_get_keyboard(seat);
@@ -25,6 +29,7 @@ void focus_toplevel(struct absinthe_toplevel *toplevel)
     wl_list_remove(&toplevel->link);
     wl_list_insert(&server->toplevels, &toplevel->link);
     wlr_xdg_toplevel_set_activated(toplevel->xdg_toplevel, true);
+    absinthe_toplevel_set_border_color(toplevel, focused_border_color);
 
     if (keyboard)
         wlr_seat_keyboard_notify_enter(seat, surface, keyboard->keycodes, keyboard->num_keycodes, &keyboard->modifiers);

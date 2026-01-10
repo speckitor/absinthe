@@ -37,13 +37,13 @@ void xdg_toplevel_map(struct wl_listener *listener, void *data)
     struct absinthe_toplevel *toplevel = wl_container_of(listener, toplevel, map);
 
     for (int i = 0; i < 4; ++i) {
-        toplevel->border[i] = wlr_scene_rect_create(toplevel->scene_tree, 0, 0, bordercolor);
+        toplevel->border[i] = wlr_scene_rect_create(toplevel->scene_tree, 0, 0, unfocused_border_color);
         toplevel->border[i]->node.data = toplevel;
     }
 
     toplevel->border_width = ABSINTHE_WINDOW_BORDER_WIDTH;
     
-    absinthe_toplevel_set_border_color(toplevel, bordercolor);
+    absinthe_toplevel_set_border_color(toplevel, unfocused_border_color);
     absinthe_toplevel_update_borders_geometry(toplevel);
 
     toplevel->output = toplevel->server->focused_output;

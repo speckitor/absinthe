@@ -75,7 +75,6 @@ void absinthe_toplevel_update_borders_geometry(struct absinthe_toplevel *topleve
     if (toplevel->geometry.width - 2 * bw < 0 || toplevel->geometry.height - 2 * bw < 0)
         return;
 
-
 	wlr_scene_node_set_position(&toplevel->scene_tree->node, toplevel->geometry.x, toplevel->geometry.y);
 	wlr_scene_node_set_position(&toplevel->scene_surface->node, bw, bw);
 
