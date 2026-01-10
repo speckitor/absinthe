@@ -25,9 +25,8 @@ void server_new_output(struct wl_listener *listener, void *data)
     wlr_output_state_set_enabled(&state, true);
 
     struct wlr_output_mode *mode = wlr_output_preferred_mode(wlr_output);
-    if (mode) {
+    if (mode)
         wlr_output_state_set_mode(&state, mode);
-    }
 
     wlr_output_commit_state(wlr_output, &state);
     wlr_output_state_finish(&state);
@@ -49,6 +48,8 @@ void server_new_output(struct wl_listener *listener, void *data)
     struct wlr_scene_output *scene_output = wlr_scene_output_create(server->scene, wlr_output);
     wlr_scene_output_layout_add_output(server->scene_layout, l_layout, scene_output);
     wlr_output_layout_get_box(server->output_layout, output->wlr_output, &output->geometry);
+
+    server->focused_output = output;
 }
 
 void server_new_xdg_toplevel(struct wl_listener *listener, void *data)

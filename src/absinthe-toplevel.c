@@ -32,13 +32,33 @@ void absinthe_toplevel_set_position(struct absinthe_toplevel *toplevel, int32_t 
 
 void absinthe_toplevel_set_size(struct absinthe_toplevel *toplevel, int32_t width, int32_t height)
 {
-    int bw = ABSINTHE_WINDOW_BORDER_WIDTH;
+    int32_t bw = toplevel->border_width;
 
     if (width < 0 || height < 0)
         return;
 
     wlr_xdg_toplevel_set_size(toplevel->xdg_toplevel, width, height);
-    wlr_xdg_surface_schedule_configure(toplevel->xdg_toplevel->base);
+}
+
+void absinthe_toplevel_set_fullscreen(struct absinthe_toplevel *toplevel, bool fullscreen)
+{
+    if (!toplevel || toplevel->fullscreen == fullscreen)
+        return;
+
+    struct absinthe_output *output = toplevel->output;
+    toplevel->fullscreen = fullscreen;
+    wlr_xdg_toplevel_set_fullscreen(toplevel->xdg_toplevel, fullscreen);
+
+    if (fullscreen) {
+        toplevel->prev_geometry = toplevel->geometry;
+        toplevel->geometry = output->geometry;
+        toplevel->border_width = 0;
+        absinthe_toplevel_set_size(toplevel, toplevel->geometry.width, toplevel->geometry.height);
+    } else {
+        toplevel->geometry = toplevel->prev_geometry;
+        toplevel->border_width = ABSINTHE_WINDOW_BORDER_WIDTH;
+        absinthe_toplevel_set_size(toplevel, toplevel->geometry.width, toplevel->geometry.height);        
+    }
 }
 
 void absinthe_toplevel_set_border_color(struct absinthe_toplevel *toplevel, const float color[4])
@@ -50,10 +70,11 @@ void absinthe_toplevel_set_border_color(struct absinthe_toplevel *toplevel, cons
 
 void absinthe_toplevel_update_borders_geometry(struct absinthe_toplevel *toplevel)
 {
-    int bw = ABSINTHE_WINDOW_BORDER_WIDTH;
+    int32_t bw = toplevel->border_width;
 
     if (toplevel->geometry.width - 2 * bw < 0 || toplevel->geometry.height - 2 * bw < 0)
         return;
+
 
 	wlr_scene_node_set_position(&toplevel->scene_tree->node, toplevel->geometry.x, toplevel->geometry.y);
 	wlr_scene_node_set_position(&toplevel->scene_surface->node, bw, bw);

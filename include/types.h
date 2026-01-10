@@ -26,9 +26,6 @@
 
 static const float bordercolor[4] = {0.88, 0.18, 0.18, 1.0};
 
-#define MAX(a, b) a > b ? a : b
-#define MIN(a, b) a < b ? a : b
-
 enum absinthe_cursor_mode {
     ABSINTHE_CURSOR_PASSTHROUGH,
     ABSINTHE_CURSOR_MOVE,
@@ -41,6 +38,8 @@ enum absinthe_cursor_resize_corner {
     ABSINTHE_CURSOR_RESIZE_CORNER_BOTTOM_LEFT,
     ABSINTHE_CURSOR_RESIZE_CORNER_BOTTOM_RIGHT,
 };
+
+struct absinthe_output;
 
 struct absinthe_server {
     struct wl_display *display;
@@ -78,6 +77,7 @@ struct absinthe_server {
     uint32_t grab_x, grab_y;
     enum absinthe_cursor_resize_corner cursor_resize_corner;
 
+    struct absinthe_output *focused_output;
     struct wl_list outputs;
     struct wl_listener new_output;
     struct wlr_output_layout *output_layout;
@@ -100,11 +100,15 @@ struct absinthe_output {
 struct absinthe_toplevel {
     struct wl_list link;
     struct absinthe_server *server;
+    struct absinthe_output *output;
     struct wlr_scene_tree *scene_tree;
     struct wlr_scene_tree *scene_surface;
+    int32_t border_width;
     struct wlr_scene_rect *border[4];
+    bool fullscreen;
     bool performing_resize;
     struct wlr_box geometry;
+    struct wlr_box prev_geometry;
     struct wlr_xdg_toplevel *xdg_toplevel;
     struct wl_listener map;
     struct wl_listener unmap;

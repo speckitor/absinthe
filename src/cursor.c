@@ -30,7 +30,7 @@ static void process_cursor_move(struct absinthe_server *server) {
 
 static void apply_resize(struct absinthe_toplevel *toplevel, struct wlr_box *new_geometry)
 {
-    int32_t bw = ABSINTHE_WINDOW_BORDER_WIDTH;
+    int32_t bw = toplevel->border_width;
 
     int32_t min_width = toplevel->xdg_toplevel->current.min_width;
     int32_t min_height = toplevel->xdg_toplevel->current.min_height;

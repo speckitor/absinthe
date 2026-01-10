@@ -3,8 +3,11 @@
 
 #include <wayland-server-core.h>
 #include <xkbcommon/xkbcommon.h>
+#include <wlr/types/wlr_xdg_shell.h>
+#include <wlr/util/log.h>
 
 #include "types.h"
+#include "absinthe-toplevel.h"
 
 void keyboard_handle_modifiers(struct wl_listener *listener, void *data)
 {
@@ -23,6 +26,22 @@ static bool keyboard_handle_keybind(struct absinthe_server *server, xkb_keysym_t
     case XKB_KEY_Return:
         if (fork() == 0)
             execl("/bin/sh", "sh", "-c", "alacritty", NULL);
+        break;
+    case XKB_KEY_f:
+        struct wlr_surface *surface = server->seat->pointer_state.focused_surface;
+
+        if (!surface)
+            break;
+        
+        struct wlr_xdg_toplevel *xdg_toplevel = wlr_xdg_toplevel_try_from_wlr_surface(surface);
+
+        if (!xdg_toplevel)
+            break;
+
+        struct absinthe_toplevel *toplevel = xdg_toplevel->base->data;
+
+        if (toplevel)
+            absinthe_toplevel_set_fullscreen(toplevel, !toplevel->fullscreen);
         break;
     default:
         return false;
