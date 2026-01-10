@@ -14,7 +14,7 @@ void xdg_popup_commit(struct wl_listener *listener, void *data)
 
 void xdg_popup_destroy(struct wl_listener *listener, void *data)
 {
-    struct absinthe_popup *popup = wl_container_of(listener, popup, commit);
+    struct absinthe_popup *popup = wl_container_of(listener, popup, destroy);
 
     wl_list_remove(&popup->commit.link);
     wl_list_remove(&popup->destroy.link);

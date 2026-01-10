@@ -93,8 +93,8 @@ void server_new_xdg_popup(struct wl_listener *listener, void *data)
     popup->xdg_popup = xdg_popup;
 
     struct wlr_xdg_surface *parent = wlr_xdg_surface_try_from_wlr_surface(xdg_popup->parent);
-    assert(parent != NULL);
-    struct wlr_scene_tree *parent_tree = parent->data;
+    struct absinthe_toplevel *parent_toplevel = parent->data;
+    struct wlr_scene_tree *parent_tree = parent_toplevel->scene_tree; 
     xdg_popup->base->data = wlr_scene_xdg_surface_create(parent_tree, xdg_popup->base);
 
     popup->commit.notify = xdg_popup_commit;
