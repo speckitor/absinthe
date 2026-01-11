@@ -156,6 +156,7 @@ void server_cursor_button(struct wl_listener *listener, void *data)
         if (mods & ABSINTHE_CURSOR_MOD) {
             if (event->button == ABSINTHE_CURSOR_MOVE_BUTTON) {
                 server->cursor_mode = ABSINTHE_CURSOR_MOVE;
+                wlr_cursor_set_xcursor(server->cursor, server->cursor_mgr, "all-scroll");
                 handled = true;
             } else if (event->button == ABSINTHE_CURSOR_RESIZE_BUTTON) {
                 server->cursor_mode = ABSINTHE_CURSOR_RESIZE;
