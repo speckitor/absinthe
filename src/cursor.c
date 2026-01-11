@@ -20,6 +20,11 @@ static void process_cursor_move(struct absinthe_server *server) {
     if (!toplevel)
         return;
 
+    if (toplevel->fullscreen) {
+        toplevel->prev_geometry = toplevel->geometry;
+        absinthe_toplevel_set_fullscreen(toplevel, false);
+    }
+
     uint32_t new_x, new_y;
     new_x = server->cursor->x - server->grab_x + server->grabbed_geometry.x;
     new_y = server->cursor->y - server->grab_y + server->grabbed_geometry.y;
@@ -68,6 +73,9 @@ static void process_cursor_resize(struct absinthe_server *server) {
 
     if (toplevel->performing_resize == true)
         return;
+
+    if (toplevel->fullscreen)
+        absinthe_toplevel_set_fullscreen(toplevel, false);
 
     int32_t new_x, new_y, new_width, new_height;
     new_x = server->grabbed_geometry.x;
