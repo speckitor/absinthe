@@ -78,6 +78,8 @@ int main(int argc, char **argv)
     wl_signal_add(&server.backend->events.new_output, &server.new_output);
 
     server.output_layout = wlr_output_layout_create(server.display);
+    server.output_layout_change.notify = outputs_update;
+    wl_signal_add(&server.output_layout->events.change, &server.output_layout_change);
 
     server.output_mgr = wlr_output_manager_v1_create(server.display);
 

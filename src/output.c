@@ -36,27 +36,27 @@ void output_destroy(struct wl_listener *listener, void *data)
     free(output);
 }
 
-void output_layout_change(struct wl_listener *listener, void *data)
+void outputs_update(struct wl_listener *listener, void *data)
 {
     struct absinthe_server *server = wl_container_of(listener, server, output_layout_change);
-    struct wlr_output_configuration_v1 *config = wlr_output_configuration_v1_create();
-
-    struct wlr_output_configuration_head_v1 *config_head;
     struct absinthe_output *output;
     wl_list_for_each(output, &server->outputs, link) {
-        if (output->wlr_output->enabled) continue;
-
-        config_head = wlr_output_configuration_head_v1_create(config, output->wlr_output);
-        config_head->state.enabled = false;
-        wlr_output_layout_remove(server->output_layout, output->wlr_output);
-    }
-
-    wl_list_for_each(output, &server->outputs, link) {
-        if (!output->wlr_output->enabled || !wlr_output_layout_get(server->output_layout, output->wlr_output)) continue;
-
-        wlr_output_layout_add_auto(server->output_layout, output->wlr_output);
         wlr_output_layout_get_box(server->output_layout, output->wlr_output, &output->geometry);
     }
-
-    wlr_output_manager_v1_set_configuration(server->output_mgr, config);
 }
+
+void update_focused_output(struct absinthe_server *server)
+{
+    struct absinthe_output *output;
+    int32_t cursor_x = server->cursor->x;
+    int32_t cursor_y = server->cursor->y;
+    wl_list_for_each(output, &server->outputs, link) {
+        bool cursor_in_output_x = cursor_x >= output->geometry.x && cursor_x <= output->geometry.x + output->geometry.width;
+        bool cursor_in_output_y = cursor_y >= output->geometry.y && cursor_y <= output->geometry.y + output->geometry.height;
+        if (cursor_in_output_x && cursor_in_output_y) {
+            server->focused_output = output;
+            break;
+        }
+    }
+}
+

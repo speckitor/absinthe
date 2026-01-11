@@ -44,12 +44,12 @@ void server_new_output(struct wl_listener *listener, void *data)
     output->destroy.notify = output_destroy;
     wl_signal_add(&wlr_output->events.destroy, &output->destroy);
 
+    wl_list_insert(&server->outputs, &output->link);
+
     struct wlr_output_layout_output *l_layout = wlr_output_layout_add_auto(server->output_layout, output->wlr_output);
     struct wlr_scene_output *scene_output = wlr_scene_output_create(server->scene, wlr_output);
     wlr_scene_output_layout_add_output(server->scene_layout, l_layout, scene_output);
     wlr_output_layout_get_box(server->output_layout, output->wlr_output, &output->geometry);
-
-    server->focused_output = output;
 }
 
 void server_new_xdg_toplevel(struct wl_listener *listener, void *data)
@@ -123,6 +123,7 @@ void server_cursor_motion(struct wl_listener *listener, void *data)
 {
     struct absinthe_server *server = wl_container_of(listener, server, cursor_motion);
     struct wlr_pointer_motion_event *event = data;
+    update_focused_output(server);
     wlr_cursor_move(server->cursor, &event->pointer->base, event->delta_x, event->delta_y);
     process_cursor_motion(server, event->time_msec);
 }
@@ -131,6 +132,7 @@ void server_cursor_motion_absolute(struct wl_listener *listener, void *data)
 {
     struct absinthe_server *server = wl_container_of(listener, server, cursor_motion_absolute);
     struct wlr_pointer_motion_absolute_event *event = data;
+    update_focused_output(server);
     wlr_cursor_warp_absolute(server->cursor, &event->pointer->base, event->x, event->y);
     process_cursor_motion(server, event->time_msec);
 }

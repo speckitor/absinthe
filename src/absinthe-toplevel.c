@@ -45,7 +45,7 @@ void absinthe_toplevel_set_fullscreen(struct absinthe_toplevel *toplevel, bool f
     if (!toplevel || toplevel->fullscreen == fullscreen)
         return;
 
-    struct absinthe_output *output = toplevel->output;
+    struct absinthe_output *output = toplevel->server->focused_output;
     toplevel->fullscreen = fullscreen;
     wlr_xdg_toplevel_set_fullscreen(toplevel->xdg_toplevel, fullscreen);
 
