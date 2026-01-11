@@ -7,7 +7,7 @@
 void reset_cursor_mode(struct absinthe_server *server)
 {
     server->cursor_mode = ABSINTHE_CURSOR_PASSTHROUGH;
-
+    wlr_cursor_set_xcursor(server->cursor, server->cursor_mgr, "default");
     if (server->grabbed_toplevel) {
         wlr_xdg_toplevel_set_resizing(server->grabbed_toplevel->xdg_toplevel, false);
         server->grabbed_toplevel = NULL;

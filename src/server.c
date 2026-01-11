@@ -141,8 +141,8 @@ void server_cursor_button(struct wl_listener *listener, void *data)
 {
     struct absinthe_server *server = wl_container_of(listener, server, cursor_button);
     struct wlr_pointer_button_event *event = data;
-
     bool handled = false;
+
     if (event->state == WL_POINTER_BUTTON_STATE_RELEASED) {
         reset_cursor_mode(server);
     } else {
@@ -162,11 +162,12 @@ void server_cursor_button(struct wl_listener *listener, void *data)
                 handled = true;
             }
         }
+
         if (toplevel) {
             server->grab_x = server->cursor->x;
             server->grab_y = server->cursor->y;
 
-            int lx, ly;
+            int32_t lx, ly;
             wlr_scene_node_coords(&toplevel->scene_tree->node, &lx, &ly);
             server->grabbed_geometry.x = lx;
             server->grabbed_geometry.y = ly;
@@ -174,23 +175,31 @@ void server_cursor_button(struct wl_listener *listener, void *data)
             server->grabbed_geometry.height = toplevel->geometry.height;
             server->grabbed_toplevel = toplevel;
 
-            int width = toplevel->xdg_toplevel->base->geometry.width;
-            int height = toplevel->xdg_toplevel->base->geometry.height;
+            if (server->cursor_mode != ABSINTHE_CURSOR_RESIZE)
+                goto handle;
 
-            if ((int)server->grab_x > (lx + width / 2) && (int)server->grab_y > (ly + height / 2)) {
+            int32_t width = toplevel->xdg_toplevel->base->geometry.width;
+            int32_t height = toplevel->xdg_toplevel->base->geometry.height;
+
+            if (server->grab_x > (lx + width / 2) && server->grab_y > (ly + height / 2)) {
                 server->cursor_resize_corner = ABSINTHE_CURSOR_RESIZE_CORNER_BOTTOM_RIGHT;
-            } else if ((int)server->grab_x < (lx + width / 2) && (int)server->grab_y > (ly + height / 2)) {
+                wlr_cursor_set_xcursor(server->cursor, server->cursor_mgr, "se-resize");
+            } else if (server->grab_x < (lx + width / 2) && server->grab_y > (ly + height / 2)) {
                 server->cursor_resize_corner = ABSINTHE_CURSOR_RESIZE_CORNER_BOTTOM_LEFT;
-            } else if ((int)server->grab_x > (lx + width / 2) && (int)server->grab_y < (ly + height / 2)) {
+                wlr_cursor_set_xcursor(server->cursor, server->cursor_mgr, "sw-resize");
+            } else if (server->grab_x > (lx + width / 2) && server->grab_y < (ly + height / 2)) {
                 server->cursor_resize_corner = ABSINTHE_CURSOR_RESIZE_CORNER_TOP_RIGHT;
+                wlr_cursor_set_xcursor(server->cursor, server->cursor_mgr, "ne-resize");
             } else {
                 server->cursor_resize_corner = ABSINTHE_CURSOR_RESIZE_CORNER_TOP_LEFT;
+                wlr_cursor_set_xcursor(server->cursor, server->cursor_mgr, "nw-resize");
             }
 
             wlr_xdg_toplevel_set_resizing(toplevel->xdg_toplevel, true);
         }
     }
 
+handle:
     if (!handled) {
         wlr_seat_pointer_notify_button(server->seat, event->time_msec, event->button, event->state);
     }
