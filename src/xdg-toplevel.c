@@ -42,14 +42,15 @@ void xdg_toplevel_map(struct wl_listener *listener, void *data)
     }
 
     toplevel->border_width = ABSINTHE_WINDOW_BORDER_WIDTH;
-    
+
     absinthe_toplevel_set_border_color(toplevel, unfocused_border_color);
     absinthe_toplevel_update_borders_geometry(toplevel);
 
     toplevel->output = toplevel->server->focused_output;
     toplevel->fullscreen = false;
-    
+
     wl_list_insert(&toplevel->server->toplevels, &toplevel->link);
+    wl_list_insert(&toplevel->server->focus_stack, &toplevel->flink);
 }
 
 void xdg_toplevel_unmap(struct wl_listener *listener, void *data)

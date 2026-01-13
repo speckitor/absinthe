@@ -27,7 +27,7 @@ struct absinthe_toplevel *absinthe_toplevel_at(struct absinthe_server *server, d
         return tree->node.data;
         break;
     case WLR_SCENE_NODE_RECT:
-        return node->data;        
+        return node->data;
         break;
     default:
         return NULL;
@@ -66,7 +66,7 @@ void absinthe_toplevel_set_fullscreen(struct absinthe_toplevel *toplevel, bool f
     } else {
         toplevel->geometry = toplevel->prev_geometry;
         toplevel->border_width = ABSINTHE_WINDOW_BORDER_WIDTH;
-        absinthe_toplevel_set_size(toplevel, toplevel->geometry.width, toplevel->geometry.height);        
+        absinthe_toplevel_set_size(toplevel, toplevel->geometry.width, toplevel->geometry.height);
     }
 }
 

@@ -54,7 +54,6 @@ struct absinthe_server {
     struct wlr_xdg_shell *xdg_shell;
     struct wl_listener new_xdg_toplevel;
     struct wl_listener new_xdg_popup;
-    struct wl_list toplevels;
     struct wlr_xdg_decoration_manager_v1 *xdg_decoration_mgr;
     struct wl_listener new_xdg_decoration;
 
@@ -78,6 +77,9 @@ struct absinthe_server {
     uint32_t grab_x, grab_y;
     enum absinthe_cursor_resize_corner cursor_resize_corner;
 
+    struct wl_list toplevels;
+    struct wl_list focus_stack;
+
     struct absinthe_output *focused_output;
     struct wl_list outputs;
     struct wl_listener new_output;
@@ -100,6 +102,7 @@ struct absinthe_output {
 
 struct absinthe_toplevel {
     struct wl_list link;
+    struct wl_list flink; // for focus stack
     struct absinthe_server *server;
     struct absinthe_output *output;
     struct wlr_scene_tree *scene_tree;
