@@ -3,6 +3,7 @@
 #include <wlr/types/wlr_subcompositor.h>
 #include <wlr/types/wlr_data_device.h>
 #include <wlr/types/wlr_xcursor_manager.h>
+#include <wlr/types/wlr_drm.h>
 #include <wlr/types/wlr_screencopy_v1.h>
 #include <wlr/types/wlr_data_control_v1.h>
 #include <wlr/types/wlr_viewporter.h>
@@ -45,7 +46,13 @@ int main(int argc, char **argv)
         return 1;
     }
 
-    wlr_renderer_init_wl_display(server.renderer, server.display);
+    wlr_renderer_init_wl_shm(server.renderer, server.display);
+
+    server.scene = wlr_scene_create();
+    if (wlr_renderer_get_texture_formats(server.renderer, WLR_BUFFER_CAP_DMABUF)) {
+        wlr_drm_create(server.display, server.renderer);
+        wlr_scene_set_linux_dmabuf_v1(server.scene, wlr_linux_dmabuf_v1_create_with_renderer(server.display, 5, server.renderer));
+    }
 
     server.allocator = wlr_allocator_autocreate(server.backend, server.renderer);
     if (!server.allocator) {
@@ -85,7 +92,6 @@ int main(int argc, char **argv)
 
     wlr_xdg_output_manager_v1_create(server.display, server.output_layout);
 
-    server.scene = wlr_scene_create();
     server.scene_layout = wlr_scene_attach_output_layout(server.scene, server.output_layout);
 
     wl_list_init(&server.toplevels);

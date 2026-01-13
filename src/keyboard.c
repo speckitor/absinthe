@@ -24,14 +24,6 @@ static bool keyboard_handle_keybind(struct absinthe_server *server, xkb_keysym_t
     struct wlr_xdg_toplevel *xdg_toplevel;
     struct absinthe_toplevel *toplevel;
 
-    surface = server->seat->pointer_state.focused_surface;
-
-    if (surface)
-        xdg_toplevel = wlr_xdg_toplevel_try_from_wlr_surface(surface);
-
-    if (xdg_toplevel)
-        toplevel = xdg_toplevel->base->data;
-
     switch (keysym) {
     case XKB_KEY_Escape:
         wl_display_terminate(server->display);
@@ -40,7 +32,19 @@ static bool keyboard_handle_keybind(struct absinthe_server *server, xkb_keysym_t
         if (fork() == 0)
             execl("/bin/sh", "sh", "-c", "alacritty", NULL);
         break;
+    case XKB_KEY_r:
+        if (fork() == 0)
+            execl("/bin/sh", "sh", "-c", "wofi --show drun", NULL);
+        break;
     case XKB_KEY_f:
+        surface = server->seat->pointer_state.focused_surface;
+
+        if (surface)
+            xdg_toplevel = wlr_xdg_toplevel_try_from_wlr_surface(surface);
+
+        if (xdg_toplevel)
+            toplevel = xdg_toplevel->base->data;
+
         if (toplevel)
             absinthe_toplevel_set_fullscreen(toplevel, !toplevel->fullscreen);
         break;
