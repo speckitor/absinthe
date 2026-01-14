@@ -58,8 +58,9 @@ void xdg_toplevel_unmap(struct wl_listener *listener, void *data)
     struct absinthe_toplevel *toplevel = wl_container_of(listener, toplevel, unmap);
 
     wlr_scene_node_destroy(&toplevel->scene_tree->node);
-    
+
     wl_list_remove(&toplevel->link);
+    wl_list_remove(&toplevel->flink);
 }
 
 void xdg_toplevel_destroy(struct wl_listener *listener, void *data)

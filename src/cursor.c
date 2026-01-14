@@ -8,14 +8,13 @@ void reset_cursor_mode(struct absinthe_server *server)
 {
     server->cursor_mode = ABSINTHE_CURSOR_PASSTHROUGH;
     wlr_cursor_set_xcursor(server->cursor, server->cursor_mgr, "default");
-    if (server->grabbed_toplevel) {
-        wlr_xdg_toplevel_set_resizing(server->grabbed_toplevel->xdg_toplevel, false);
-        server->grabbed_toplevel = NULL;
+    if (server->focused_toplevel) {
+        wlr_xdg_toplevel_set_resizing(server->focused_toplevel->xdg_toplevel, false);
     }
 }
 
 static void process_cursor_move(struct absinthe_server *server) {
-    struct absinthe_toplevel *toplevel = server->grabbed_toplevel;
+    struct absinthe_toplevel *toplevel = server->focused_toplevel;
 
     if (!toplevel)
         return;
@@ -66,7 +65,7 @@ static void apply_resize(struct absinthe_toplevel *toplevel, struct wlr_box *new
 }
 
 static void process_cursor_resize(struct absinthe_server *server) {
-    struct absinthe_toplevel *toplevel = server->grabbed_toplevel;
+    struct absinthe_toplevel *toplevel = server->focused_toplevel;
 
     if (!toplevel)
         return;
@@ -122,7 +121,7 @@ static void process_cursor_resize(struct absinthe_server *server) {
             .height = new_height,
         };
 
-        apply_resize(server->grabbed_toplevel, &new_geometry);
+        apply_resize(server->focused_toplevel, &new_geometry);
     }
 }
 

@@ -174,7 +174,6 @@ void server_cursor_button(struct wl_listener *listener, void *data)
             server->grabbed_geometry.y = ly;
             server->grabbed_geometry.width = toplevel->geometry.width;
             server->grabbed_geometry.height = toplevel->geometry.height;
-            server->grabbed_toplevel = toplevel;
 
             if (server->cursor_mode != ABSINTHE_CURSOR_RESIZE)
                 goto handle;

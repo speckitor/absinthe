@@ -25,6 +25,8 @@ void focus_toplevel(struct absinthe_toplevel *toplevel)
         }
     }
 
+    toplevel->server->focused_toplevel = toplevel;
+
     struct wlr_keyboard *keyboard = wlr_seat_get_keyboard(seat);
     wlr_scene_node_raise_to_top(&toplevel->scene_tree->node);
     wl_list_remove(&toplevel->flink);

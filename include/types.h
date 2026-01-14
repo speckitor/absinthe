@@ -72,12 +72,12 @@ struct absinthe_server {
     struct wl_listener request_set_selection;
     struct wl_list keyboards;
     enum absinthe_cursor_mode cursor_mode;
-    struct absinthe_toplevel *grabbed_toplevel;
     struct wlr_box grabbed_geometry;
     uint32_t grab_x, grab_y;
     enum absinthe_cursor_resize_corner cursor_resize_corner;
 
     struct wl_list toplevels;
+    struct absinthe_toplevel *focused_toplevel;
     struct wl_list focus_stack;
 
     struct absinthe_output *focused_output;
