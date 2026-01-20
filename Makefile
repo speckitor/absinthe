@@ -1,7 +1,7 @@
 all: compile
 
 proto:
-	wayland-scanner server-header /usr/share/wayland-protocols/stable/xdg-shell/xdg-shell.xml xdg-shell-protocol.h
+	wayland-scanner server-header $(shell pkg-config --variable=pkgdatadir wayland-protocols)/stable/xdg-shell/xdg-shell.xml xdg-shell-protocol.h
 
 compile: proto
 	gcc -o absinthe src/* \
