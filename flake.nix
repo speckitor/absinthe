@@ -8,13 +8,41 @@
   outputs = { self, nixpkgs, ... }:
     let
       system = "x86_64-linux";
+      pkgs = import nixpkgs { inherit system; };
     in
     {
-      devShells."${system}".default =
-      let
-        pkgs = import nixpkgs { inherit system; };
-      in
-      pkgs.mkShell {
+      packages.${system}.default = pkgs.stdenv.mkDerivation {
+        pname = "absinthe";
+        version = "0.1";
+
+        src = ./.;
+
+        nativeBuildInputs = with pkgs; [
+          gcc
+          gnumake
+          pkg-config
+          wayland-scanner
+        ];
+
+        buildInputs = with pkgs; [
+          wayland
+          wayland-protocols
+          wlroots_0_19
+          pixman
+          libxkbcommon
+        ];
+
+        buildPhase = ''
+          make
+        '';
+
+        installPhase = ''
+          mkdir -p $out/bin
+          cp absinthe $out/bin/
+        '';
+      };
+
+      devShells."${system}".default = pkgs.mkShell {
         packages = with pkgs; [
           pkg-config
           gnumake
@@ -25,12 +53,12 @@
           wlroots_0_19
           pixman
           libxkbcommon
-          zsh
+          fish
         ];
 
         shellHook = ''
           echo "Absinthe dev shell"
-          exec zsh
+          exec fish
         '';
       };
     };
