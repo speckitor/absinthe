@@ -2,16 +2,19 @@
   description = "Absinthe wayland compositor";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.11";
   };
 
-  outputs = { self, nixpkgs }:
+  outputs = { self, nixpkgs, ... }:
     let
-      system = "x86_64_linux";
-      pkgs = import nixpkgs { inherit system; };
+      system = "x86_64-linux";
     in
     {
-      devShells.${system}.default = pkgs.mkShell {
+      devShells."${system}".default =
+      let
+        pkgs = import nixpkgs { inherit system; };
+      in
+      pkgs.mkShell {
         packages = with pkgs; [
           pkg-config
           gnumake
@@ -22,7 +25,13 @@
           wlroots_0_19
           pixman
           libxkbcommon
+          zsh
         ];
+
+        shellHook = ''
+          echo "Absinthe dev shell"
+          exec zsh
+        '';
       };
     };
 }
