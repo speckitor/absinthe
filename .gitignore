@@ -1,5 +1,6 @@
 absinthe
 .cache/
 result/
+result
 compile_commands.json
 xdg-shell-protocol.h
