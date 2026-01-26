@@ -47,6 +47,7 @@
           pkg-config
           gnumake
           gcc
+          gdb
           wayland
           wayland-protocols
           wayland-scanner

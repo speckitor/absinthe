@@ -24,6 +24,11 @@ void xdg_toplevel_commit(struct wl_listener *listener, void *data)
             int32_t bw = toplevel->border_width;
             toplevel->geometry.width = toplevel->xdg_toplevel->base->geometry.width + 2 * bw;
             toplevel->geometry.height = toplevel->xdg_toplevel->base->geometry.height + 2 * bw;
+
+            int32_t rel_x = toplevel->output->geometry.x + toplevel->output->geometry.width / 2 - toplevel->geometry.width / 2;
+            int32_t rel_y = toplevel->output->geometry.y + toplevel->output->geometry.height / 2 - toplevel->geometry.height / 2;
+            toplevel->geometry.x += abs(rel_x);
+            toplevel->geometry.y += abs(rel_y);
         }
 
         absinthe_toplevel_set_position(toplevel, toplevel->geometry.x, toplevel->geometry.y);
