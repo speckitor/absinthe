@@ -31,7 +31,7 @@ void server_new_output(struct wl_listener *listener, void *data)
     wlr_output_commit_state(wlr_output, &state);
     wlr_output_state_finish(&state);
 
-    struct absinthe_output *output = calloc(1, sizeof(*output));
+    struct absinthe_output *output = malloc(sizeof(*output));
     output->wlr_output = wlr_output;
     output->server = server;
 
@@ -57,7 +57,7 @@ void server_new_xdg_toplevel(struct wl_listener *listener, void *data)
     struct absinthe_server *server = wl_container_of(listener, server, new_xdg_toplevel);
     struct wlr_xdg_toplevel *xdg_toplevel = data;
 
-    struct absinthe_toplevel *toplevel = calloc(1, sizeof(*toplevel));
+    struct absinthe_toplevel *toplevel = malloc(sizeof(*toplevel));
     toplevel->server = server;
     toplevel->xdg_toplevel = xdg_toplevel;
     toplevel->scene_tree = wlr_scene_tree_create(&toplevel->server->scene->tree);
@@ -90,12 +90,12 @@ void server_new_xdg_popup(struct wl_listener *listener, void *data)
     struct absinthe_server *server = wl_container_of(listener, server, new_xdg_popup);
     struct wlr_xdg_popup *xdg_popup = data;
 
-    struct absinthe_popup *popup = calloc(1, sizeof(*popup));
+    struct absinthe_popup *popup = malloc(sizeof(*popup));
     popup->xdg_popup = xdg_popup;
 
     struct wlr_xdg_surface *parent = wlr_xdg_surface_try_from_wlr_surface(xdg_popup->parent);
     struct absinthe_toplevel *parent_toplevel = parent->data;
-    struct wlr_scene_tree *parent_tree = parent_toplevel->scene_tree; 
+    struct wlr_scene_tree *parent_tree = parent_toplevel->scene_tree;
     xdg_popup->base->data = wlr_scene_xdg_surface_create(parent_tree, xdg_popup->base);
 
     popup->commit.notify = xdg_popup_commit;
@@ -221,7 +221,7 @@ void server_cursor_frame(struct wl_listener *listener, void *data)
 static void server_new_keyboard(struct absinthe_server *server, struct wlr_input_device *device)
 {
     struct wlr_keyboard *wlr_keyboard = wlr_keyboard_from_input_device(device);
-    struct absinthe_keyboard *keyboard = calloc(1, sizeof(*keyboard));
+    struct absinthe_keyboard *keyboard = malloc(sizeof(*keyboard));
     keyboard->server = server;
     keyboard->wlr_keyboard = wlr_keyboard;
 

@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <assert.h>
 
 #include <wayland-server-core.h>
 #include <wlr/util/log.h>
@@ -12,24 +13,17 @@ void xdg_toplevel_commit(struct wl_listener *listener, void *data)
     struct absinthe_toplevel *toplevel = wl_container_of(listener, toplevel, commit);
 
     if (toplevel->xdg_toplevel->base->initial_commit) {
-        // Let client set the preferred size
-        wlr_xdg_toplevel_set_size(toplevel->xdg_toplevel, 0, 0);
-
         // Forse server side decoration mode
         if (toplevel->decoration)
             xdg_decoration_request_mode(&toplevel->decoration_request_mode, toplevel->decoration);
+
+        // Let toplevel set preferred size
+        wlr_xdg_toplevel_set_size(toplevel->xdg_toplevel, 0, 0);
     } else {
         // Check for size because we did't set it on initial commit
-        if (toplevel->geometry.width == 0 || toplevel->geometry.height == 0) {
-            int32_t bw = toplevel->border_width;
-            toplevel->geometry.width = toplevel->xdg_toplevel->base->geometry.width + 2 * bw;
-            toplevel->geometry.height = toplevel->xdg_toplevel->base->geometry.height + 2 * bw;
-
-            int32_t rel_x = toplevel->output->geometry.x + toplevel->output->geometry.width / 2 - toplevel->geometry.width / 2;
-            int32_t rel_y = toplevel->output->geometry.y + toplevel->output->geometry.height / 2 - toplevel->geometry.height / 2;
-            toplevel->geometry.x += abs(rel_x);
-            toplevel->geometry.y += abs(rel_y);
-        }
+        int32_t bw = toplevel->border_width;
+        toplevel->geometry.width = toplevel->xdg_toplevel->base->geometry.width + 2 * bw;
+        toplevel->geometry.height = toplevel->xdg_toplevel->base->geometry.height + 2 * bw;
 
         absinthe_toplevel_set_position(toplevel, toplevel->geometry.x, toplevel->geometry.y);
         absinthe_toplevel_update_borders_geometry(toplevel);
@@ -47,9 +41,6 @@ void xdg_toplevel_map(struct wl_listener *listener, void *data)
     }
 
     toplevel->border_width = ABSINTHE_WINDOW_BORDER_WIDTH;
-
-    absinthe_toplevel_set_border_color(toplevel, unfocused_border_color);
-    absinthe_toplevel_update_borders_geometry(toplevel);
 
     toplevel->output = toplevel->server->focused_output;
     toplevel->fullscreen = false;
