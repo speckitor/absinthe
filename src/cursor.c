@@ -47,7 +47,7 @@ static void apply_resize(struct absinthe_toplevel *toplevel, struct wlr_box *new
 
     if (max_height == 0)
         max_height = 10000;
-    
+
     if (new_geometry->width - 2 * bw >= min_width && new_geometry->width - 2 * bw <= max_width) {
         toplevel->geometry.x = new_geometry->x;
         toplevel->geometry.width = new_geometry->width;

@@ -149,22 +149,23 @@ void server_cursor_button(struct wl_listener *listener, void *data)
         double sx, sy;
         struct wlr_surface *surface = NULL;
         struct absinthe_toplevel *toplevel = absinthe_toplevel_at(server, server->cursor->x, server->cursor->y, &surface, &sx, &sy);
-        focus_toplevel(toplevel);
 
-        struct wlr_keyboard *keyboard = wlr_seat_get_keyboard(server->seat);
-        uint32_t mods = wlr_keyboard_get_modifiers(keyboard);
-        if (mods & ABSINTHE_CURSOR_MOD) {
-            if (event->button == ABSINTHE_CURSOR_MOVE_BUTTON) {
-                server->cursor_mode = ABSINTHE_CURSOR_MOVE;
-                wlr_cursor_set_xcursor(server->cursor, server->cursor_mgr, "all-scroll");
-                handled = true;
-            } else if (event->button == ABSINTHE_CURSOR_RESIZE_BUTTON) {
-                server->cursor_mode = ABSINTHE_CURSOR_RESIZE;
-                handled = true;
-            }
-        }
 
         if (toplevel) {
+            struct wlr_keyboard *keyboard = wlr_seat_get_keyboard(server->seat);
+            uint32_t mods = wlr_keyboard_get_modifiers(keyboard);
+            if (mods & ABSINTHE_CURSOR_MOD) {
+                if (event->button == ABSINTHE_CURSOR_MOVE_BUTTON) {
+                    server->cursor_mode = ABSINTHE_CURSOR_MOVE;
+                    wlr_cursor_set_xcursor(server->cursor, server->cursor_mgr, "all-scroll");
+                    handled = true;
+                } else if (event->button == ABSINTHE_CURSOR_RESIZE_BUTTON) {
+                    server->cursor_mode = ABSINTHE_CURSOR_RESIZE;
+                    handled = true;
+                }
+            }
+
+            focus_toplevel(toplevel);
             server->grab_x = server->cursor->x;
             server->grab_y = server->cursor->y;
 
