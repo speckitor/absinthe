@@ -5,8 +5,10 @@
 #include <wlr/util/log.h>
 
 #include "types.h"
-#include "xdg-decoration.h"
 #include "absinthe-toplevel.h"
+#include "layout.h"
+#include "output.h"
+#include "xdg-decoration.h"
 
 void xdg_toplevel_commit(struct wl_listener *listener, void *data)
 {
@@ -18,7 +20,7 @@ void xdg_toplevel_commit(struct wl_listener *listener, void *data)
             xdg_decoration_request_mode(&toplevel->decoration_request_mode, toplevel->decoration);
 
         // Let toplevel set preferred size
-        wlr_xdg_toplevel_set_size(toplevel->xdg_toplevel, 0, 0);
+        // wlr_xdg_toplevel_set_size(toplevel->xdg_toplevel, 0, 0);
     } else {
         // Check for size because we did't set it on initial commit
         int32_t bw = toplevel->border_width;
@@ -42,11 +44,14 @@ void xdg_toplevel_map(struct wl_listener *listener, void *data)
 
     toplevel->border_width = ABSINTHE_WINDOW_BORDER_WIDTH;
 
+    update_focused_output(toplevel->server);
     toplevel->output = toplevel->server->focused_output;
     toplevel->fullscreen = false;
 
     wl_list_insert(&toplevel->server->toplevels, &toplevel->link);
     wl_list_insert(&toplevel->server->focus_stack, &toplevel->flink);
+
+    layout_arrange(toplevel->output);
 }
 
 void xdg_toplevel_unmap(struct wl_listener *listener, void *data)
@@ -57,6 +62,8 @@ void xdg_toplevel_unmap(struct wl_listener *listener, void *data)
 
     wl_list_remove(&toplevel->link);
     wl_list_remove(&toplevel->flink);
+
+    layout_arrange(toplevel->output);
 }
 
 void xdg_toplevel_destroy(struct wl_listener *listener, void *data)

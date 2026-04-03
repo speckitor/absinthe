@@ -16,7 +16,7 @@
 #include <wlr/types/wlr_output_management_v1.h>
 #include <wlr/types/wlr_xdg_decoration_v1.h>
 
-// Configuration, later will be moved
+// Configuration, will be moved later
 
 #define ABSINTHE_CURSOR_MOD WLR_MODIFIER_ALT
 #define ABSINTHE_CURSOR_MOVE_BUTTON BTN_LEFT
@@ -26,6 +26,13 @@
 
 static const float focused_border_color[4] = {0.88, 0.18, 0.18, 1.0};
 static const float unfocused_border_color[4] = {0.18, 0.18, 0.18, 1.0};
+
+#define ABSINTHE_MAIN_TOPLEVEL_WIDTH 0.5
+
+#define ABSINTHE_OUTPUT_GAP 10
+#define ABSINTHE_LAYOUT_GAP 10
+
+// Configuration end
 
 enum absinthe_cursor_mode {
     ABSINTHE_CURSOR_PASSTHROUGH,
@@ -38,6 +45,23 @@ enum absinthe_cursor_resize_corner {
     ABSINTHE_CURSOR_RESIZE_CORNER_TOP_RIGHT,
     ABSINTHE_CURSOR_RESIZE_CORNER_BOTTOM_LEFT,
     ABSINTHE_CURSOR_RESIZE_CORNER_BOTTOM_RIGHT,
+};
+
+enum absinthe_toplevel_type {
+    ABSINTHE_TOPLEVEL_XDG_SHELL,
+    ABSINTHE_TOPLEVEL_LAYER_SHELL,
+    ABSINTHE_TOPLEVEL_X11,
+};
+
+enum absinthe_layers {
+    ABSINTHE_LAYER_BACKGROUND,
+    ABSINTHE_LAYER_TILE,
+    ABSINTHE_LAYER_FLOAT,
+    ABSINTHE_LAYER_FULLSCREEN,
+    ABSINTHE_LAYER_POPUP,
+    ABSINTHE_LAYER_OVERLAY,
+    ABSINTHE_LAYER_LOCK,
+    ABSINTHE_LAYERS_COUNT,
 };
 
 struct absinthe_output;
@@ -71,14 +95,15 @@ struct absinthe_server {
     struct wl_listener pointer_focus_change;
     struct wl_listener request_set_selection;
     struct wl_list keyboards;
+
     enum absinthe_cursor_mode cursor_mode;
     struct wlr_box grabbed_geometry;
     uint32_t grab_x, grab_y;
     enum absinthe_cursor_resize_corner cursor_resize_corner;
 
     struct wl_list toplevels;
-    struct absinthe_toplevel *focused_toplevel;
     struct wl_list focus_stack;
+    struct absinthe_toplevel *focused_toplevel;
 
     struct absinthe_output *focused_output;
     struct wl_list outputs;
@@ -107,12 +132,15 @@ struct absinthe_toplevel {
     struct absinthe_output *output;
     struct wlr_scene_tree *scene_tree;
     struct wlr_scene_tree *scene_surface;
+
     int32_t border_width;
     struct wlr_scene_rect *border[4];
     bool fullscreen;
     bool performing_resize;
+
     struct wlr_box geometry;
     struct wlr_box prev_geometry;
+
     struct wlr_xdg_toplevel *xdg_toplevel;
     struct wl_listener map;
     struct wl_listener unmap;

@@ -172,7 +172,7 @@ void server_cursor_button(struct wl_listener *listener, void *data)
             int32_t lx, ly;
             wlr_scene_node_coords(&toplevel->scene_tree->node, &lx, &ly);
             server->grabbed_geometry.x = lx;
-            server->grabbed_geometry.y = ly;
+           server->grabbed_geometry.y = ly;
             server->grabbed_geometry.width = toplevel->geometry.width;
             server->grabbed_geometry.height = toplevel->geometry.height;
 
