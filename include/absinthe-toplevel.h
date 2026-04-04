@@ -1,5 +1,7 @@
 #include "types.h"
 
+bool absinthe_toplevel_is_x11(struct absinthe_toplevel *toplevel);
+
 struct absinthe_toplevel *absinthe_toplevel_at(struct absinthe_server *server, double lx, double ly, struct wlr_surface **surface, double *sx, double *sy);
 
 void absinthe_toplevel_set_position(struct absinthe_toplevel *toplevel, int32_t x, int32_t y);

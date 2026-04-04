@@ -16,23 +16,13 @@
 #include <wlr/types/wlr_output_management_v1.h>
 #include <wlr/types/wlr_xdg_decoration_v1.h>
 
-// Configuration, will be moved later
+#ifdef XWAYLAND
+#include <wlr/xwayland.h>
+#include <xcb/xcb.h>
+#include <xcb/xcb_icccm.h>
+#endif
 
-#define ABSINTHE_CURSOR_MOD WLR_MODIFIER_ALT
-#define ABSINTHE_CURSOR_MOVE_BUTTON BTN_LEFT
-#define ABSINTHE_CURSOR_RESIZE_BUTTON BTN_RIGHT
-
-#define ABSINTHE_WINDOW_BORDER_WIDTH 2
-
-static const float focused_border_color[4] = {0.88, 0.18, 0.18, 1.0};
-static const float unfocused_border_color[4] = {0.18, 0.18, 0.18, 1.0};
-
-#define ABSINTHE_MAIN_TOPLEVEL_WIDTH 0.5
-
-#define ABSINTHE_OUTPUT_GAP 10
-#define ABSINTHE_LAYOUT_GAP 10
-
-// Configuration end
+#include "config.h"
 
 enum absinthe_cursor_mode {
     ABSINTHE_CURSOR_PASSTHROUGH,
@@ -48,17 +38,18 @@ enum absinthe_cursor_resize_corner {
 };
 
 enum absinthe_toplevel_type {
-    ABSINTHE_TOPLEVEL_XDG_SHELL,
+    ABSINTHE_TOPLEVEL_XDG,
     ABSINTHE_TOPLEVEL_LAYER_SHELL,
     ABSINTHE_TOPLEVEL_X11,
 };
 
 enum absinthe_layers {
     ABSINTHE_LAYER_BACKGROUND,
+    ABSINTHE_LAYER_BOTTOM,
     ABSINTHE_LAYER_TILE,
     ABSINTHE_LAYER_FLOAT,
+    ABSINTHE_LAYER_TOP,
     ABSINTHE_LAYER_FULLSCREEN,
-    ABSINTHE_LAYER_POPUP,
     ABSINTHE_LAYER_OVERLAY,
     ABSINTHE_LAYER_LOCK,
     ABSINTHE_LAYERS_COUNT,
@@ -126,6 +117,8 @@ struct absinthe_output {
 };
 
 struct absinthe_toplevel {
+    enum absinthe_toplevel_type type;
+
     struct wl_list link;
     struct wl_list flink; // for focus stack
     struct absinthe_server *server;
@@ -135,13 +128,18 @@ struct absinthe_toplevel {
 
     int32_t border_width;
     struct wlr_scene_rect *border[4];
+    struct wlr_xdg_toplevel_decoration_v1 *decoration;
+
     bool fullscreen;
     bool performing_resize;
 
     struct wlr_box geometry;
     struct wlr_box prev_geometry;
 
-    struct wlr_xdg_toplevel *xdg_toplevel;
+    union {
+        struct wlr_xdg_toplevel *xdg;
+        struct wlr_xwayland_surface *x11;
+    } toplevel;
     struct wl_listener map;
     struct wl_listener unmap;
     struct wl_listener commit;
@@ -150,9 +148,16 @@ struct absinthe_toplevel {
     struct wl_listener request_resize;
     struct wl_listener request_maximize;
     struct wl_listener request_fullscreen;
-    struct wlr_xdg_toplevel_decoration_v1 *decoration;
     struct wl_listener decoration_request_mode;
     struct wl_listener decoration_destroy;
+
+#ifdef XWAYLAND
+    struct wl_listener activate;
+    struct wl_listener associate;
+    struct wl_listener dissociate;
+    struct wl_listener configure;
+    struct wl_listener set_hints;
+#endif
 };
 
 struct absinthe_popup {

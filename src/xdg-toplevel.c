@@ -14,7 +14,7 @@ void xdg_toplevel_commit(struct wl_listener *listener, void *data)
 {
     struct absinthe_toplevel *toplevel = wl_container_of(listener, toplevel, commit);
 
-    if (toplevel->xdg_toplevel->base->initial_commit) {
+    if (toplevel->toplevel.xdg->base->initial_commit) {
         // Forse server side decoration mode
         if (toplevel->decoration)
             xdg_decoration_request_mode(&toplevel->decoration_request_mode, toplevel->decoration);
@@ -23,9 +23,9 @@ void xdg_toplevel_commit(struct wl_listener *listener, void *data)
         // wlr_xdg_toplevel_set_size(toplevel->xdg_toplevel, 0, 0);
     } else {
         // Check for size because we did't set it on initial commit
-        int32_t bw = toplevel->border_width;
-        toplevel->geometry.width = toplevel->xdg_toplevel->base->geometry.width + 2 * bw;
-        toplevel->geometry.height = toplevel->xdg_toplevel->base->geometry.height + 2 * bw;
+        int32_t borders_width = 2 * toplevel->border_width;
+        toplevel->geometry.width = toplevel->toplevel.xdg->base->geometry.width + borders_width;
+        toplevel->geometry.height = toplevel->toplevel.xdg->base->geometry.height + borders_width;
 
         absinthe_toplevel_set_position(toplevel, toplevel->geometry.x, toplevel->geometry.y);
         absinthe_toplevel_update_borders_geometry(toplevel);
@@ -42,7 +42,7 @@ void xdg_toplevel_map(struct wl_listener *listener, void *data)
         toplevel->border[i]->node.data = toplevel;
     }
 
-    toplevel->border_width = ABSINTHE_WINDOW_BORDER_WIDTH;
+    toplevel->border_width = ABSINTHE_TOPLEVEL_BORDER_WIDTH;
 
     update_focused_output(toplevel->server);
     toplevel->output = toplevel->server->focused_output;
@@ -85,26 +85,26 @@ void xdg_toplevel_destroy(struct wl_listener *listener, void *data)
 void xdg_toplevel_request_move(struct wl_listener *listener, void *data)
 {
     struct absinthe_toplevel *toplevel = wl_container_of(listener, toplevel, request_maximize);
-    if (toplevel->xdg_toplevel->base->initialized)
-        wlr_xdg_surface_schedule_configure(toplevel->xdg_toplevel->base);
+    if (toplevel->toplevel.xdg->base->initialized)
+        wlr_xdg_surface_schedule_configure(toplevel->toplevel.xdg->base);
 }
 
 void xdg_toplevel_request_resize(struct wl_listener *listener, void *data)
 {
     struct absinthe_toplevel *toplevel = wl_container_of(listener, toplevel, request_maximize);
-    if (toplevel->xdg_toplevel->base->initialized)
-        wlr_xdg_surface_schedule_configure(toplevel->xdg_toplevel->base);
+    if (toplevel->toplevel.xdg->base->initialized)
+        wlr_xdg_surface_schedule_configure(toplevel->toplevel.xdg->base);
 }
 
 void xdg_toplevel_request_maximize(struct wl_listener *listener, void *data)
 {
     struct absinthe_toplevel *toplevel = wl_container_of(listener, toplevel, request_maximize);
-    if (toplevel->xdg_toplevel->base->initialized)
-        wlr_xdg_surface_schedule_configure(toplevel->xdg_toplevel->base);
+    if (toplevel->toplevel.xdg->base->initialized)
+        wlr_xdg_surface_schedule_configure(toplevel->toplevel.xdg->base);
 }
 
 void xdg_toplevel_request_fullscreen(struct wl_listener *listener, void *data)
 {
     struct absinthe_toplevel *toplevel = wl_container_of(listener, toplevel, request_fullscreen);
-    absinthe_toplevel_set_fullscreen(toplevel, toplevel->xdg_toplevel->requested.fullscreen);
+    absinthe_toplevel_set_fullscreen(toplevel, toplevel->toplevel.xdg->requested.fullscreen);
 }

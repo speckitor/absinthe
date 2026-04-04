@@ -12,7 +12,7 @@ void focus_toplevel(struct absinthe_toplevel *toplevel)
     struct absinthe_server *server = toplevel->server;
     struct wlr_seat *seat = server->seat;
     struct wlr_surface *prev_surface = seat->keyboard_state.focused_surface;
-    struct wlr_surface *surface = toplevel->xdg_toplevel->base->surface;
+    struct wlr_surface *surface = toplevel->toplevel.xdg->base->surface;
 
     if (surface == prev_surface)
         return;
@@ -31,7 +31,7 @@ void focus_toplevel(struct absinthe_toplevel *toplevel)
     wlr_scene_node_raise_to_top(&toplevel->scene_tree->node);
     wl_list_remove(&toplevel->flink);
     wl_list_insert(&server->focus_stack, &toplevel->flink);
-    wlr_xdg_toplevel_set_activated(toplevel->xdg_toplevel, true);
+    wlr_xdg_toplevel_set_activated(toplevel->toplevel.xdg, true);
     absinthe_toplevel_set_border_color(toplevel, focused_border_color);
 
     if (keyboard)

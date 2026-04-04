@@ -59,7 +59,8 @@ void server_new_xdg_toplevel(struct wl_listener *listener, void *data)
 
     struct absinthe_toplevel *toplevel = malloc(sizeof(*toplevel));
     toplevel->server = server;
-    toplevel->xdg_toplevel = xdg_toplevel;
+    toplevel->type = ABSINTHE_TOPLEVEL_XDG;
+    toplevel->toplevel.xdg = xdg_toplevel;
     toplevel->scene_tree = wlr_scene_tree_create(&toplevel->server->scene->tree);
     toplevel->scene_tree->node.data = toplevel;
     toplevel->scene_surface = wlr_scene_xdg_surface_create(toplevel->scene_tree, xdg_toplevel->base);
@@ -150,54 +151,54 @@ void server_cursor_button(struct wl_listener *listener, void *data)
         struct wlr_surface *surface = NULL;
         struct absinthe_toplevel *toplevel = absinthe_toplevel_at(server, server->cursor->x, server->cursor->y, &surface, &sx, &sy);
 
+        if (!toplevel)
+            goto handle;
 
-        if (toplevel) {
-            struct wlr_keyboard *keyboard = wlr_seat_get_keyboard(server->seat);
-            uint32_t mods = wlr_keyboard_get_modifiers(keyboard);
-            if (mods & ABSINTHE_CURSOR_MOD) {
-                if (event->button == ABSINTHE_CURSOR_MOVE_BUTTON) {
-                    server->cursor_mode = ABSINTHE_CURSOR_MOVE;
-                    wlr_cursor_set_xcursor(server->cursor, server->cursor_mgr, "all-scroll");
-                    handled = true;
-                } else if (event->button == ABSINTHE_CURSOR_RESIZE_BUTTON) {
-                    server->cursor_mode = ABSINTHE_CURSOR_RESIZE;
-                    handled = true;
-                }
+        struct wlr_keyboard *keyboard = wlr_seat_get_keyboard(server->seat);
+        uint32_t mods = wlr_keyboard_get_modifiers(keyboard);
+        if (mods & ABSINTHE_CURSOR_MOD) {
+            if (event->button == ABSINTHE_CURSOR_MOVE_BUTTON) {
+                server->cursor_mode = ABSINTHE_CURSOR_MOVE;
+                wlr_cursor_set_xcursor(server->cursor, server->cursor_mgr, "all-scroll");
+                handled = true;
+            } else if (event->button == ABSINTHE_CURSOR_RESIZE_BUTTON) {
+                server->cursor_mode = ABSINTHE_CURSOR_RESIZE;
+                handled = true;
             }
-
-            focus_toplevel(toplevel);
-            server->grab_x = server->cursor->x;
-            server->grab_y = server->cursor->y;
-
-            int32_t lx, ly;
-            wlr_scene_node_coords(&toplevel->scene_tree->node, &lx, &ly);
-            server->grabbed_geometry.x = lx;
-           server->grabbed_geometry.y = ly;
-            server->grabbed_geometry.width = toplevel->geometry.width;
-            server->grabbed_geometry.height = toplevel->geometry.height;
-
-            if (server->cursor_mode != ABSINTHE_CURSOR_RESIZE)
-                goto handle;
-
-            int32_t width = toplevel->xdg_toplevel->base->geometry.width;
-            int32_t height = toplevel->xdg_toplevel->base->geometry.height;
-
-            if (server->grab_x > (lx + width / 2) && server->grab_y > (ly + height / 2)) {
-                server->cursor_resize_corner = ABSINTHE_CURSOR_RESIZE_CORNER_BOTTOM_RIGHT;
-                wlr_cursor_set_xcursor(server->cursor, server->cursor_mgr, "se-resize");
-            } else if (server->grab_x < (lx + width / 2) && server->grab_y > (ly + height / 2)) {
-                server->cursor_resize_corner = ABSINTHE_CURSOR_RESIZE_CORNER_BOTTOM_LEFT;
-                wlr_cursor_set_xcursor(server->cursor, server->cursor_mgr, "sw-resize");
-            } else if (server->grab_x > (lx + width / 2) && server->grab_y < (ly + height / 2)) {
-                server->cursor_resize_corner = ABSINTHE_CURSOR_RESIZE_CORNER_TOP_RIGHT;
-                wlr_cursor_set_xcursor(server->cursor, server->cursor_mgr, "ne-resize");
-            } else {
-                server->cursor_resize_corner = ABSINTHE_CURSOR_RESIZE_CORNER_TOP_LEFT;
-                wlr_cursor_set_xcursor(server->cursor, server->cursor_mgr, "nw-resize");
-            }
-
-            wlr_xdg_toplevel_set_resizing(toplevel->xdg_toplevel, true);
         }
+
+        focus_toplevel(toplevel);
+        server->grab_x = server->cursor->x;
+        server->grab_y = server->cursor->y;
+
+        int32_t lx, ly;
+        wlr_scene_node_coords(&toplevel->scene_tree->node, &lx, &ly);
+        server->grabbed_geometry.x = lx;
+        server->grabbed_geometry.y = ly;
+        server->grabbed_geometry.width = toplevel->geometry.width;
+        server->grabbed_geometry.height = toplevel->geometry.height;
+
+        if (server->cursor_mode != ABSINTHE_CURSOR_RESIZE)
+            goto handle;
+
+        int32_t width = toplevel->toplevel.xdg->base->geometry.width;
+        int32_t height = toplevel->toplevel.xdg->base->geometry.height;
+
+        if (server->grab_x > (lx + width / 2) && server->grab_y > (ly + height / 2)) {
+            server->cursor_resize_corner = ABSINTHE_CURSOR_RESIZE_CORNER_BOTTOM_RIGHT;
+            wlr_cursor_set_xcursor(server->cursor, server->cursor_mgr, "se-resize");
+        } else if (server->grab_x < (lx + width / 2) && server->grab_y > (ly + height / 2)) {
+            server->cursor_resize_corner = ABSINTHE_CURSOR_RESIZE_CORNER_BOTTOM_LEFT;
+            wlr_cursor_set_xcursor(server->cursor, server->cursor_mgr, "sw-resize");
+        } else if (server->grab_x > (lx + width / 2) && server->grab_y < (ly + height / 2)) {
+            server->cursor_resize_corner = ABSINTHE_CURSOR_RESIZE_CORNER_TOP_RIGHT;
+            wlr_cursor_set_xcursor(server->cursor, server->cursor_mgr, "ne-resize");
+        } else {
+            server->cursor_resize_corner = ABSINTHE_CURSOR_RESIZE_CORNER_TOP_LEFT;
+            wlr_cursor_set_xcursor(server->cursor, server->cursor_mgr, "nw-resize");
+        }
+
+        wlr_xdg_toplevel_set_resizing(toplevel->toplevel.xdg, true);
     }
 
 handle:
