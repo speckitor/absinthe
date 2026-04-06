@@ -2,6 +2,7 @@
 #include <stdlib.h>
 
 #include <wlr/util/log.h>
+#include <wlr/types/wlr_xcursor_manager.h>
 
 #include "types.h"
 #include "output.h"
@@ -12,6 +13,11 @@
 #include "focus.h"
 #include "keyboard.h"
 #include "cursor.h"
+
+#ifdef XWAYLAND
+#include <wlr/xwayland.h>
+#include "xwayland.h"
+#endif
 
 void server_new_output(struct wl_listener *listener, void *data)
 {
@@ -118,7 +124,56 @@ void server_new_xdg_decoration(struct wl_listener *listener, void *data)
     wl_signal_add(&xdg_decoration->events.destroy, &toplevel->decoration_destroy);
 
     xdg_decoration_request_mode(&toplevel->decoration_request_mode, xdg_decoration);
+
+    toplevel->destroy.notify = xdg_toplevel_destroy;
+    wl_signal_add(&toplevel->toplevel.xdg->events.destroy, &toplevel->destroy);
 }
+
+#ifdef XWAYLAND
+void server_xwayland_ready(struct wl_listener *listener, void *data)
+{
+    struct absinthe_server *server = wl_container_of(listener, server, xwayland_ready);
+    struct wlr_xcursor *xcursor;
+
+    wlr_xwayland_set_seat(server->xwayland, server->seat);
+
+    if ((xcursor = wlr_xcursor_manager_get_xcursor(server->cursor_mgr, "default", 1)))
+		wlr_xwayland_set_cursor(server->xwayland,
+				xcursor->images[0]->buffer, xcursor->images[0]->width * 4,
+				xcursor->images[0]->width, xcursor->images[0]->height,
+				xcursor->images[0]->hotspot_x, xcursor->images[0]->hotspot_y);
+}
+
+void server_xwayland_new_surface(struct wl_listener *listener, void *data)
+{
+    struct wlr_xwayland_surface *surface = data;
+    struct absinthe_toplevel *toplevel = malloc(sizeof(*toplevel));
+
+    toplevel->type = ABSINTHE_TOPLEVEL_X11;
+    toplevel->toplevel.x11 = surface;
+    toplevel->border_width = absinthe_toplevel_is_unmanaged(toplevel)
+        ? 0
+        : ABSINTHE_TOPLEVEL_BORDER_WIDTH;
+
+    toplevel->destroy.notify = xdg_toplevel_destroy;
+    wl_signal_add(&surface->events.destroy, &toplevel->destroy);
+    toplevel->request_maximize.notify = xdg_toplevel_request_maximize;
+    wl_signal_add(&surface->events.request_maximize, &toplevel->request_maximize);
+    toplevel->request_fullscreen.notify = xdg_toplevel_request_fullscreen;
+    wl_signal_add(&surface->events.request_fullscreen, &toplevel->request_fullscreen);
+
+    toplevel->xwayland_activate.notify = xwayland_activate;
+    wl_signal_add(&surface->events.request_activate, &toplevel->xwayland_activate);
+    toplevel->xwayland_associate.notify = xwayland_associate;
+    wl_signal_add(&surface->events.associate, &toplevel->xwayland_associate);
+    toplevel->xwayland_dissociate.notify = xwayland_dissociate;
+    wl_signal_add(&surface->events.dissociate, &toplevel->xwayland_dissociate);
+    toplevel->xwayland_configure.notify = xwayland_configure;
+    wl_signal_add(&surface->events.request_configure, &toplevel->xwayland_configure);
+    toplevel->xwayland_set_hints.notify = xwayland_set_hints;
+    wl_signal_add(&surface->events.set_hints, &toplevel->xwayland_set_hints);
+}
+#endif
 
 void server_cursor_motion(struct wl_listener *listener, void *data)
 {

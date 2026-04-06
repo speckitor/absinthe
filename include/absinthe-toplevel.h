@@ -1,6 +1,7 @@
 #include "types.h"
 
 bool absinthe_toplevel_is_x11(struct absinthe_toplevel *toplevel);
+bool absinthe_toplevel_is_unmanaged(struct absinthe_toplevel *toplevel);
 
 struct absinthe_toplevel *absinthe_toplevel_at(struct absinthe_server *server, double lx, double ly, struct wlr_surface **surface, double *sx, double *sy);
 

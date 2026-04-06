@@ -72,6 +72,12 @@ struct absinthe_server {
     struct wlr_xdg_decoration_manager_v1 *xdg_decoration_mgr;
     struct wl_listener new_xdg_decoration;
 
+#ifdef XWAYLAND
+    struct wlr_xwayland *xwayland;
+    struct wl_listener xwayland_new_surface;
+    struct wl_listener xwayland_ready;
+#endif
+
     struct wlr_cursor *cursor;
     struct wlr_xcursor_manager *cursor_mgr;
     struct wl_listener cursor_motion;
@@ -152,11 +158,11 @@ struct absinthe_toplevel {
     struct wl_listener decoration_destroy;
 
 #ifdef XWAYLAND
-    struct wl_listener activate;
-    struct wl_listener associate;
-    struct wl_listener dissociate;
-    struct wl_listener configure;
-    struct wl_listener set_hints;
+    struct wl_listener xwayland_activate;
+    struct wl_listener xwayland_associate;
+    struct wl_listener xwayland_dissociate;
+    struct wl_listener xwayland_configure;
+    struct wl_listener xwayland_set_hints;
 #endif
 };
 

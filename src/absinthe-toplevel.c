@@ -6,7 +6,16 @@
 bool absinthe_toplevel_is_x11(struct absinthe_toplevel *toplevel)
 {
 #ifdef XWAYLAND
-    return toplevel->type == ABSINTHE_TOPLEVEL_TYPE_X11;
+    return toplevel->type == ABSINTHE_TOPLEVEL_X11;
+#endif
+    return false;
+}
+
+bool absinthe_toplevel_is_unmanaged(struct absinthe_toplevel *toplevel)
+{
+#ifdef XWAYLAND
+    if (absinthe_toplevel_is_x11(toplevel))
+        return toplevel->toplevel.x11->override_redirect;
 #endif
     return false;
 }

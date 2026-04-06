@@ -5,5 +5,6 @@ proto:
 
 compile: proto
 	gcc -o absinthe src/* \
+		-DXWAYLAND \
 		-I./ -I./include -DWLR_USE_UNSTABLE $(shell pkg-config wlroots-0.20 --libs --cflags) -lwayland-server -lxkbcommon \
 		-ggdb

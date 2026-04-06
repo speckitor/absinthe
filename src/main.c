@@ -131,6 +131,8 @@ int main(int argc, char **argv)
     server.request_set_selection.notify = seat_request_set_selection;
     wl_signal_add(&server.seat->events.request_set_selection, &server.request_set_selection);
 
+    unsetenv("DISPLAY");
+
     const char *socket = wl_display_add_socket_auto(server.display);
     if (!socket) {
         wlr_log(WLR_ERROR, "Failed to add socket");
@@ -144,6 +146,19 @@ int main(int argc, char **argv)
         wl_display_destroy(server.display);
         return 1;
     }
+
+#ifdef XWAYLAND
+    if ((server.xwayland = wlr_xwayland_create(server.display, server.compositor, 1))) {
+        server.xwayland_ready.notify = server_xwayland_ready;
+        wl_signal_add(&server.xwayland->events.ready, &server.xwayland_ready);
+        server.xwayland_new_surface.notify = server_xwayland_new_surface;
+        wl_signal_add(&server.xwayland->events.new_surface, &server.xwayland_new_surface);
+
+        setenv("DISPLAY", server.xwayland->display_name, 1);
+    } else {
+        wlr_log(WLR_ERROR, "Failed to setup XWayland, continuing without it");
+    }
+#endif
 
     setenv("WAYLAND_DISPLAY", socket, true);
 

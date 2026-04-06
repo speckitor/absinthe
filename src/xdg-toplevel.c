@@ -70,14 +70,23 @@ void xdg_toplevel_destroy(struct wl_listener *listener, void *data)
 {
     struct absinthe_toplevel *toplevel = wl_container_of(listener, toplevel, destroy);
 
-    wl_list_remove(&toplevel->map.link);
-    wl_list_remove(&toplevel->unmap.link);
-    wl_list_remove(&toplevel->commit.link);
     wl_list_remove(&toplevel->destroy.link);
-    wl_list_remove(&toplevel->request_move.link);
-    wl_list_remove(&toplevel->request_resize.link);
     wl_list_remove(&toplevel->request_maximize.link);
     wl_list_remove(&toplevel->request_fullscreen.link);
+
+    if (absinthe_toplevel_is_x11(toplevel)) {
+        wl_list_remove(&toplevel->xwayland_activate.link);
+        wl_list_remove(&toplevel->xwayland_associate.link);
+        wl_list_remove(&toplevel->xwayland_dissociate.link);
+        wl_list_remove(&toplevel->xwayland_configure.link);
+        wl_list_remove(&toplevel->xwayland_set_hints.link);
+    } else {
+        wl_list_remove(&toplevel->map.link);
+        wl_list_remove(&toplevel->unmap.link);
+        wl_list_remove(&toplevel->commit.link);
+        wl_list_remove(&toplevel->request_move.link);
+        wl_list_remove(&toplevel->request_resize.link);
+    }
 
     free(toplevel);
 }
