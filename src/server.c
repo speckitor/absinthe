@@ -69,23 +69,24 @@ void server_new_xdg_toplevel(struct wl_listener *listener, void *data)
     toplevel->toplevel.xdg = xdg_toplevel;
     toplevel->toplevel.xdg->base->data = toplevel;
 
-    toplevel->map.notify = xdg_toplevel_map;
-    wl_signal_add(&xdg_toplevel->base->surface->events.map, &toplevel->map);
-    toplevel->unmap.notify = xdg_toplevel_unmap;
-    wl_signal_add(&xdg_toplevel->base->surface->events.unmap, &toplevel->unmap);
     toplevel->commit.notify = xdg_toplevel_commit;
     wl_signal_add(&xdg_toplevel->base->surface->events.commit, &toplevel->commit);
 
-    toplevel->destroy.notify = xdg_toplevel_destroy;
+    toplevel->map.notify = absinthe_toplevel_map;
+    wl_signal_add(&xdg_toplevel->base->surface->events.map, &toplevel->map);
+    toplevel->unmap.notify = absinthe_toplevel_unmap;
+    wl_signal_add(&xdg_toplevel->base->surface->events.unmap, &toplevel->unmap);
+
+    toplevel->destroy.notify = absinthe_toplevel_destroy;
     wl_signal_add(&xdg_toplevel->events.destroy, &toplevel->destroy);
 
-    toplevel->request_move.notify = xdg_toplevel_request_move;
+    toplevel->request_move.notify = absinthe_toplevel_request_move;
     wl_signal_add(&xdg_toplevel->events.request_move, &toplevel->request_move);
-    toplevel->request_resize.notify = xdg_toplevel_request_resize;
+    toplevel->request_resize.notify = absinthe_toplevel_request_resize;
     wl_signal_add(&xdg_toplevel->events.request_resize, &toplevel->request_resize);
-    toplevel->request_maximize.notify = xdg_toplevel_request_maximize;
+    toplevel->request_maximize.notify = absinthe_toplevel_request_maximize;
     wl_signal_add(&xdg_toplevel->events.request_maximize, &toplevel->request_maximize);
-    toplevel->request_fullscreen.notify = xdg_toplevel_request_fullscreen;
+    toplevel->request_fullscreen.notify = absinthe_toplevel_request_fullscreen;
     wl_signal_add(&xdg_toplevel->events.request_fullscreen, &toplevel->request_fullscreen);
 }
 
@@ -148,11 +149,11 @@ void server_xwayland_new_surface(struct wl_listener *listener, void *data)
     toplevel->server = server;
     toplevel->toplevel.x11 = surface;
 
-    toplevel->destroy.notify = xdg_toplevel_destroy;
+    toplevel->destroy.notify = absinthe_toplevel_destroy;
     wl_signal_add(&surface->events.destroy, &toplevel->destroy);
-    toplevel->request_maximize.notify = xdg_toplevel_request_maximize;
+    toplevel->request_maximize.notify = absinthe_toplevel_request_maximize;
     wl_signal_add(&surface->events.request_maximize, &toplevel->request_maximize);
-    toplevel->request_fullscreen.notify = xdg_toplevel_request_fullscreen;
+    toplevel->request_fullscreen.notify = absinthe_toplevel_request_fullscreen;
     wl_signal_add(&surface->events.request_fullscreen, &toplevel->request_fullscreen);
 
     toplevel->xwayland_activate.notify = xwayland_activate;

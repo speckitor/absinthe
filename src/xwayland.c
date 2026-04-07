@@ -16,9 +16,9 @@ void xwayland_associate(struct wl_listener *listener, void *data)
 {
     struct absinthe_toplevel *toplevel = wl_container_of(listener, toplevel, xwayland_associate);
 
-    toplevel->map.notify = xdg_toplevel_map;
+    toplevel->map.notify = absinthe_toplevel_map;
     wl_signal_add(&toplevel->toplevel.x11->surface->events.map, &toplevel->map);
-    toplevel->unmap.notify = xdg_toplevel_unmap;
+    toplevel->unmap.notify = absinthe_toplevel_unmap;
     wl_signal_add(&toplevel->toplevel.x11->surface->events.unmap, &toplevel->unmap);
 }
 
