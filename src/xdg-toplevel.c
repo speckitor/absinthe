@@ -37,6 +37,18 @@ void xdg_toplevel_map(struct wl_listener *listener, void *data)
 {
     struct absinthe_toplevel *toplevel = wl_container_of(listener, toplevel, map);
 
+    toplevel->scene_tree = wlr_scene_tree_create(&toplevel->server->scene->tree);
+    toplevel->scene_tree->node.data = toplevel;
+
+    toplevel->border_width = absinthe_toplevel_is_unmanaged(toplevel)
+        ? 0
+        : ABSINTHE_TOPLEVEL_BORDER_WIDTH;
+
+    toplevel->scene_surface = toplevel->type == ABSINTHE_TOPLEVEL_XDG
+        ? wlr_scene_xdg_surface_create(toplevel->scene_tree, toplevel->toplevel.xdg->base)
+        : wlr_scene_subsurface_tree_create(toplevel->scene_tree, toplevel->toplevel.x11->surface);
+    toplevel->scene_surface->node.data = toplevel;
+
     for (int i = 0; i < 4; ++i) {
         toplevel->border[i] = wlr_scene_rect_create(toplevel->scene_tree, 0, 0, unfocused_border_color);
         toplevel->border[i]->node.data = toplevel;
@@ -70,23 +82,26 @@ void xdg_toplevel_destroy(struct wl_listener *listener, void *data)
 {
     struct absinthe_toplevel *toplevel = wl_container_of(listener, toplevel, destroy);
 
-    wl_list_remove(&toplevel->destroy.link);
-    wl_list_remove(&toplevel->request_maximize.link);
-    wl_list_remove(&toplevel->request_fullscreen.link);
-
+#ifdef XWAYLAND
     if (absinthe_toplevel_is_x11(toplevel)) {
         wl_list_remove(&toplevel->xwayland_activate.link);
         wl_list_remove(&toplevel->xwayland_associate.link);
         wl_list_remove(&toplevel->xwayland_dissociate.link);
         wl_list_remove(&toplevel->xwayland_configure.link);
         wl_list_remove(&toplevel->xwayland_set_hints.link);
-    } else {
+    } else
+#endif
+    {
         wl_list_remove(&toplevel->map.link);
         wl_list_remove(&toplevel->unmap.link);
         wl_list_remove(&toplevel->commit.link);
         wl_list_remove(&toplevel->request_move.link);
         wl_list_remove(&toplevel->request_resize.link);
     }
+
+    wl_list_remove(&toplevel->destroy.link);
+    wl_list_remove(&toplevel->request_maximize.link);
+    wl_list_remove(&toplevel->request_fullscreen.link);
 
     free(toplevel);
 }

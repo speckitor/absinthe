@@ -136,6 +136,8 @@ struct absinthe_toplevel {
     struct wlr_scene_rect *border[4];
     struct wlr_xdg_toplevel_decoration_v1 *decoration;
 
+    bool floating;
+    bool tiled;
     bool fullscreen;
     bool performing_resize;
 

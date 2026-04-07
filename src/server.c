@@ -64,13 +64,10 @@ void server_new_xdg_toplevel(struct wl_listener *listener, void *data)
     struct wlr_xdg_toplevel *xdg_toplevel = data;
 
     struct absinthe_toplevel *toplevel = malloc(sizeof(*toplevel));
-    toplevel->server = server;
     toplevel->type = ABSINTHE_TOPLEVEL_XDG;
+    toplevel->server = server;
     toplevel->toplevel.xdg = xdg_toplevel;
-    toplevel->scene_tree = wlr_scene_tree_create(&toplevel->server->scene->tree);
-    toplevel->scene_tree->node.data = toplevel;
-    toplevel->scene_surface = wlr_scene_xdg_surface_create(toplevel->scene_tree, xdg_toplevel->base);
-    xdg_toplevel->base->data = toplevel;
+    toplevel->toplevel.xdg->base->data = toplevel;
 
     toplevel->map.notify = xdg_toplevel_map;
     wl_signal_add(&xdg_toplevel->base->surface->events.map, &toplevel->map);
@@ -124,9 +121,6 @@ void server_new_xdg_decoration(struct wl_listener *listener, void *data)
     wl_signal_add(&xdg_decoration->events.destroy, &toplevel->decoration_destroy);
 
     xdg_decoration_request_mode(&toplevel->decoration_request_mode, xdg_decoration);
-
-    toplevel->destroy.notify = xdg_toplevel_destroy;
-    wl_signal_add(&toplevel->toplevel.xdg->events.destroy, &toplevel->destroy);
 }
 
 #ifdef XWAYLAND
@@ -137,23 +131,22 @@ void server_xwayland_ready(struct wl_listener *listener, void *data)
 
     wlr_xwayland_set_seat(server->xwayland, server->seat);
 
-    if ((xcursor = wlr_xcursor_manager_get_xcursor(server->cursor_mgr, "default", 1)))
-		wlr_xwayland_set_cursor(server->xwayland,
-				xcursor->images[0]->buffer, xcursor->images[0]->width * 4,
-				xcursor->images[0]->width, xcursor->images[0]->height,
-				xcursor->images[0]->hotspot_x, xcursor->images[0]->hotspot_y);
+    // if ((xcursor = wlr_xcursor_manager_get_xcursor(server->cursor_mgr, "default", 1)))
+    //     wlr_xwayland_set_cursor(server->xwayland,
+    //                             xcursor->images[0]->buffer, xcursor->images[0]->width * 4,
+    //                             xcursor->images[0]->width, xcursor->images[0]->height,
+    //                             xcursor->images[0]->hotspot_x, xcursor->images[0]->hotspot_y);
 }
 
 void server_xwayland_new_surface(struct wl_listener *listener, void *data)
 {
+    struct absinthe_server *server = wl_container_of(listener, server, xwayland_new_surface);
     struct wlr_xwayland_surface *surface = data;
     struct absinthe_toplevel *toplevel = malloc(sizeof(*toplevel));
 
     toplevel->type = ABSINTHE_TOPLEVEL_X11;
+    toplevel->server = server;
     toplevel->toplevel.x11 = surface;
-    toplevel->border_width = absinthe_toplevel_is_unmanaged(toplevel)
-        ? 0
-        : ABSINTHE_TOPLEVEL_BORDER_WIDTH;
 
     toplevel->destroy.notify = xdg_toplevel_destroy;
     wl_signal_add(&surface->events.destroy, &toplevel->destroy);

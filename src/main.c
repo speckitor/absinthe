@@ -155,6 +155,7 @@ int main(int argc, char **argv)
         wl_signal_add(&server.xwayland->events.new_surface, &server.xwayland_new_surface);
 
         setenv("DISPLAY", server.xwayland->display_name, 1);
+        wlr_log(WLR_INFO, "Running XWayland, DISPLAY=%s", server.xwayland->display_name);
     } else {
         wlr_log(WLR_ERROR, "Failed to setup XWayland, continuing without it");
     }
