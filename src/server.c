@@ -128,15 +128,15 @@ void server_new_xdg_decoration(struct wl_listener *listener, void *data)
 void server_xwayland_ready(struct wl_listener *listener, void *data)
 {
     struct absinthe_server *server = wl_container_of(listener, server, xwayland_ready);
-    struct wlr_xcursor *xcursor;
 
     wlr_xwayland_set_seat(server->xwayland, server->seat);
 
-    // if ((xcursor = wlr_xcursor_manager_get_xcursor(server->cursor_mgr, "default", 1)))
-    //     wlr_xwayland_set_cursor(server->xwayland,
-    //                             xcursor->images[0]->buffer, xcursor->images[0]->width * 4,
-    //                             xcursor->images[0]->width, xcursor->images[0]->height,
-    //                             xcursor->images[0]->hotspot_x, xcursor->images[0]->hotspot_y);
+    struct wlr_xcursor *xcursor;
+    if ((xcursor = wlr_xcursor_manager_get_xcursor(server->cursor_mgr, "default", 1))) {
+        struct wlr_buffer *buffer = wlr_xcursor_image_get_buffer(xcursor->images[0]);
+        wlr_xwayland_set_cursor(server->xwayland, buffer,
+            xcursor->images[0]->hotspot_x, xcursor->images[0]->hotspot_y);
+    }
 }
 
 void server_xwayland_new_surface(struct wl_listener *listener, void *data)
