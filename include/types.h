@@ -126,7 +126,7 @@ struct absinthe_toplevel {
     enum absinthe_toplevel_type type;
 
     struct wl_list link;
-    struct wl_list flink; // for focus stack
+    struct wl_list flink;
     struct absinthe_server *server;
     struct absinthe_output *output;
     struct wlr_scene_tree *scene_tree;

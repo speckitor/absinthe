@@ -32,7 +32,7 @@ void xwayland_dissociate(struct wl_listener *listener, void *data)
 
 void xwayland_configure(struct wl_listener *listener, void *data)
 {
-    struct absinthe_toplevel *toplevel = wl_container_of(listener, toplevel, xwayland_activate);
+    struct absinthe_toplevel *toplevel = wl_container_of(listener, toplevel, xwayland_configure);
     struct wlr_xwayland_surface_configure_event *event = data;
 
     if (!toplevel->toplevel.x11->surface || !toplevel->toplevel.x11->surface->mapped) {
@@ -41,10 +41,10 @@ void xwayland_configure(struct wl_listener *listener, void *data)
     }
 
     if (absinthe_toplevel_is_unmanaged(toplevel)) {
-		wlr_scene_node_set_position(&toplevel->scene_tree->node, event->x, event->y);
-		wlr_xwayland_surface_configure(toplevel->toplevel.x11,
-				event->x, event->y, event->width, event->height);
-		return;
+        wlr_scene_node_set_position(&toplevel->scene_tree->node, event->x, event->y);
+        wlr_xwayland_surface_configure(toplevel->toplevel.x11,
+                                       event->x, event->y, event->width, event->height);
+        return;
     }
 }
 

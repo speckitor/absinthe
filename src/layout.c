@@ -1,3 +1,4 @@
+#include "absinthe-toplevel.h"
 #include "types.h"
 
 void layout_arrange(struct absinthe_output *output)
@@ -24,11 +25,11 @@ void layout_arrange(struct absinthe_output *output)
                 break;
         }
 
-        wlr_xdg_toplevel_set_size(toplevel->toplevel.xdg,
-                                  output->geometry.width - borders_width - 2 * output_gap,
-                                  output->geometry.height - borders_width - 2 * output_gap);
         toplevel->geometry.x = output->geometry.x + output_gap;
         toplevel->geometry.y = output->geometry.y + output_gap;
+        absinthe_toplevel_set_size(toplevel,
+                                   output->geometry.width - borders_width - 2 * output_gap,
+                                   output->geometry.height - borders_width - 2 * output_gap);
         return;
     }
 
@@ -47,9 +48,9 @@ void layout_arrange(struct absinthe_output *output)
                 continue;
 
             height = (output->geometry.height - dy - output_gap) / (ABSINTHE_MAIN_STACK_SIZE - i) - borders_width;
-            wlr_xdg_toplevel_set_size(toplevel->toplevel.xdg, main_stack_width, height);
             toplevel->geometry.x = output->geometry.x + output_gap;
             toplevel->geometry.y = output->geometry.y + dy;
+            absinthe_toplevel_set_size(toplevel, main_stack_width, height);
             dy += height + borders_width + layout_gap;
 
             i++;
@@ -64,17 +65,17 @@ void layout_arrange(struct absinthe_output *output)
 
         if (i < ABSINTHE_MAIN_STACK_SIZE) {
             height = (output->geometry.height - dy - output_gap) / (ABSINTHE_MAIN_STACK_SIZE - i) - borders_width;
-            wlr_xdg_toplevel_set_size(toplevel->toplevel.xdg, main_stack_width, height);
             toplevel->geometry.x = output->geometry.x + output_gap;
             toplevel->geometry.y = output->geometry.y + dy;
+            absinthe_toplevel_set_size(toplevel, main_stack_width, height);
             dy += height + borders_width + layout_gap;
         } else {
             if (i == ABSINTHE_MAIN_STACK_SIZE)
                 dy = output_gap;
             height = (output->geometry.height - dy - output_gap) / (toplevels_count - i) - borders_width;
-            wlr_xdg_toplevel_set_size(toplevel->toplevel.xdg, width, height);
             toplevel->geometry.x = output->geometry.x + main_stack_width + layout_gap + output_gap;
             toplevel->geometry.y = output->geometry.y + dy;
+            absinthe_toplevel_set_size(toplevel, width, height);
             dy += height + borders_width + layout_gap;
         }
 

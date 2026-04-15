@@ -1,3 +1,5 @@
+#include <stdlib.h>
+
 #include <wayland-server-core.h>
 #include <wlr/util/log.h>
 
@@ -23,6 +25,15 @@ bool absinthe_toplevel_is_unmanaged(struct absinthe_toplevel *toplevel)
     return false;
 }
 
+struct wlr_surface *absinthe_toplevel_surface(struct absinthe_toplevel *toplevel)
+{
+#ifdef XWAYLAND
+    if (absinthe_toplevel_is_x11(toplevel))
+        return toplevel->toplevel.x11->surface;
+#endif
+    return toplevel->toplevel.xdg->base->surface;
+}
+
 void absinthe_toplevel_map(struct wl_listener *listener, void *data)
 {
     struct absinthe_toplevel *toplevel = wl_container_of(listener, toplevel, map);
@@ -34,9 +45,14 @@ void absinthe_toplevel_map(struct wl_listener *listener, void *data)
         ? 0
         : ABSINTHE_TOPLEVEL_BORDER_WIDTH;
 
-    toplevel->scene_surface = toplevel->type == ABSINTHE_TOPLEVEL_XDG
-        ? wlr_scene_xdg_surface_create(toplevel->scene_tree, toplevel->toplevel.xdg->base)
-        : wlr_scene_subsurface_tree_create(toplevel->scene_tree, toplevel->toplevel.x11->surface);
+#ifdef XWAYLAND
+    if (absinthe_toplevel_is_x11(toplevel)) {
+        toplevel->scene_surface = wlr_scene_subsurface_tree_create(toplevel->scene_tree, toplevel->toplevel.x11->surface);
+    } else
+#endif
+    {
+        toplevel->scene_surface = wlr_scene_subsurface_tree_create(toplevel->scene_tree, toplevel->toplevel.xdg->base->surface);
+    }
     toplevel->scene_surface->node.data = toplevel;
 
     for (int i = 0; i < 4; ++i) {
@@ -60,10 +76,13 @@ void absinthe_toplevel_unmap(struct wl_listener *listener, void *data)
 {
     struct absinthe_toplevel *toplevel = wl_container_of(listener, toplevel, unmap);
 
-    wlr_scene_node_destroy(&toplevel->scene_tree->node);
+    if (toplevel == toplevel->server->focused_toplevel)
+        toplevel->server->focused_toplevel = NULL;
 
     wl_list_remove(&toplevel->link);
     wl_list_remove(&toplevel->flink);
+
+    wlr_scene_node_destroy(&toplevel->scene_tree->node);
 
     layout_arrange(toplevel->output);
 }
@@ -162,8 +181,15 @@ void absinthe_toplevel_set_size(struct absinthe_toplevel *toplevel, int32_t widt
 {
     if (width < 0 || height < 0)
         return;
-
-    wlr_xdg_toplevel_set_size(toplevel->toplevel.xdg, width, height);
+    if (toplevel->type == ABSINTHE_TOPLEVEL_XDG)
+        wlr_xdg_toplevel_set_size(toplevel->toplevel.xdg, width, height);
+#ifdef XWAYLAND
+    else if (toplevel->type == ABSINTHE_TOPLEVEL_X11) {
+        wlr_xwayland_surface_configure(toplevel->toplevel.x11,
+                                       toplevel->geometry.x, toplevel->geometry.y, width, height);
+        absinthe_toplevel_set_position(toplevel, toplevel->geometry.x, toplevel->geometry.y);
+    }
+#endif
 }
 
 void absinthe_toplevel_set_fullscreen(struct absinthe_toplevel *toplevel, bool fullscreen)
@@ -201,16 +227,16 @@ void absinthe_toplevel_update_borders_geometry(struct absinthe_toplevel *topleve
     if (toplevel->geometry.width - 2 * border_width < 0 || toplevel->geometry.height - 2 * border_width < 0)
         return;
 
-	wlr_scene_node_set_position(&toplevel->scene_tree->node, toplevel->geometry.x, toplevel->geometry.y);
-	wlr_scene_node_set_position(&toplevel->scene_surface->node, border_width, border_width);
+    wlr_scene_node_set_position(&toplevel->scene_tree->node, toplevel->geometry.x, toplevel->geometry.y);
+    wlr_scene_node_set_position(&toplevel->scene_surface->node, border_width, border_width);
 
     wlr_scene_rect_set_size(toplevel->border[0], toplevel->geometry.width - 2 * border_width, border_width);
     wlr_scene_rect_set_size(toplevel->border[1], toplevel->geometry.width - 2 * border_width, border_width);
     wlr_scene_rect_set_size(toplevel->border[2], border_width, toplevel->geometry.height);
     wlr_scene_rect_set_size(toplevel->border[3], border_width, toplevel->geometry.height);
 
-	wlr_scene_node_set_position(&toplevel->border[0]->node, border_width, 0);
-	wlr_scene_node_set_position(&toplevel->border[1]->node, border_width, toplevel->geometry.height - border_width);
-	wlr_scene_node_set_position(&toplevel->border[2]->node, 0, 0);
-	wlr_scene_node_set_position(&toplevel->border[3]->node, toplevel->geometry.width - border_width, 0);
+    wlr_scene_node_set_position(&toplevel->border[0]->node, border_width, 0);
+    wlr_scene_node_set_position(&toplevel->border[1]->node, border_width, toplevel->geometry.height - border_width);
+    wlr_scene_node_set_position(&toplevel->border[2]->node, 0, 0);
+    wlr_scene_node_set_position(&toplevel->border[3]->node, toplevel->geometry.width - border_width, 0);
 }
