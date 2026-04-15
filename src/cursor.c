@@ -132,11 +132,6 @@ void process_cursor_motion(struct absinthe_server *server, uint32_t time)
     struct wlr_surface *surface = NULL;
     struct absinthe_toplevel *toplevel = absinthe_toplevel_at(server, server->cursor->x, server->cursor->y, &surface, &sx, &sy);
 
-    if (!toplevel) {
-        wlr_cursor_set_xcursor(server->cursor, server->cursor_mgr, "default");
-        return;
-    }
-
     if (server->cursor_mode == ABSINTHE_CURSOR_MOVE) {
         process_cursor_move(server);
         return;
