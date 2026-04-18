@@ -26,8 +26,8 @@ void xwayland_dissociate(struct wl_listener *listener, void *data)
 {
     struct absinthe_toplevel *toplevel = wl_container_of(listener, toplevel, xwayland_dissociate);
 
-    wl_list_remove(&toplevel->map.link);
-    wl_list_remove(&toplevel->unmap.link);
+    // wl_list_remove(&toplevel->map.link);
+    // wl_list_remove(&toplevel->unmap.link);
 }
 
 void xwayland_configure(struct wl_listener *listener, void *data)

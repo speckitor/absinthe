@@ -10,6 +10,7 @@ void layout_arrange(struct absinthe_output *output)
     size_t toplevels_count = 0;
     wl_list_for_each(toplevel, &output->server->toplevels, link) {
         if (toplevel->output == output)
+            wlr_scene_node_set_enabled(&toplevel->scene_tree->node, true);
             toplevels_count++;
     }
 

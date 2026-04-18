@@ -25,6 +25,21 @@ bool absinthe_toplevel_is_unmanaged(struct absinthe_toplevel *toplevel)
     return false;
 }
 
+void absinthe_toplevel_update_geometry(struct absinthe_toplevel *toplevel)
+{
+#ifdef XWAYLAND
+    if (absinthe_toplevel_is_x11(toplevel)) {
+            toplevel->geometry.x = toplevel->toplevel.x11->x;
+            toplevel->geometry.y = toplevel->toplevel.x11->y;
+            toplevel->geometry.width = toplevel->toplevel.x11->width;
+            toplevel->geometry.height = toplevel->toplevel.x11->height;
+    } else 
+#endif
+    {
+        toplevel->geometry = toplevel->toplevel.xdg->base->geometry;
+    }
+}
+
 struct wlr_surface *absinthe_toplevel_surface(struct absinthe_toplevel *toplevel)
 {
 #ifdef XWAYLAND
@@ -40,6 +55,7 @@ void absinthe_toplevel_map(struct wl_listener *listener, void *data)
 
     toplevel->scene_tree = wlr_scene_tree_create(&toplevel->server->scene->tree);
     toplevel->scene_tree->node.data = toplevel;
+    wlr_scene_node_set_enabled(&toplevel->scene_tree->node, false);
 
     toplevel->border_width = absinthe_toplevel_is_unmanaged(toplevel)
         ? 0
@@ -55,12 +71,16 @@ void absinthe_toplevel_map(struct wl_listener *listener, void *data)
     }
     toplevel->scene_surface->node.data = toplevel;
 
+    absinthe_toplevel_update_geometry(toplevel);
+    toplevel->border_width = ABSINTHE_TOPLEVEL_BORDER_WIDTH;
+    int32_t borders_width = ABSINTHE_TOPLEVEL_BORDER_WIDTH * 2;
+    toplevel->geometry.width += borders_width;
+    toplevel->geometry.height += borders_width;
+
     for (int i = 0; i < 4; ++i) {
         toplevel->border[i] = wlr_scene_rect_create(toplevel->scene_tree, 0, 0, unfocused_border_color);
         toplevel->border[i]->node.data = toplevel;
     }
-
-    toplevel->border_width = ABSINTHE_TOPLEVEL_BORDER_WIDTH;
 
     update_focused_output(toplevel->server);
     toplevel->output = toplevel->server->focused_output;
