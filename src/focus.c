@@ -12,7 +12,13 @@ void focus_toplevel(struct absinthe_toplevel *toplevel)
     struct absinthe_server *server = toplevel->server;
     struct wlr_seat *seat = server->seat;
     struct wlr_surface *prev_surface = seat->keyboard_state.focused_surface;
-    struct wlr_surface *surface = toplevel->toplevel.xdg->base->surface;
+    struct wlr_surface *surface;
+#ifdef XWAYLAND
+    if (absinthe_toplevel_is_x11(toplevel))
+        surface = toplevel->toplevel.x11->surface;
+    else
+#endif
+        surface = toplevel->toplevel.xdg->base->surface;
 
     if (surface == prev_surface)
         return;
@@ -20,7 +26,7 @@ void focus_toplevel(struct absinthe_toplevel *toplevel)
     if (prev_surface) {
         struct wlr_xdg_toplevel *prev_toplevel = wlr_xdg_toplevel_try_from_wlr_surface(prev_surface);
         if (prev_toplevel) {
-            wlr_xdg_toplevel_set_activated(prev_toplevel, false);
+            // wlr_xdg_toplevel_set_activated(prev_toplevel, false);
             absinthe_toplevel_set_border_color(prev_toplevel->base->data, unfocused_border_color);
         }
     }
@@ -31,7 +37,7 @@ void focus_toplevel(struct absinthe_toplevel *toplevel)
     wlr_scene_node_raise_to_top(&toplevel->scene_tree->node);
     wl_list_remove(&toplevel->flink);
     wl_list_insert(&server->focus_stack, &toplevel->flink);
-    wlr_xdg_toplevel_set_activated(toplevel->toplevel.xdg, true);
+    // wlr_xdg_toplevel_set_activated(toplevel->toplevel.xdg, true);
     absinthe_toplevel_set_border_color(toplevel, focused_border_color);
 
     if (keyboard)
