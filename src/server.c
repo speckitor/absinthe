@@ -13,6 +13,7 @@
 #include "focus.h"
 #include "keyboard.h"
 #include "cursor.h"
+#include "config.h"
 
 #ifdef XWAYLAND
 #include <wlr/xwayland.h>
@@ -56,6 +57,9 @@ void server_new_output(struct wl_listener *listener, void *data)
     struct wlr_scene_output *scene_output = wlr_scene_output_create(server->scene, wlr_output);
     wlr_scene_output_layout_add_output(server->scene_layout, l_layout, scene_output);
     wlr_output_layout_get_box(server->output_layout, output->wlr_output, &output->geometry);
+
+    output->main_stack_size = ABSINTHE_MAIN_STACK_SIZE;
+    output->main_stack_width = ABSINTHE_MAIN_STACK_WIDTH;
 }
 
 void server_new_xdg_toplevel(struct wl_listener *listener, void *data)

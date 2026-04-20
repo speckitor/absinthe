@@ -120,6 +120,9 @@ struct absinthe_output {
     struct wl_listener frame;
     struct wl_listener request_state;
     struct wl_listener destroy;
+
+    float main_stack_width;
+    float main_stack_size;
 };
 
 struct absinthe_toplevel {

@@ -9,6 +9,7 @@
 #include "types.h"
 #include "absinthe-toplevel.h"
 #include "focus.h"
+#include "layout.h"
 
 void keyboard_handle_modifiers(struct wl_listener *listener, void *data)
 {
@@ -41,6 +42,30 @@ static bool keyboard_handle_keybind(struct absinthe_server *server, xkb_keysym_t
         break;
     case XKB_KEY_k:
         focus_prev(server);
+        break;
+    case XKB_KEY_h:
+        if (server->focused_output && server->focused_output->main_stack_width > 0.15) {
+            server->focused_output->main_stack_width -= 0.1;
+            layout_arrange(server->focused_output);
+        }
+        break;
+    case XKB_KEY_l:
+        if (server->focused_output && server->focused_output->main_stack_width < 0.9) {
+            server->focused_output->main_stack_width += 0.1;
+            layout_arrange(server->focused_output);
+        }
+        break;
+    case XKB_KEY_H:
+        if (server->focused_output) {
+            server->focused_output->main_stack_size += 1;
+            layout_arrange(server->focused_output);
+        }
+        break;
+    case XKB_KEY_L:
+        if (server->focused_output && server->focused_output->main_stack_size > 1) {
+            server->focused_output->main_stack_size -= 1;
+            layout_arrange(server->focused_output);
+        }
         break;
     default:
         return false;
