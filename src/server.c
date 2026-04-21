@@ -38,7 +38,7 @@ void server_new_output(struct wl_listener *listener, void *data)
     wlr_output_commit_state(wlr_output, &state);
     wlr_output_state_finish(&state);
 
-    struct absinthe_output *output = malloc(sizeof(*output));
+    struct absinthe_output *output = calloc(1, sizeof(*output));
     output->wlr_output = wlr_output;
     output->server = server;
 
@@ -67,7 +67,7 @@ void server_new_xdg_toplevel(struct wl_listener *listener, void *data)
     struct absinthe_server *server = wl_container_of(listener, server, new_xdg_toplevel);
     struct wlr_xdg_toplevel *xdg_toplevel = data;
 
-    struct absinthe_toplevel *toplevel = malloc(sizeof(*toplevel));
+    struct absinthe_toplevel *toplevel = calloc(1, sizeof(*toplevel));
     toplevel->type = ABSINTHE_TOPLEVEL_XDG;
     toplevel->server = server;
     toplevel->toplevel.xdg = xdg_toplevel;
@@ -99,7 +99,7 @@ void server_new_xdg_popup(struct wl_listener *listener, void *data)
     struct absinthe_server *server = wl_container_of(listener, server, new_xdg_popup);
     struct wlr_xdg_popup *xdg_popup = data;
 
-    struct absinthe_popup *popup = malloc(sizeof(*popup));
+    struct absinthe_popup *popup = calloc(1, sizeof(*popup));
     popup->xdg_popup = xdg_popup;
 
     struct wlr_xdg_surface *parent = wlr_xdg_surface_try_from_wlr_surface(xdg_popup->parent);
@@ -125,7 +125,8 @@ void server_new_xdg_decoration(struct wl_listener *listener, void *data)
     toplevel->decoration_destroy.notify = xdg_decoration_destroy;
     wl_signal_add(&xdg_decoration->events.destroy, &toplevel->decoration_destroy);
 
-    xdg_decoration_request_mode(&toplevel->decoration_request_mode, xdg_decoration);
+    /* Forse server side decoration mode */
+    xdg_decoration_request_mode(&toplevel->decoration_request_mode, toplevel->decoration);
 }
 
 #ifdef XWAYLAND
@@ -147,7 +148,7 @@ void server_xwayland_new_surface(struct wl_listener *listener, void *data)
 {
     struct absinthe_server *server = wl_container_of(listener, server, xwayland_new_surface);
     struct wlr_xwayland_surface *surface = data;
-    struct absinthe_toplevel *toplevel = malloc(sizeof(*toplevel));
+    struct absinthe_toplevel *toplevel = calloc(1, sizeof(*toplevel));
 
     toplevel->type = ABSINTHE_TOPLEVEL_X11;
     toplevel->server = server;
@@ -276,7 +277,7 @@ void server_cursor_frame(struct wl_listener *listener, void *data)
 static void server_new_keyboard(struct absinthe_server *server, struct wlr_input_device *device)
 {
     struct wlr_keyboard *wlr_keyboard = wlr_keyboard_from_input_device(device);
-    struct absinthe_keyboard *keyboard = malloc(sizeof(*keyboard));
+    struct absinthe_keyboard *keyboard = calloc(1, sizeof(*keyboard));
     keyboard->server = server;
     keyboard->wlr_keyboard = wlr_keyboard;
 
