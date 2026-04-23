@@ -74,10 +74,9 @@ void absinthe_toplevel_map(struct wl_listener *listener, void *data)
     toplevel->scene_surface->node.data = toplevel;
 
     absinthe_toplevel_update_geometry(toplevel);
-    toplevel->border_width = ABSINTHE_TOPLEVEL_BORDER_WIDTH;
-    int32_t borders_width = ABSINTHE_TOPLEVEL_BORDER_WIDTH * 2;
-    toplevel->geometry.width += borders_width;
-    toplevel->geometry.height += borders_width;
+    toplevel->border_width = absinthe_toplevel_is_unmanaged(toplevel)
+        ? 0
+        : ABSINTHE_TOPLEVEL_BORDER_WIDTH;
 
     for (int i = 0; i < 4; ++i) {
         toplevel->border[i] = wlr_scene_rect_create(toplevel->scene_tree, 0, 0, unfocused_border_color);
@@ -204,13 +203,14 @@ void absinthe_toplevel_set_size(struct absinthe_toplevel *toplevel, int32_t widt
     if (width < 0 || height < 0)
         return;
     if (toplevel->type == ABSINTHE_TOPLEVEL_XDG) {
-        toplevel->resizing = wlr_xdg_toplevel_set_size(toplevel->toplevel.xdg, width, height);
+        toplevel->resizing = wlr_xdg_toplevel_set_size(toplevel->toplevel.xdg, width - 2 * toplevel->border_width, height - 2 * toplevel->border_width);
     }
 #ifdef XWAYLAND
     else if (toplevel->type == ABSINTHE_TOPLEVEL_X11) {
         wlr_xwayland_surface_configure(toplevel->toplevel.x11,
-                                       toplevel->geometry.x, toplevel->geometry.y, width, height);
+                                       toplevel->geometry.x, toplevel->geometry.y, width - 2 * toplevel->border_width, height - 2 * toplevel->border_width);
         absinthe_toplevel_set_position(toplevel, toplevel->geometry.x, toplevel->geometry.y);
+        absinthe_toplevel_update_borders_geometry(toplevel);
     }
 #endif
 }
@@ -231,7 +231,9 @@ void absinthe_toplevel_set_fullscreen(struct absinthe_toplevel *toplevel, bool f
         absinthe_toplevel_set_size(toplevel, toplevel->geometry.width, toplevel->geometry.height);
     } else {
         toplevel->geometry = toplevel->prev_geometry;
-        toplevel->border_width = ABSINTHE_TOPLEVEL_BORDER_WIDTH;
+        toplevel->border_width = absinthe_toplevel_is_unmanaged(toplevel)
+            ? 0
+            : ABSINTHE_TOPLEVEL_BORDER_WIDTH;
         absinthe_toplevel_set_size(toplevel, toplevel->geometry.width, toplevel->geometry.height);
     }
 }

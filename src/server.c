@@ -153,6 +153,9 @@ void server_xwayland_new_surface(struct wl_listener *listener, void *data)
     toplevel->type = ABSINTHE_TOPLEVEL_X11;
     toplevel->server = server;
     toplevel->toplevel.x11 = surface;
+    toplevel->border_width = absinthe_toplevel_is_unmanaged(toplevel)
+        ? 0
+        : ABSINTHE_TOPLEVEL_BORDER_WIDTH;
 
     toplevel->destroy.notify = absinthe_toplevel_destroy;
     wl_signal_add(&surface->events.destroy, &toplevel->destroy);

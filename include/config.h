@@ -13,5 +13,5 @@ static const float unfocused_border_color[4] = {0.39, 0.42, 0.46, 1.0};
 #define ABSINTHE_MAIN_STACK_SIZE 1;
 #define ABSINTHE_MAIN_STACK_WIDTH 0.5;
 
-#define ABSINTHE_OUTPUT_GAP 10
-#define ABSINTHE_LAYOUT_GAP 10
+#define ABSINTHE_OUTPUT_GAP 0
+#define ABSINTHE_LAYOUT_GAP 0
