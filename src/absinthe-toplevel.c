@@ -57,6 +57,8 @@ void absinthe_toplevel_map(struct wl_listener *listener, void *data)
     toplevel->scene_tree->node.data = toplevel;
     wlr_scene_node_set_enabled(&toplevel->scene_tree->node, false);
 
+    toplevel->tiled = true;
+
     toplevel->border_width = absinthe_toplevel_is_unmanaged(toplevel)
         ? 0
         : ABSINTHE_TOPLEVEL_BORDER_WIDTH;
@@ -201,8 +203,9 @@ void absinthe_toplevel_set_size(struct absinthe_toplevel *toplevel, int32_t widt
 {
     if (width < 0 || height < 0)
         return;
-    if (toplevel->type == ABSINTHE_TOPLEVEL_XDG)
-        wlr_xdg_toplevel_set_size(toplevel->toplevel.xdg, width, height);
+    if (toplevel->type == ABSINTHE_TOPLEVEL_XDG) {
+        toplevel->resizing = wlr_xdg_toplevel_set_size(toplevel->toplevel.xdg, width, height);
+    }
 #ifdef XWAYLAND
     else if (toplevel->type == ABSINTHE_TOPLEVEL_X11) {
         wlr_xwayland_surface_configure(toplevel->toplevel.x11,
