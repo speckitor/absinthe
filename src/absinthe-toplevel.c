@@ -2,6 +2,7 @@
 
 #include <wayland-server-core.h>
 #include <wlr/util/log.h>
+#include <wlr/util/edges.h>
 
 #include "types.h"
 #include "absinthe-toplevel.h"
@@ -58,6 +59,11 @@ void absinthe_toplevel_map(struct wl_listener *listener, void *data)
     wlr_scene_node_set_enabled(&toplevel->scene_tree->node, false);
 
     toplevel->tiled = true;
+	if (wl_resource_get_version(toplevel->toplevel.xdg->resource) >= XDG_TOPLEVEL_STATE_TILED_RIGHT_SINCE_VERSION) {
+        wlr_xdg_toplevel_set_tiled(toplevel->toplevel.xdg, WLR_EDGE_TOP | WLR_EDGE_BOTTOM | WLR_EDGE_LEFT | WLR_EDGE_RIGHT);
+	} else {
+		wlr_xdg_toplevel_set_maximized(toplevel->toplevel.xdg, true);
+	}
 
     toplevel->border_width = absinthe_toplevel_is_unmanaged(toplevel)
         ? 0
@@ -200,8 +206,12 @@ void absinthe_toplevel_set_position(struct absinthe_toplevel *toplevel, int32_t 
 
 void absinthe_toplevel_set_size(struct absinthe_toplevel *toplevel, int32_t width, int32_t height)
 {
-    if (width < 0 || height < 0)
+    if (width <= toplevel->border_width || height <= toplevel->border_width || (width == toplevel->geometry.width && height == toplevel->geometry.height))
         return;
+
+    toplevel->geometry.width = width;
+    toplevel->geometry.height = height;
+
     if (toplevel->type == ABSINTHE_TOPLEVEL_XDG) {
         toplevel->resizing = wlr_xdg_toplevel_set_size(toplevel->toplevel.xdg, width - 2 * toplevel->border_width, height - 2 * toplevel->border_width);
     }
@@ -209,10 +219,16 @@ void absinthe_toplevel_set_size(struct absinthe_toplevel *toplevel, int32_t widt
     else if (toplevel->type == ABSINTHE_TOPLEVEL_X11) {
         wlr_xwayland_surface_configure(toplevel->toplevel.x11,
                                        toplevel->geometry.x, toplevel->geometry.y, width - 2 * toplevel->border_width, height - 2 * toplevel->border_width);
-        absinthe_toplevel_set_position(toplevel, toplevel->geometry.x, toplevel->geometry.y);
-        absinthe_toplevel_update_borders_geometry(toplevel);
+        absinthe_toplevel_set_position(toplevel, toplevel->geometry.x + toplevel->border_width, toplevel->geometry.y + toplevel->border_width);
     }
 #endif
+    struct wlr_box clip = {
+        .x = 0,
+        .y = 0,
+        .width = width - toplevel->border_width,
+        .height = height - toplevel->border_width,
+    };
+    wlr_scene_subsurface_tree_set_clip(&toplevel->scene_surface->node, &clip);
 }
 
 void absinthe_toplevel_set_fullscreen(struct absinthe_toplevel *toplevel, bool fullscreen)

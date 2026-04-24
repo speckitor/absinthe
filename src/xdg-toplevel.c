@@ -27,9 +27,6 @@ void xdg_toplevel_commit(struct wl_listener *listener, void *data)
         toplevel->resizing = wlr_xdg_toplevel_set_size(toplevel->toplevel.xdg, 0, 0);
         return;
     }
-    /* Check for size because we did't set it on initial commit */
-    toplevel->geometry.width = toplevel->toplevel.xdg->base->geometry.width + borders_width;
-    toplevel->geometry.height = toplevel->toplevel.xdg->base->geometry.height + borders_width;
 
     /* Update borders and position only after client prepared new buffer */
     absinthe_toplevel_set_position(toplevel, toplevel->geometry.x, toplevel->geometry.y);
