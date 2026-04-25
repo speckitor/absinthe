@@ -47,20 +47,18 @@ static void apply_resize(struct absinthe_toplevel *toplevel, struct wlr_box *new
 	if (max_height == 0)
 		max_height = 10000;
 
-	if (toplevel->geometry.width != min_width && new_geometry->width >= min_width && new_geometry->width <= max_width) {
+	if (new_geometry->width >= min_width && new_geometry->width <= max_width) {
 		toplevel->geometry.x = new_geometry->x;
-		toplevel->geometry.width = new_geometry->width;
 		resize = true;
 	}
 
-	if (toplevel->geometry.height != min_height && new_geometry->height >= min_height && new_geometry->height<= max_height) {
+	if (new_geometry->height >= min_height && new_geometry->height <= max_height) {
 		toplevel->geometry.y = new_geometry->y;
-		toplevel->geometry.height = new_geometry->height;
 		resize = true;
 	}
 
 	if (resize)
-		absinthe_toplevel_set_size(toplevel, toplevel->geometry.width, toplevel->geometry.height);
+		absinthe_toplevel_set_size(toplevel, new_geometry->width, new_geometry->height);
 }
 
 static void process_cursor_resize(struct absinthe_server *server) {
