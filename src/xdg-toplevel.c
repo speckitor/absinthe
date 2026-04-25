@@ -17,9 +17,7 @@ void xdg_toplevel_commit(struct wl_listener *listener, void *data)
 	int32_t borders_width = 2 * toplevel->border_width;
 
 	if (toplevel->toplevel.xdg->base->initial_commit) {
-		/* Let toplevel set preferred size */
-		toplevel->geometry.width = toplevel->toplevel.xdg->base->geometry.width + borders_width;
-		toplevel->geometry.height = toplevel->toplevel.xdg->base->geometry.height + borders_width;
+		wlr_xdg_toplevel_set_activated(toplevel->toplevel.xdg, false);
 
 		/* Forse server side decoration mode */
 		if (toplevel->decoration)

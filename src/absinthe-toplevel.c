@@ -195,6 +195,8 @@ struct absinthe_toplevel *absinthe_toplevel_at(struct absinthe_server *server, d
 
 void absinthe_toplevel_set_position(struct absinthe_toplevel *toplevel, int32_t x, int32_t y)
 {
+	toplevel->geometry.x = x;
+	toplevel->geometry.y = y;
 	wlr_scene_node_set_position(&toplevel->scene_tree->node, x, y);
 }
 
@@ -239,17 +241,15 @@ void absinthe_toplevel_set_fullscreen(struct absinthe_toplevel *toplevel, bool f
 
 	if (fullscreen) {
 		toplevel->prev_geometry = toplevel->geometry;
-		toplevel->geometry.x = output->geometry.x;
-		toplevel->geometry.y = output->geometry.y;
 		toplevel->border_width = 0;
 		absinthe_toplevel_set_size(toplevel, output->geometry.width, output->geometry.height);
+		absinthe_toplevel_set_position(toplevel, output->geometry.x, output->geometry.y);
 	} else {
-		toplevel->geometry.x = toplevel->prev_geometry.x;
-		toplevel->geometry.y = toplevel->prev_geometry.y;
 		toplevel->border_width = absinthe_toplevel_is_unmanaged(toplevel)
 			? 0
 			: ABSINTHE_TOPLEVEL_BORDER_WIDTH;
 		absinthe_toplevel_set_size(toplevel, toplevel->prev_geometry.width, toplevel->prev_geometry.height);
+		absinthe_toplevel_set_position(toplevel, toplevel->prev_geometry.x, toplevel->prev_geometry.y);
 	}
 }
 

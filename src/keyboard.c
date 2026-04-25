@@ -27,7 +27,7 @@ static bool keyboard_handle_keybind(struct absinthe_server *server, xkb_keysym_t
 		break;
 	case XKB_KEY_Return:
 		if (fork() == 0)
-			execl("/bin/sh", "sh", "-c", "foot", NULL);
+			execl("/bin/sh", "sh", "-c", "ghostty", NULL);
 		break;
 	case XKB_KEY_r:
 		if (fork() == 0)
