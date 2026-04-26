@@ -13,6 +13,7 @@
 
 void keyboard_handle_modifiers(struct wl_listener *listener, void *data)
 {
+	UNUSED(data);
 	struct absinthe_keyboard *keyboard = wl_container_of(listener, keyboard, modifiers);
 
 	wlr_seat_set_keyboard(keyboard->server->seat, keyboard->wlr_keyboard);
@@ -27,7 +28,7 @@ static bool keyboard_handle_keybind(struct absinthe_server *server, xkb_keysym_t
 		break;
 	case XKB_KEY_Return:
 		if (fork() == 0)
-			execl("/bin/sh", "sh", "-c", "ghostty", NULL);
+			execl("/bin/sh", "sh", "-c", "foot", NULL);
 		break;
 	case XKB_KEY_r:
 		if (fork() == 0)
@@ -98,6 +99,7 @@ void keyboard_handle_key(struct wl_listener *listener, void *data)
 
 void keyboard_handle_destroy(struct wl_listener *listener, void *data)
 {
+	UNUSED(data);
 	struct absinthe_keyboard *keyboard = wl_container_of(listener, keyboard, modifiers);
 
 	wl_list_remove(&keyboard->modifiers.link);

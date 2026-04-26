@@ -39,7 +39,6 @@ static void apply_resize(struct absinthe_toplevel *toplevel, struct wlr_box *new
 
 	int32_t max_width = toplevel->toplevel.xdg->current.max_width;
 	int32_t max_height = toplevel->toplevel.xdg->current.max_height;
-	bool resize = false;
 
 	if (max_width == 0)
 		max_width = 10000;
@@ -127,7 +126,6 @@ void process_cursor_motion(struct absinthe_server *server, uint32_t time)
 	double sx, sy;
 	struct wlr_seat *seat = server->seat;
 	struct wlr_surface *surface = NULL;
-	struct absinthe_toplevel *toplevel = absinthe_toplevel_at(server, server->cursor->x, server->cursor->y, &surface, &sx, &sy);
 
 	if (server->cursor_mode == ABSINTHE_CURSOR_MOVE) {
 		process_cursor_move(server);

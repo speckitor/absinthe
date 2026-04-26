@@ -1,4 +1,5 @@
 #include "absinthe-toplevel.h"
+#include "focus.h"
 #include "types.h"
 
 void layout_arrange(struct absinthe_output *output)

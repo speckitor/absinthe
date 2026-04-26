@@ -6,6 +6,7 @@
 
 void xdg_popup_commit(struct wl_listener *listener, void *data)
 {
+	UNUSED(data);
 	struct absinthe_popup *popup = wl_container_of(listener, popup, commit);
 
 	if (popup->xdg_popup->base->initial_commit)
@@ -14,6 +15,7 @@ void xdg_popup_commit(struct wl_listener *listener, void *data)
 
 void xdg_popup_destroy(struct wl_listener *listener, void *data)
 {
+	UNUSED(data);
 	struct absinthe_popup *popup = wl_container_of(listener, popup, destroy);
 
 	wl_list_remove(&popup->commit.link);

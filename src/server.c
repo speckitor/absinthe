@@ -116,6 +116,7 @@ void server_new_xdg_popup(struct wl_listener *listener, void *data)
 
 void server_new_xdg_decoration(struct wl_listener *listener, void *data)
 {
+	UNUSED(listener);
 	struct wlr_xdg_toplevel_decoration_v1 *xdg_decoration = data;
 	struct absinthe_toplevel *toplevel = xdg_decoration->toplevel->base->data;
 	toplevel->decoration = xdg_decoration;
@@ -132,6 +133,7 @@ void server_new_xdg_decoration(struct wl_listener *listener, void *data)
 #ifdef XWAYLAND
 void server_xwayland_ready(struct wl_listener *listener, void *data)
 {
+	UNUSED(data);
 	struct absinthe_server *server = wl_container_of(listener, server, xwayland_ready);
 
 	wlr_xwayland_set_seat(server->xwayland, server->seat);
@@ -273,6 +275,7 @@ void server_cursor_axis(struct wl_listener *listener, void *data)
 
 void server_cursor_frame(struct wl_listener *listener, void *data)
 {
+	UNUSED(data);
 	struct absinthe_server *server = wl_container_of(listener, server, cursor_frame);
 	wlr_seat_pointer_notify_frame(server->seat);
 }

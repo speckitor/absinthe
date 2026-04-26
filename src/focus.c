@@ -29,6 +29,10 @@ void focus_toplevel(struct absinthe_toplevel *toplevel)
 			wlr_xdg_toplevel_set_activated(prev_toplevel, false);
 			absinthe_toplevel_set_border_color(prev_toplevel->base->data, unfocused_border_color);
 		}
+
+		struct wlr_xwayland_surface *prev_xwayland_surface = wlr_xwayland_surface_try_from_wlr_surface(prev_surface);
+		if (prev_xwayland_surface)
+			absinthe_toplevel_set_border_color(prev_surface->data, unfocused_border_color);
 	}
 
 	toplevel->server->focused_toplevel = toplevel;
@@ -45,7 +49,7 @@ void focus_toplevel(struct absinthe_toplevel *toplevel)
 		wlr_seat_keyboard_notify_enter(seat, surface, keyboard->keycodes, keyboard->num_keycodes, &keyboard->modifiers);
 }
 
-static struct absinthe_toplevel *focus_get_topmost(struct absinthe_server *server)
+struct absinthe_toplevel *focus_get_topmost(struct absinthe_server *server)
 {
 	struct absinthe_toplevel *toplevel;
 	wl_list_for_each(toplevel, &server->focus_stack, flink) {
@@ -58,6 +62,9 @@ static struct absinthe_toplevel *focus_get_topmost(struct absinthe_server *serve
 void focus_next(struct absinthe_server *server)
 {
 	struct absinthe_toplevel *toplevel = focus_get_topmost(server);
+	if (!toplevel)
+		return;
+
 	struct absinthe_toplevel *next;
 	wl_list_for_each(next, &toplevel->link, link) {
 		if (&next->link == &toplevel->server->toplevels)
@@ -70,6 +77,9 @@ void focus_next(struct absinthe_server *server)
 void focus_prev(struct absinthe_server *server)
 {
 	struct absinthe_toplevel *toplevel = focus_get_topmost(server);
+	if (!toplevel)
+		return;
+
 	struct absinthe_toplevel *prev;
 	wl_list_for_each_reverse(prev, &toplevel->link, link) {
 		if (&prev->link == &toplevel->server->toplevels)

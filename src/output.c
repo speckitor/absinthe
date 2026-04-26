@@ -6,6 +6,7 @@
 
 void output_frame(struct wl_listener *listener, void *data)
 {
+	UNUSED(data);
 	struct absinthe_output *output = wl_container_of(listener, output, frame);
 	struct wlr_scene *scene = output->server->scene;
 
@@ -34,6 +35,7 @@ void output_request_state(struct wl_listener *listener, void *data)
 
 void output_destroy(struct wl_listener *listener, void *data)
 {
+	UNUSED(data);
 	struct absinthe_output *output = wl_container_of(listener, output, request_state);
 
 	wl_list_remove(&output->frame.link);
@@ -45,6 +47,7 @@ void output_destroy(struct wl_listener *listener, void *data)
 
 void outputs_update(struct wl_listener *listener, void *data)
 {
+	UNUSED(data);
 	struct absinthe_server *server = wl_container_of(listener, server, output_layout_change);
 	struct absinthe_output *output;
 	wl_list_for_each(output, &server->outputs, link) {

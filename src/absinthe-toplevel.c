@@ -8,6 +8,7 @@
 #include "absinthe-toplevel.h"
 #include "output.h"
 #include "layout.h"
+#include "focus.h"
 
 bool absinthe_toplevel_is_unmanaged(struct absinthe_toplevel *toplevel)
 {
@@ -44,11 +45,12 @@ struct wlr_surface *absinthe_toplevel_surface(struct absinthe_toplevel *toplevel
 
 void absinthe_toplevel_map(struct wl_listener *listener, void *data)
 {
+	UNUSED(data);
 	struct absinthe_toplevel *toplevel = wl_container_of(listener, toplevel, map);
 
 	toplevel->scene_tree = wlr_scene_tree_create(&toplevel->server->scene->tree);
 	toplevel->scene_tree->node.data = toplevel;
-	wlr_scene_node_set_enabled(&toplevel->scene_tree->node, false);
+	wlr_scene_node_set_enabled(&toplevel->scene_tree->node, absinthe_toplevel_is_unmanaged(toplevel));
 
 	toplevel->tiled = true;
 
@@ -91,14 +93,18 @@ void absinthe_toplevel_map(struct wl_listener *listener, void *data)
 	wl_list_insert(&toplevel->server->focus_stack, &toplevel->flink);
 
 	layout_arrange(toplevel->output);
+	focus_toplevel(focus_get_topmost(toplevel->server));
 }
 
 void absinthe_toplevel_unmap(struct wl_listener *listener, void *data)
 {
+	UNUSED(data);
 	struct absinthe_toplevel *toplevel = wl_container_of(listener, toplevel, unmap);
 
-	if (toplevel == toplevel->server->focused_toplevel)
+	if (toplevel == toplevel->server->focused_toplevel) {
 		toplevel->server->focused_toplevel = NULL;
+		toplevel->server->seat->keyboard_state.focused_surface = NULL;
+	}
 
 	wl_list_remove(&toplevel->link);
 	wl_list_remove(&toplevel->flink);
@@ -106,10 +112,12 @@ void absinthe_toplevel_unmap(struct wl_listener *listener, void *data)
 	wlr_scene_node_destroy(&toplevel->scene_tree->node);
 
 	layout_arrange(toplevel->output);
+	focus_next(toplevel->server);
 }
 
 void absinthe_toplevel_destroy(struct wl_listener *listener, void *data)
 {
+	UNUSED(data);
 	struct absinthe_toplevel *toplevel = wl_container_of(listener, toplevel, destroy);
 
 #ifdef XWAYLAND
@@ -138,6 +146,7 @@ void absinthe_toplevel_destroy(struct wl_listener *listener, void *data)
 
 void absinthe_toplevel_request_move(struct wl_listener *listener, void *data)
 {
+	UNUSED(data);
 	struct absinthe_toplevel *toplevel = wl_container_of(listener, toplevel, request_maximize);
 	if (toplevel->toplevel.xdg->base->initialized)
 		wlr_xdg_surface_schedule_configure(toplevel->toplevel.xdg->base);
@@ -145,6 +154,7 @@ void absinthe_toplevel_request_move(struct wl_listener *listener, void *data)
 
 void absinthe_toplevel_request_resize(struct wl_listener *listener, void *data)
 {
+	UNUSED(data);
 	struct absinthe_toplevel *toplevel = wl_container_of(listener, toplevel, request_maximize);
 	if (toplevel->toplevel.xdg->base->initialized)
 		wlr_xdg_surface_schedule_configure(toplevel->toplevel.xdg->base);
@@ -152,6 +162,7 @@ void absinthe_toplevel_request_resize(struct wl_listener *listener, void *data)
 
 void absinthe_toplevel_request_maximize(struct wl_listener *listener, void *data)
 {
+	UNUSED(data);
 	struct absinthe_toplevel *toplevel = wl_container_of(listener, toplevel, request_maximize);
 	if (toplevel->toplevel.xdg->base->initialized)
 		wlr_xdg_surface_schedule_configure(toplevel->toplevel.xdg->base);
@@ -159,6 +170,7 @@ void absinthe_toplevel_request_maximize(struct wl_listener *listener, void *data
 
 void absinthe_toplevel_request_fullscreen(struct wl_listener *listener, void *data)
 {
+	UNUSED(data);
 	struct absinthe_toplevel *toplevel = wl_container_of(listener, toplevel, request_fullscreen);
 	absinthe_toplevel_set_fullscreen(toplevel, toplevel->toplevel.xdg->requested.fullscreen);
 }

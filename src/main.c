@@ -22,7 +22,7 @@
 #include "seat.h"
 #include "output.h"
 
-int main(int argc, char **argv)
+int main(void)
 {
 	wlr_log_init(WLR_DEBUG, NULL);
 

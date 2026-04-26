@@ -24,6 +24,8 @@
 
 #include "config.h"
 
+#define UNUSED(x) (void)(x)
+
 enum absinthe_cursor_mode {
 	ABSINTHE_CURSOR_PASSTHROUGH,
 	ABSINTHE_CURSOR_MOVE,
@@ -95,7 +97,7 @@ struct absinthe_server {
 
 	enum absinthe_cursor_mode cursor_mode;
 	struct wlr_box grabbed_geometry;
-	uint32_t grab_x, grab_y;
+	int32_t grab_x, grab_y;
 	enum absinthe_cursor_resize_corner cursor_resize_corner;
 
 	struct wl_list toplevels;
