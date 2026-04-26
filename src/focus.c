@@ -59,6 +59,26 @@ struct absinthe_toplevel *focus_get_topmost(struct absinthe_server *server)
 	return NULL;
 }
 
+struct absinthe_toplevel *focus_get_first_tiled(struct absinthe_output *output)
+{
+	struct absinthe_toplevel *toplevel;
+	wl_list_for_each(toplevel, &output->server->focus_stack, flink) {
+		if (toplevel->tiled && toplevel->output == output)
+			return toplevel;
+	}
+	return NULL;
+}
+
+struct absinthe_toplevel *focus_get_last_tiled(struct absinthe_output *output)
+{
+	struct absinthe_toplevel *toplevel;
+	wl_list_for_each_reverse(toplevel, &output->server->focus_stack, flink) {
+		if (toplevel->tiled && toplevel->output == output)
+			return toplevel;
+	}
+	return NULL;
+}
+
 void focus_next(struct absinthe_server *server)
 {
 	struct absinthe_toplevel *toplevel = focus_get_topmost(server);

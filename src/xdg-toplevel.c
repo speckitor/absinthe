@@ -25,9 +25,6 @@ void xdg_toplevel_commit(struct wl_listener *listener, void *data)
 		return;
 	}
 
-	/* Update borders and position only after client prepared new buffer */
-	absinthe_toplevel_set_position(toplevel, toplevel->geometry.x, toplevel->geometry.y);
-	absinthe_toplevel_update_borders_geometry(toplevel);
 	if (toplevel->resizing && toplevel->resizing <= toplevel->toplevel.xdg->base->current.configure_serial)
 		toplevel->resizing = 0;
 }

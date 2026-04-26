@@ -142,6 +142,7 @@ struct absinthe_toplevel {
 	struct wlr_xdg_toplevel_decoration_v1 *decoration;
 
 	bool tiled, floating, fullscreen, maximized;
+	bool urgent;
 	uint32_t resizing;
 
 	struct wlr_box geometry;

@@ -109,10 +109,10 @@ void absinthe_toplevel_unmap(struct wl_listener *listener, void *data)
 	wl_list_remove(&toplevel->link);
 	wl_list_remove(&toplevel->flink);
 
-	wlr_scene_node_destroy(&toplevel->scene_tree->node);
+	if (toplevel->output == toplevel->server->focused_output)
+		layout_arrange(toplevel->output);
 
-	layout_arrange(toplevel->output);
-	focus_next(toplevel->server);
+	wlr_scene_node_destroy(&toplevel->scene_tree->node);
 }
 
 void absinthe_toplevel_destroy(struct wl_listener *listener, void *data)
@@ -240,6 +240,8 @@ void absinthe_toplevel_set_size(struct absinthe_toplevel *toplevel, int32_t widt
 		absinthe_toplevel_set_position(toplevel, toplevel->geometry.x + toplevel->border_width, toplevel->geometry.y + toplevel->border_width);
 	}
 #endif
+
+	absinthe_toplevel_update_borders_geometry(toplevel);
 }
 
 void absinthe_toplevel_set_fullscreen(struct absinthe_toplevel *toplevel, bool fullscreen)
@@ -263,6 +265,8 @@ void absinthe_toplevel_set_fullscreen(struct absinthe_toplevel *toplevel, bool f
 		absinthe_toplevel_set_size(toplevel, toplevel->prev_geometry.width, toplevel->prev_geometry.height);
 		absinthe_toplevel_set_position(toplevel, toplevel->prev_geometry.x, toplevel->prev_geometry.y);
 	}
+
+	absinthe_toplevel_update_borders_geometry(toplevel);
 }
 
 void absinthe_toplevel_set_border_color(struct absinthe_toplevel *toplevel, const float color[4])
