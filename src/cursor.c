@@ -3,6 +3,7 @@
 
 #include "types.h"
 #include "absinthe-toplevel.h"
+#include "layout.h"
 
 void reset_cursor_mode(struct absinthe_server *server)
 {
@@ -30,6 +31,11 @@ static void process_cursor_move(struct absinthe_server *server) {
 	toplevel->geometry.x = new_x;
 	toplevel->geometry.y = new_y;
 	absinthe_toplevel_set_position(toplevel, new_x, new_y);
+
+	if (toplevel->tiled) {
+		toplevel->tiled = false;	
+		layout_arrange(toplevel->output);
+	}
 }
 
 static void apply_resize(struct absinthe_toplevel *toplevel, struct wlr_box *new_geometry)
@@ -71,6 +77,11 @@ static void process_cursor_resize(struct absinthe_server *server) {
 
 	if (toplevel->fullscreen)
 		absinthe_toplevel_set_fullscreen(toplevel, false);
+
+	if (toplevel->tiled) {
+		toplevel->tiled = false;	
+		layout_arrange(toplevel->output);
+	}
 
 	int32_t new_x, new_y, new_width, new_height;
 	new_x = server->grabbed_geometry.x;

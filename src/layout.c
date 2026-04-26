@@ -10,7 +10,7 @@ void layout_arrange(struct absinthe_output *output)
 	struct absinthe_toplevel *toplevel;
 	size_t toplevels_count = 0;
 	wl_list_for_each(toplevel, &output->server->toplevels, link) {
-		if (toplevel->tiled && toplevel->output == output) {
+		if (toplevel->output == output && toplevel->tiled) {
 			toplevels_count++;
 			wlr_scene_node_set_enabled(&toplevel->scene_tree->node, true);
 		}
@@ -23,7 +23,7 @@ void layout_arrange(struct absinthe_output *output)
 
 	if (toplevels_count == 1) {
 		wl_list_for_each(toplevel, &output->server->toplevels, link) {
-			if (toplevel->output == output)
+			if (toplevel->output == output && toplevel->tiled)
 				break;
 		}
 		toplevel->geometry.x = output->geometry.x + output_gap;
