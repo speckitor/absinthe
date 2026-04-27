@@ -106,11 +106,13 @@ void absinthe_toplevel_unmap(struct wl_listener *listener, void *data)
 		toplevel->server->seat->keyboard_state.focused_surface = NULL;
 	}
 
+	if (toplevel->output == toplevel->server->focused_output && toplevel->tiled)
+		focus_logical_next(toplevel);
+
 	wl_list_remove(&toplevel->link);
 	wl_list_remove(&toplevel->flink);
 
-	if (toplevel->output == toplevel->server->focused_output)
-		layout_arrange(toplevel->output);
+	layout_arrange(toplevel->output);
 
 	wlr_scene_node_destroy(&toplevel->scene_tree->node);
 }
