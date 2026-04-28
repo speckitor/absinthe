@@ -39,10 +39,10 @@ static bool keyboard_handle_keybind(struct absinthe_server *server, xkb_keysym_t
 							 !server->focused_toplevel->fullscreen);
 		break;
 	case XKB_KEY_j:
-		focus_next(server, false);
+		focus_next(server);
 		break;
 	case XKB_KEY_k:
-		focus_prev(server, false);
+		focus_prev(server);
 		break;
 	case XKB_KEY_h:
 		if (server->focused_output && server->focused_output->main_stack_width > 0.15) {

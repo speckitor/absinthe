@@ -63,23 +63,7 @@ struct absinthe_toplevel *focus_get_topmost(struct absinthe_server *server)
 	return NULL;
 }
 
-void focus_after_unmap(struct absinthe_toplevel *toplevel)
-{
-	struct absinthe_toplevel *temp;
-	size_t i = 0;
-	wl_list_for_each(temp, &toplevel->server->toplevels, link)
-	{
-		if (toplevel == temp && i == 0) {
-			focus_next(toplevel->server, true);
-			return;
-		}
-		++i;
-	}
-
-	focus_prev(toplevel->server, true);
-}
-
-void focus_next(struct absinthe_server *server, bool tiled)
+void focus_next(struct absinthe_server *server)
 {
 	struct absinthe_toplevel *toplevel = focus_get_topmost(server);
 	if (!toplevel)
@@ -90,18 +74,12 @@ void focus_next(struct absinthe_server *server, bool tiled)
 	{
 		if (&next->link == &toplevel->server->toplevels)
 			continue;
-		if (tiled && !next->tiled)
-			continue;
 		break;
-	}
-	if (tiled && !next->tiled) {
-		wlr_log(WLR_ERROR, "No tiled");
-		return;
 	}
 	focus_toplevel(next);
 }
 
-void focus_prev(struct absinthe_server *server, bool tiled)
+void focus_prev(struct absinthe_server *server)
 {
 	struct absinthe_toplevel *toplevel = focus_get_topmost(server);
 	if (!toplevel)
@@ -112,13 +90,7 @@ void focus_prev(struct absinthe_server *server, bool tiled)
 	{
 		if (&prev->link == &toplevel->server->toplevels)
 			continue;
-		if (tiled && !prev->tiled)
-			continue;
 		break;
-	}
-	if (tiled && !prev->tiled) {
-		wlr_log(WLR_ERROR, "No tiled");
-		return;
 	}
 	focus_toplevel(prev);
 }
