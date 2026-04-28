@@ -1,26 +1,26 @@
 #include <stdlib.h>
-#include <wlr/util/log.h>
-#include <wlr/types/wlr_subcompositor.h>
-#include <wlr/types/wlr_data_device.h>
-#include <wlr/types/wlr_xcursor_manager.h>
-#include <wlr/types/wlr_drm.h>
-#include <wlr/types/wlr_screencopy_v1.h>
-#include <wlr/types/wlr_data_control_v1.h>
-#include <wlr/types/wlr_viewporter.h>
-#include <wlr/types/wlr_single_pixel_buffer_v1.h>
-#include <wlr/types/wlr_fractional_scale_v1.h>
-#include <wlr/types/wlr_presentation_time.h>
 #include <wlr/types/wlr_alpha_modifier_v1.h>
+#include <wlr/types/wlr_data_control_v1.h>
+#include <wlr/types/wlr_data_device.h>
+#include <wlr/types/wlr_drm.h>
 #include <wlr/types/wlr_export_dmabuf_v1.h>
 #include <wlr/types/wlr_ext_foreign_toplevel_list_v1.h>
-#include <wlr/types/wlr_server_decoration.h>
+#include <wlr/types/wlr_fractional_scale_v1.h>
 #include <wlr/types/wlr_output_management_v1.h>
+#include <wlr/types/wlr_presentation_time.h>
+#include <wlr/types/wlr_screencopy_v1.h>
+#include <wlr/types/wlr_server_decoration.h>
+#include <wlr/types/wlr_single_pixel_buffer_v1.h>
+#include <wlr/types/wlr_subcompositor.h>
+#include <wlr/types/wlr_viewporter.h>
+#include <wlr/types/wlr_xcursor_manager.h>
 #include <wlr/types/wlr_xdg_output_v1.h>
+#include <wlr/util/log.h>
 
-#include "types.h"
-#include "server.h"
-#include "seat.h"
 #include "output.h"
+#include "seat.h"
+#include "server.h"
+#include "types.h"
 
 int main(void)
 {
@@ -51,7 +51,8 @@ int main(void)
 	server.scene = wlr_scene_create();
 	if (wlr_renderer_get_texture_formats(server.renderer, WLR_BUFFER_CAP_DMABUF)) {
 		wlr_drm_create(server.display, server.renderer);
-		wlr_scene_set_linux_dmabuf_v1(server.scene, wlr_linux_dmabuf_v1_create_with_renderer(server.display, 5, server.renderer));
+		wlr_scene_set_linux_dmabuf_v1(
+		    server.scene, wlr_linux_dmabuf_v1_create_with_renderer(server.display, 5, server.renderer));
 	}
 
 	server.allocator = wlr_allocator_autocreate(server.backend, server.renderer);
@@ -73,9 +74,8 @@ int main(void)
 	wlr_export_dmabuf_manager_v1_create(server.display);
 	wlr_ext_foreign_toplevel_list_v1_create(server.display, 1);
 
-	wlr_server_decoration_manager_set_default_mode(
-		wlr_server_decoration_manager_create(server.display),
-		WLR_SERVER_DECORATION_MANAGER_MODE_SERVER);
+	wlr_server_decoration_manager_set_default_mode(wlr_server_decoration_manager_create(server.display),
+						       WLR_SERVER_DECORATION_MANAGER_MODE_SERVER);
 	server.xdg_decoration_mgr = wlr_xdg_decoration_manager_v1_create(server.display);
 	server.new_xdg_decoration.notify = server_new_xdg_decoration;
 	wl_signal_add(&server.xdg_decoration_mgr->events.new_toplevel_decoration, &server.new_xdg_decoration);

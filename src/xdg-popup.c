@@ -1,5 +1,4 @@
 #include <stdlib.h>
-
 #include <wayland-server-core.h>
 
 #include "types.h"

@@ -1,9 +1,9 @@
 #include <wayland-server-core.h>
 #include <wlr/util/log.h>
 
-#include "types.h"
 #include "absinthe-toplevel.h"
 #include "layout.h"
+#include "types.h"
 
 void reset_cursor_mode(struct absinthe_server *server)
 {
@@ -14,7 +14,8 @@ void reset_cursor_mode(struct absinthe_server *server)
 	}
 }
 
-static void process_cursor_move(struct absinthe_server *server) {
+static void process_cursor_move(struct absinthe_server *server)
+{
 	struct absinthe_toplevel *toplevel = server->focused_toplevel;
 
 	if (!toplevel)
@@ -33,7 +34,7 @@ static void process_cursor_move(struct absinthe_server *server) {
 	absinthe_toplevel_set_position(toplevel, new_x, new_y);
 
 	if (toplevel->tiled) {
-		toplevel->tiled = false;	
+		toplevel->tiled = false;
 		layout_arrange(toplevel->output);
 	}
 }
@@ -54,19 +55,20 @@ static void apply_resize(struct absinthe_toplevel *toplevel, struct wlr_box *new
 
 	if (!(new_geometry->width >= min_width && new_geometry->width <= max_width)) {
 		new_geometry->width = toplevel->geometry.width;
-		new_geometry->x = toplevel->geometry.x;	
+		new_geometry->x = toplevel->geometry.x;
 	}
-			
+
 	if (!(new_geometry->height >= min_height && new_geometry->height <= max_height)) {
 		new_geometry->height = toplevel->geometry.height;
-		new_geometry->y = toplevel->geometry.y;	
+		new_geometry->y = toplevel->geometry.y;
 	}
 
 	absinthe_toplevel_set_size(toplevel, new_geometry->width, new_geometry->height);
 	absinthe_toplevel_set_position(toplevel, new_geometry->x, new_geometry->y);
 }
 
-static void process_cursor_resize(struct absinthe_server *server) {
+static void process_cursor_resize(struct absinthe_server *server)
+{
 	struct absinthe_toplevel *toplevel = server->focused_toplevel;
 
 	if (!toplevel)
@@ -79,7 +81,7 @@ static void process_cursor_resize(struct absinthe_server *server) {
 		absinthe_toplevel_set_fullscreen(toplevel, false);
 
 	if (toplevel->tiled) {
-		toplevel->tiled = false;	
+		toplevel->tiled = false;
 		layout_arrange(toplevel->output);
 	}
 
@@ -122,10 +124,10 @@ static void process_cursor_resize(struct absinthe_server *server) {
 
 	if (new_width > 0 && new_height > 0) {
 		struct wlr_box new_geometry = {
-			.x = new_x,
-			.y = new_y,
-			.width = new_width,
-			.height = new_height,
+		    .x = new_x,
+		    .y = new_y,
+		    .width = new_width,
+		    .height = new_height,
 		};
 
 		apply_resize(server->focused_toplevel, &new_geometry);

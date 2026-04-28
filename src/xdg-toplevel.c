@@ -1,13 +1,12 @@
-#include <stdlib.h>
 #include <assert.h>
-
+#include <stdlib.h>
 #include <wayland-server-core.h>
 #include <wlr/util/log.h>
 
-#include "types.h"
 #include "absinthe-toplevel.h"
 #include "layout.h"
 #include "output.h"
+#include "types.h"
 #include "xdg-decoration.h"
 
 void xdg_toplevel_commit(struct wl_listener *listener, void *data)

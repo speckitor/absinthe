@@ -1,15 +1,14 @@
 #include <stdlib.h>
 #include <unistd.h>
-
 #include <wayland-server-core.h>
-#include <xkbcommon/xkbcommon.h>
 #include <wlr/types/wlr_xdg_shell.h>
 #include <wlr/util/log.h>
+#include <xkbcommon/xkbcommon.h>
 
-#include "types.h"
 #include "absinthe-toplevel.h"
 #include "focus.h"
 #include "layout.h"
+#include "types.h"
 
 void keyboard_handle_modifiers(struct wl_listener *listener, void *data)
 {
@@ -28,7 +27,7 @@ static bool keyboard_handle_keybind(struct absinthe_server *server, xkb_keysym_t
 		break;
 	case XKB_KEY_Return:
 		if (fork() == 0)
-			execl("/bin/sh", "sh", "-c", "alacritty", NULL);
+			execl("/bin/sh", "sh", "-c", "ghostty", NULL);
 		break;
 	case XKB_KEY_r:
 		if (fork() == 0)
@@ -36,7 +35,8 @@ static bool keyboard_handle_keybind(struct absinthe_server *server, xkb_keysym_t
 		break;
 	case XKB_KEY_f:
 		if (server->focused_toplevel)
-			absinthe_toplevel_set_fullscreen(server->focused_toplevel, !server->focused_toplevel->fullscreen);
+			absinthe_toplevel_set_fullscreen(server->focused_toplevel,
+							 !server->focused_toplevel->fullscreen);
 		break;
 	case XKB_KEY_j:
 		focus_next(server, false);

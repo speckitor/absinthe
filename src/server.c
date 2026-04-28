@@ -1,22 +1,23 @@
 #include <assert.h>
 #include <stdlib.h>
-
-#include <wlr/util/log.h>
 #include <wlr/types/wlr_xcursor_manager.h>
+#include <wlr/util/log.h>
 
-#include "types.h"
-#include "output.h"
-#include "xdg-toplevel.h"
-#include "xdg-popup.h"
-#include "xdg-decoration.h"
+#include "absinthe-toplevel-handlers.h"
 #include "absinthe-toplevel.h"
+#include "config.h"
+#include "cursor.h"
 #include "focus.h"
 #include "keyboard.h"
-#include "cursor.h"
-#include "config.h"
+#include "output.h"
+#include "types.h"
+#include "xdg-decoration.h"
+#include "xdg-popup.h"
+#include "xdg-toplevel.h"
 
 #ifdef XWAYLAND
 #include <wlr/xwayland.h>
+
 #include "xwayland.h"
 #endif
 
@@ -53,7 +54,8 @@ void server_new_output(struct wl_listener *listener, void *data)
 
 	wl_list_insert(&server->outputs, &output->link);
 
-	struct wlr_output_layout_output *l_layout = wlr_output_layout_add_auto(server->output_layout, output->wlr_output);
+	struct wlr_output_layout_output *l_layout =
+	    wlr_output_layout_add_auto(server->output_layout, output->wlr_output);
 	struct wlr_scene_output *scene_output = wlr_scene_output_create(server->scene, wlr_output);
 	wlr_scene_output_layout_add_output(server->scene_layout, l_layout, scene_output);
 	wlr_output_layout_get_box(server->output_layout, output->wlr_output, &output->geometry);
@@ -141,8 +143,8 @@ void server_xwayland_ready(struct wl_listener *listener, void *data)
 	struct wlr_xcursor *xcursor;
 	if ((xcursor = wlr_xcursor_manager_get_xcursor(server->cursor_mgr, "default", 1))) {
 		struct wlr_buffer *buffer = wlr_xcursor_image_get_buffer(xcursor->images[0]);
-		wlr_xwayland_set_cursor(server->xwayland, buffer,
-			xcursor->images[0]->hotspot_x, xcursor->images[0]->hotspot_y);
+		wlr_xwayland_set_cursor(server->xwayland, buffer, xcursor->images[0]->hotspot_x,
+					xcursor->images[0]->hotspot_y);
 	}
 }
 
@@ -155,9 +157,7 @@ void server_xwayland_new_surface(struct wl_listener *listener, void *data)
 	toplevel->type = ABSINTHE_TOPLEVEL_X11;
 	toplevel->server = server;
 	toplevel->toplevel.x11 = surface;
-	toplevel->border_width = absinthe_toplevel_is_unmanaged(toplevel)
-		? 0
-		: ABSINTHE_TOPLEVEL_BORDER_WIDTH;
+	toplevel->border_width = absinthe_toplevel_is_unmanaged(toplevel) ? 0 : ABSINTHE_TOPLEVEL_BORDER_WIDTH;
 
 	toplevel->destroy.notify = absinthe_toplevel_destroy;
 	wl_signal_add(&surface->events.destroy, &toplevel->destroy);
@@ -208,7 +208,8 @@ void server_cursor_button(struct wl_listener *listener, void *data)
 	} else {
 		double sx, sy;
 		struct wlr_surface *surface = NULL;
-		struct absinthe_toplevel *toplevel = absinthe_toplevel_at(server, server->cursor->x, server->cursor->y, &surface, &sx, &sy);
+		struct absinthe_toplevel *toplevel =
+		    absinthe_toplevel_at(server, server->cursor->x, server->cursor->y, &surface, &sx, &sy);
 
 		if (!toplevel)
 			goto handle;
@@ -270,7 +271,8 @@ void server_cursor_axis(struct wl_listener *listener, void *data)
 {
 	struct absinthe_server *server = wl_container_of(listener, server, cursor_axis);
 	struct wlr_pointer_axis_event *event = data;
-	wlr_seat_pointer_notify_axis(server->seat, event->time_msec, event->orientation, event->delta, event->delta_discrete, event->source, event->relative_direction);
+	wlr_seat_pointer_notify_axis(server->seat, event->time_msec, event->orientation, event->delta,
+				     event->delta_discrete, event->source, event->relative_direction);
 }
 
 void server_cursor_frame(struct wl_listener *listener, void *data)

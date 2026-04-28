@@ -10,3 +10,7 @@ compile: proto
 		-I./ -I./include -DWLR_USE_UNSTABLE $(shell pkg-config wlroots-0.20 --libs --cflags) -lwayland-server -lxkbcommon \
 		-O3 \
 		-g
+
+format:
+	find src/ -type f -print0 | xargs -0 clang-format -i
+	find include/ -type f -print0 | xargs -0 clang-format -i

@@ -1,20 +1,19 @@
 #pragma once
 
 #include <linux/input-event-codes.h>
-
 #include <wayland-server-core.h>
 #include <wlr/backend.h>
-#include <wlr/render/wlr_renderer.h>
 #include <wlr/render/allocator.h>
-#include <wlr/types/wlr_xdg_shell.h>
+#include <wlr/render/wlr_renderer.h>
+#include <wlr/types/wlr_cursor.h>
+#include <wlr/types/wlr_keyboard.h>
 #include <wlr/types/wlr_output.h>
 #include <wlr/types/wlr_output_layout.h>
-#include <wlr/types/wlr_scene.h>
-#include <wlr/types/wlr_cursor.h>
-#include <wlr/types/wlr_seat.h>
-#include <wlr/types/wlr_keyboard.h>
 #include <wlr/types/wlr_output_management_v1.h>
+#include <wlr/types/wlr_scene.h>
+#include <wlr/types/wlr_seat.h>
 #include <wlr/types/wlr_xdg_decoration_v1.h>
+#include <wlr/types/wlr_xdg_shell.h>
 
 #ifdef XWAYLAND
 #include <wlr/xwayland.h>

@@ -1,9 +1,10 @@
 #ifdef XWAYLAND
 
-#include "types.h"
-#include "absinthe-toplevel.h"
-#include "xdg-toplevel.h"
 #include "xwayland.h"
+#include "absinthe-toplevel-handlers.h"
+#include "absinthe-toplevel.h"
+#include "types.h"
+#include "xdg-toplevel.h"
 
 void xwayland_activate(struct wl_listener *listener, void *data)
 {
@@ -47,8 +48,7 @@ void xwayland_configure(struct wl_listener *listener, void *data)
 
 	if (absinthe_toplevel_is_unmanaged(toplevel)) {
 		wlr_scene_node_set_position(&toplevel->scene_tree->node, event->x, event->y);
-		wlr_xwayland_surface_configure(toplevel->toplevel.x11,
-									   event->x, event->y, event->width, event->height);
+		wlr_xwayland_surface_configure(toplevel->toplevel.x11, event->x, event->y, event->width, event->height);
 		return;
 	}
 }
@@ -58,5 +58,4 @@ void xwayland_set_hints(struct wl_listener *listener, void *data)
 	UNUSED(listener);
 	UNUSED(data);
 }
-
 #endif

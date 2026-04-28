@@ -1,0 +1,23 @@
+BasedOnStyle: LLVM
+Language: C
+PointerAlignment: Right
+IndentWidth: 8
+TabWidth: 8
+ColumnLimit: 120
+UseTab: Always
+SpaceAfterCStyleCast: false
+SortIncludes: true
+BraceWrapping:
+  AfterClass: false
+  AfterControlStatement: false
+  AfterEnum: false
+  AfterFunction: true
+  AfterNamespace: false
+  AfterObjCDeclaration: false
+  AfterStruct: false
+  AfterUnion: false
+  BeforeCatch: false
+  BeforeElse: false
+  IndentBraces: false
+BreakBeforeBraces: Custom
+

@@ -1,9 +1,9 @@
 #include <wayland-server-core.h>
 #include <wlr/util/log.h>
 
-#include "types.h"
 #include "absinthe-toplevel.h"
 #include "focus.h"
+#include "types.h"
 
 void focus_toplevel(struct absinthe_toplevel *toplevel)
 {
@@ -31,7 +31,8 @@ void focus_toplevel(struct absinthe_toplevel *toplevel)
 			absinthe_toplevel_set_border_color(prev_toplevel->base->data, unfocused_border_color);
 		}
 
-		struct wlr_xwayland_surface *prev_xwayland_surface = wlr_xwayland_surface_try_from_wlr_surface(prev_surface);
+		struct wlr_xwayland_surface *prev_xwayland_surface =
+		    wlr_xwayland_surface_try_from_wlr_surface(prev_surface);
 		if (prev_xwayland_surface)
 			absinthe_toplevel_set_border_color(prev_surface->data, unfocused_border_color);
 	}
@@ -47,24 +48,27 @@ void focus_toplevel(struct absinthe_toplevel *toplevel)
 	absinthe_toplevel_set_border_color(toplevel, focused_border_color);
 
 	if (keyboard)
-		wlr_seat_keyboard_notify_enter(seat, surface, keyboard->keycodes, keyboard->num_keycodes, &keyboard->modifiers);
+		wlr_seat_keyboard_notify_enter(seat, surface, keyboard->keycodes, keyboard->num_keycodes,
+					       &keyboard->modifiers);
 }
 
 struct absinthe_toplevel *focus_get_topmost(struct absinthe_server *server)
 {
 	struct absinthe_toplevel *toplevel;
-	wl_list_for_each(toplevel, &server->focus_stack, flink) {
+	wl_list_for_each(toplevel, &server->focus_stack, flink)
+	{
 		if (toplevel)
 			return toplevel;
 	}
 	return NULL;
 }
 
-void focus_logical_next(struct absinthe_toplevel *toplevel)
+void focus_after_unmap(struct absinthe_toplevel *toplevel)
 {
 	struct absinthe_toplevel *temp;
 	size_t i = 0;
-	wl_list_for_each(temp, &toplevel->server->toplevels, link) {
+	wl_list_for_each(temp, &toplevel->server->toplevels, link)
+	{
 		if (toplevel == temp && i == 0) {
 			focus_next(toplevel->server, true);
 			return;
@@ -82,7 +86,8 @@ void focus_next(struct absinthe_server *server, bool tiled)
 		return;
 
 	struct absinthe_toplevel *next;
-	wl_list_for_each(next, &toplevel->link, link) {
+	wl_list_for_each(next, &toplevel->link, link)
+	{
 		if (&next->link == &toplevel->server->toplevels)
 			continue;
 		if (tiled && !next->tiled)
@@ -103,7 +108,8 @@ void focus_prev(struct absinthe_server *server, bool tiled)
 		return;
 
 	struct absinthe_toplevel *prev;
-	wl_list_for_each_reverse(prev, &toplevel->link, link) {
+	wl_list_for_each_reverse(prev, &toplevel->link, link)
+	{
 		if (&prev->link == &toplevel->server->toplevels)
 			continue;
 		if (tiled && !prev->tiled)
