@@ -10,7 +10,7 @@ void reset_cursor_mode(struct absinthe_server *server)
 	server->cursor_mode = ABSINTHE_CURSOR_PASSTHROUGH;
 	wlr_cursor_set_xcursor(server->cursor, server->cursor_mgr, "default");
 	if (server->focused_toplevel) {
-		wlr_xdg_toplevel_set_resizing(server->focused_toplevel->toplevel.xdg, false);
+		wlr_xdg_toplevel_set_resizing(server->focused_toplevel->xdg_toplevel, false);
 	}
 }
 
@@ -41,11 +41,11 @@ static void process_cursor_move(struct absinthe_server *server)
 
 static void apply_resize(struct absinthe_toplevel *toplevel, struct wlr_box *new_geometry)
 {
-	int32_t min_width = toplevel->toplevel.xdg->current.min_width;
-	int32_t min_height = toplevel->toplevel.xdg->current.min_height;
+	int32_t min_width = toplevel->xdg_toplevel->current.min_width;
+	int32_t min_height = toplevel->xdg_toplevel->current.min_height;
 
-	int32_t max_width = toplevel->toplevel.xdg->current.max_width;
-	int32_t max_height = toplevel->toplevel.xdg->current.max_height;
+	int32_t max_width = toplevel->xdg_toplevel->current.max_width;
+	int32_t max_height = toplevel->xdg_toplevel->current.max_height;
 
 	if (max_width == 0)
 		max_width = 10000;

@@ -17,11 +17,11 @@ void absinthe_toplevel_map(struct wl_listener *listener, void *data)
 	toplevel->tiled = true;
 
 	if (toplevel->type != ABSINTHE_TOPLEVEL_X11 &&
-	    wl_resource_get_version(toplevel->toplevel.xdg->resource) >= XDG_TOPLEVEL_STATE_TILED_RIGHT_SINCE_VERSION) {
-		wlr_xdg_toplevel_set_tiled(toplevel->toplevel.xdg,
+	    wl_resource_get_version(toplevel->xdg_toplevel->resource) >= XDG_TOPLEVEL_STATE_TILED_RIGHT_SINCE_VERSION) {
+		wlr_xdg_toplevel_set_tiled(toplevel->xdg_toplevel,
 					   WLR_EDGE_TOP | WLR_EDGE_BOTTOM | WLR_EDGE_LEFT | WLR_EDGE_RIGHT);
 	} else {
-		wlr_xdg_toplevel_set_maximized(toplevel->toplevel.xdg, true);
+		wlr_xdg_toplevel_set_maximized(toplevel->xdg_toplevel, true);
 	}
 
 	toplevel->border_width = absinthe_toplevel_is_unmanaged(toplevel) ? 0 : ABSINTHE_TOPLEVEL_BORDER_WIDTH;
@@ -29,12 +29,12 @@ void absinthe_toplevel_map(struct wl_listener *listener, void *data)
 #ifdef XWAYLAND
 	if (toplevel->type == ABSINTHE_TOPLEVEL_X11) {
 		toplevel->scene_surface =
-		    wlr_scene_subsurface_tree_create(toplevel->scene_tree, toplevel->toplevel.x11->surface);
+		    wlr_scene_subsurface_tree_create(toplevel->scene_tree, toplevel->xwayland_surface->surface);
 	} else
 #endif
 	{
 		toplevel->scene_surface =
-		    wlr_scene_subsurface_tree_create(toplevel->scene_tree, toplevel->toplevel.xdg->base->surface);
+		    wlr_scene_subsurface_tree_create(toplevel->scene_tree, toplevel->xdg_toplevel->base->surface);
 	}
 	toplevel->scene_surface->node.data = toplevel;
 
@@ -109,29 +109,29 @@ void absinthe_toplevel_request_move(struct wl_listener *listener, void *data)
 {
 	UNUSED(data);
 	struct absinthe_toplevel *toplevel = wl_container_of(listener, toplevel, request_maximize);
-	if (toplevel->toplevel.xdg->base->initialized)
-		wlr_xdg_surface_schedule_configure(toplevel->toplevel.xdg->base);
+	if (toplevel->xdg_toplevel->base->initialized)
+		wlr_xdg_surface_schedule_configure(toplevel->xdg_toplevel->base);
 }
 
 void absinthe_toplevel_request_resize(struct wl_listener *listener, void *data)
 {
 	UNUSED(data);
 	struct absinthe_toplevel *toplevel = wl_container_of(listener, toplevel, request_maximize);
-	if (toplevel->toplevel.xdg->base->initialized)
-		wlr_xdg_surface_schedule_configure(toplevel->toplevel.xdg->base);
+	if (toplevel->xdg_toplevel->base->initialized)
+		wlr_xdg_surface_schedule_configure(toplevel->xdg_toplevel->base);
 }
 
 void absinthe_toplevel_request_maximize(struct wl_listener *listener, void *data)
 {
 	UNUSED(data);
 	struct absinthe_toplevel *toplevel = wl_container_of(listener, toplevel, request_maximize);
-	if (toplevel->toplevel.xdg->base->initialized)
-		wlr_xdg_surface_schedule_configure(toplevel->toplevel.xdg->base);
+	if (toplevel->xdg_toplevel->base->initialized)
+		wlr_xdg_surface_schedule_configure(toplevel->xdg_toplevel->base);
 }
 
 void absinthe_toplevel_request_fullscreen(struct wl_listener *listener, void *data)
 {
 	UNUSED(data);
 	struct absinthe_toplevel *toplevel = wl_container_of(listener, toplevel, request_fullscreen);
-	absinthe_toplevel_set_fullscreen(toplevel, toplevel->toplevel.xdg->requested.fullscreen);
+	absinthe_toplevel_set_fullscreen(toplevel, toplevel->xdg_toplevel->requested.fullscreen);
 }

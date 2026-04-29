@@ -148,9 +148,9 @@ struct absinthe_toplevel {
 	struct wlr_box prev_geometry;
 
 	union {
-		struct wlr_xdg_toplevel *xdg;
-		struct wlr_xwayland_surface *x11;
-	} toplevel;
+		struct wlr_xdg_toplevel *xdg_toplevel;
+		struct wlr_xwayland_surface *xwayland_surface;
+	};
 	struct wl_listener map;
 	struct wl_listener unmap;
 	struct wl_listener commit;

@@ -72,8 +72,8 @@ void server_new_xdg_toplevel(struct wl_listener *listener, void *data)
 	struct absinthe_toplevel *toplevel = calloc(1, sizeof(*toplevel));
 	toplevel->type = ABSINTHE_TOPLEVEL_XDG;
 	toplevel->server = server;
-	toplevel->toplevel.xdg = xdg_toplevel;
-	toplevel->toplevel.xdg->base->data = toplevel;
+	toplevel->xdg_toplevel = xdg_toplevel;
+	toplevel->xdg_toplevel->base->data = toplevel;
 
 	toplevel->commit.notify = xdg_toplevel_commit;
 	wl_signal_add(&xdg_toplevel->base->surface->events.commit, &toplevel->commit);
@@ -156,7 +156,7 @@ void server_xwayland_new_surface(struct wl_listener *listener, void *data)
 
 	toplevel->type = ABSINTHE_TOPLEVEL_X11;
 	toplevel->server = server;
-	toplevel->toplevel.x11 = surface;
+	toplevel->xwayland_surface = surface;
 	toplevel->border_width = absinthe_toplevel_is_unmanaged(toplevel) ? 0 : ABSINTHE_TOPLEVEL_BORDER_WIDTH;
 
 	toplevel->destroy.notify = absinthe_toplevel_destroy;
@@ -241,8 +241,8 @@ void server_cursor_button(struct wl_listener *listener, void *data)
 		if (server->cursor_mode != ABSINTHE_CURSOR_RESIZE)
 			goto handle;
 
-		int32_t width = toplevel->toplevel.xdg->base->geometry.width;
-		int32_t height = toplevel->toplevel.xdg->base->geometry.height;
+		int32_t width = toplevel->xdg_toplevel->base->geometry.width;
+		int32_t height = toplevel->xdg_toplevel->base->geometry.height;
 
 		if (server->grab_x > (lx + width / 2) && server->grab_y > (ly + height / 2)) {
 			server->cursor_resize_corner = ABSINTHE_CURSOR_RESIZE_CORNER_BOTTOM_RIGHT;
@@ -258,7 +258,7 @@ void server_cursor_button(struct wl_listener *listener, void *data)
 			wlr_cursor_set_xcursor(server->cursor, server->cursor_mgr, "nw-resize");
 		}
 
-		wlr_xdg_toplevel_set_resizing(toplevel->toplevel.xdg, true);
+		wlr_xdg_toplevel_set_resizing(toplevel->xdg_toplevel, true);
 	}
 
 handle:

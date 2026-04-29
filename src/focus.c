@@ -16,10 +16,10 @@ void focus_toplevel(struct absinthe_toplevel *toplevel)
 	struct wlr_surface *surface;
 #ifdef XWAYLAND
 	if (toplevel->type == ABSINTHE_TOPLEVEL_X11)
-		surface = toplevel->toplevel.x11->surface;
+		surface = toplevel->xwayland_surface->surface;
 	else
 #endif
-		surface = toplevel->toplevel.xdg->base->surface;
+		surface = toplevel->xdg_toplevel->base->surface;
 
 	if (surface == prev_surface)
 		return;
@@ -44,7 +44,7 @@ void focus_toplevel(struct absinthe_toplevel *toplevel)
 	wl_list_remove(&toplevel->flink);
 	wl_list_insert(&server->focus_stack, &toplevel->flink);
 	if (toplevel->type != ABSINTHE_TOPLEVEL_X11)
-		wlr_xdg_toplevel_set_activated(toplevel->toplevel.xdg, true);
+		wlr_xdg_toplevel_set_activated(toplevel->xdg_toplevel, true);
 	absinthe_toplevel_set_border_color(toplevel, focused_border_color);
 
 	if (keyboard)
