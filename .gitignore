@@ -1,3 +1,5 @@
 absinthe
 xdg-shell-protocol.h
+wlr-layer-shell-unstable-v1-protocol.h
 tags
+compile_commands.json

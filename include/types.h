@@ -1,4 +1,5 @@
-#pragma once
+#ifndef __TYPES_H_
+#define __TYPES_H_
 
 #include <linux/input-event-codes.h>
 #include <wayland-server-core.h>
@@ -21,39 +22,43 @@
 #include <xcb/xcb_icccm.h>
 #endif
 
-#include "config.h"
+#define MAX(A, B) (A) > (B) ? (A) : (B)
+#define MIN(A, B) (A) < (B) ? (A) : (B)
+#define LISTEN(L, C, E)                    \
+	do {                               \
+		(L).notify = (C);          \
+		wl_signal_add(&(E), &(L)); \
+	} while (0);
+#define UNUSED(X) (void)(X)
 
-#define UNUSED(x) (void)(x)
-
-enum absinthe_cursor_mode {
-	ABSINTHE_CURSOR_PASSTHROUGH,
-	ABSINTHE_CURSOR_MOVE,
-	ABSINTHE_CURSOR_RESIZE,
+enum {
+	CURSOR_PASSTHROUGH,
+	CURSOR_MOVE,
+	CURSOR_RESIZE,
 };
 
-enum absinthe_cursor_resize_corner {
-	ABSINTHE_CURSOR_RESIZE_CORNER_TOP_LEFT,
-	ABSINTHE_CURSOR_RESIZE_CORNER_TOP_RIGHT,
-	ABSINTHE_CURSOR_RESIZE_CORNER_BOTTOM_LEFT,
-	ABSINTHE_CURSOR_RESIZE_CORNER_BOTTOM_RIGHT,
+enum {
+	TOP_LEFT,
+	TOP_RIGHT,
+	BOTTOM_LEFT,
+	BOTTOM_RIGHT,
 };
 
-enum absinthe_toplevel_type {
-	ABSINTHE_TOPLEVEL_XDG,
-	ABSINTHE_TOPLEVEL_LAYER_SHELL,
-	ABSINTHE_TOPLEVEL_X11,
+enum {
+	TOPLEVEL_XDG,
+	TOPLEVEL_X11,
 };
 
 enum absinthe_layers {
-	ABSINTHE_LAYER_BACKGROUND,
-	ABSINTHE_LAYER_BOTTOM,
-	ABSINTHE_LAYER_TILE,
-	ABSINTHE_LAYER_FLOAT,
-	ABSINTHE_LAYER_TOP,
-	ABSINTHE_LAYER_FULLSCREEN,
-	ABSINTHE_LAYER_OVERLAY,
-	ABSINTHE_LAYER_LOCK,
-	ABSINTHE_LAYERS_COUNT,
+	LAYER_BACKGROUND,
+	LAYER_BOTTOM,
+	LAYER_TILE,
+	LAYER_FLOAT,
+	LAYER_TOP,
+	LAYER_FULLSCREEN,
+	LAYER_OVERLAY,
+	LAYER_LOCK,
+	LAYERS_COUNT,
 };
 
 struct absinthe_output;
@@ -70,19 +75,23 @@ struct absinthe_server {
 	struct wlr_xdg_shell *xdg_shell;
 	struct wl_listener new_xdg_toplevel;
 	struct wl_listener new_xdg_popup;
-	struct wlr_xdg_decoration_manager_v1 *xdg_decoration_mgr;
-	struct wl_listener new_xdg_decoration;
+	struct wlr_xdg_decoration_manager_v1 *xdg_deco_mgr;
+	struct wl_listener new_xdg_deco;
+
+	struct wlr_layer_shell *layer_shell;
+	struct wl_listener new_layer_surface;
+	struct wlr_scene_tree *layers[LAYERS_COUNT];
 
 #ifdef XWAYLAND
 	struct wlr_xwayland *xwayland;
-	struct wl_listener xwayland_new_surface;
-	struct wl_listener xwayland_ready;
+	struct wl_listener xw_new_surface;
+	struct wl_listener xw_ready;
 #endif
 
 	struct wlr_cursor *cursor;
 	struct wlr_xcursor_manager *cursor_mgr;
 	struct wl_listener cursor_motion;
-	struct wl_listener cursor_motion_absolute;
+	struct wl_listener cursor_motion_abs;
 	struct wl_listener cursor_button;
 	struct wl_listener cursor_axis;
 	struct wl_listener cursor_frame;
@@ -94,10 +103,10 @@ struct absinthe_server {
 	struct wl_listener request_set_selection;
 	struct wl_list keyboards;
 
-	enum absinthe_cursor_mode cursor_mode;
-	struct wlr_box grabbed_geometry;
+	int cursor_mode;
+	int resize_corner;
+	struct wlr_box grab_geom;
 	int32_t grab_x, grab_y;
-	enum absinthe_cursor_resize_corner cursor_resize_corner;
 
 	struct wl_list toplevels;
 	struct wl_list focus_stack;
@@ -107,49 +116,68 @@ struct absinthe_server {
 	struct wl_list outputs;
 	struct wl_listener new_output;
 	struct wlr_output_layout *output_layout;
-	struct wl_listener output_layout_change;
+	struct wl_listener layout_change;
 	struct wlr_output_manager_v1 *output_mgr;
-	struct wl_listener output_mgr_apply;
-	struct wl_listener output_mgr_test;
+	struct wl_listener mgr_apply;
+	struct wl_listener mgr_test;
 };
 
 struct absinthe_output {
 	struct wl_list link;
 	struct absinthe_server *server;
-	struct wlr_box geometry;
-	struct wlr_output *wlr_output;
+
+	struct wlr_box geom;
+	struct wlr_box usable_area;
+
+	struct wlr_output *wlr;
 	struct wl_listener frame;
 	struct wl_listener request_state;
 	struct wl_listener destroy;
 
-	float main_stack_width;
-	float main_stack_size;
+	float mstack_width;
+	float mstack_size;
+};
+
+struct absinthe_layer_surface {
+	struct absinthe_server *server;
+	struct absinthe_output *output;
+
+	struct wlr_scene_tree *scene_tree;
+	struct wlr_scene_tree *scene_layer;
+	struct wlr_scene_tree *popups;
+
+	struct wlr_layer_surface_v1 *wlr;
+	struct wl_listener map;
+	struct wl_listener unmap;
+	struct wl_listener commit;
+	struct wl_listener destroy;
 };
 
 struct absinthe_toplevel {
-	enum absinthe_toplevel_type type;
+	int type;
 
 	struct wl_list link;
 	struct wl_list flink;
 	struct absinthe_server *server;
 	struct absinthe_output *output;
+
 	struct wlr_scene_tree *scene_tree;
 	struct wlr_scene_tree *scene_surface;
 
-	int32_t border_width;
+	int32_t bw;
 	struct wlr_scene_rect *border[4];
-	struct wlr_xdg_toplevel_decoration_v1 *decoration;
+	struct wlr_xdg_toplevel_decoration_v1 *deco;
 
 	bool tiled, floating, fullscreen, maximized;
 	bool urgent;
 	uint32_t resizing;
 
-	struct wlr_box geometry;
-	struct wlr_box prev_geometry;
+	struct wlr_box geom;
+	struct wlr_box prev_geom;
 
 	union {
-		struct wlr_xdg_toplevel *xdg_toplevel;
-		struct wlr_xwayland_surface *xwayland_surface;
+		struct wlr_xdg_toplevel *xdg;
+		struct wlr_xwayland_surface *xw;
 	};
 	struct wl_listener map;
 	struct wl_listener unmap;
@@ -159,20 +187,20 @@ struct absinthe_toplevel {
 	struct wl_listener request_resize;
 	struct wl_listener request_maximize;
 	struct wl_listener request_fullscreen;
-	struct wl_listener decoration_request_mode;
-	struct wl_listener decoration_destroy;
+	struct wl_listener deco_request_mode;
+	struct wl_listener deco_destroy;
 
 #ifdef XWAYLAND
-	struct wl_listener xwayland_activate;
-	struct wl_listener xwayland_associate;
-	struct wl_listener xwayland_dissociate;
-	struct wl_listener xwayland_configure;
-	struct wl_listener xwayland_set_hints;
+	struct wl_listener xw_activate;
+	struct wl_listener xw_associate;
+	struct wl_listener xw_dissociate;
+	struct wl_listener xw_configure;
+	struct wl_listener xw_set_hints;
 #endif
 };
 
 struct absinthe_popup {
-	struct wlr_xdg_popup *xdg_popup;
+	struct wlr_xdg_popup *wlr;
 	struct wl_listener commit;
 	struct wl_listener destroy;
 };
@@ -180,8 +208,10 @@ struct absinthe_popup {
 struct absinthe_keyboard {
 	struct wl_list link;
 	struct absinthe_server *server;
-	struct wlr_keyboard *wlr_keyboard;
+	struct wlr_keyboard *wlr;
 	struct wl_listener modifiers;
 	struct wl_listener key;
 	struct wl_listener destroy;
 };
+
+#endif /* __TYPES_H_ */

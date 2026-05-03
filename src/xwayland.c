@@ -1,61 +1,69 @@
 #ifdef XWAYLAND
 
-#include "xwayland.h"
-#include "absinthe-toplevel-handlers.h"
-#include "absinthe-toplevel.h"
+#include "toplevel-handlers.h"
+#include "toplevel.h"
 #include "types.h"
-#include "xdg-toplevel.h"
+#include "xwayland.h"
 
-void xwayland_activate(struct wl_listener *listener, void *data)
+void
+xwayland_activate(struct wl_listener *listener, void *data)
 {
 	UNUSED(data);
-	struct absinthe_toplevel *toplevel = wl_container_of(listener, toplevel, xwayland_activate);
+	struct absinthe_toplevel *toplevel = wl_container_of(listener, toplevel,
+	    xw_activate);
 
-	if (!absinthe_toplevel_is_unmanaged(toplevel))
-		wlr_xwayland_surface_activate(toplevel->xwayland_surface, 1);
+	if (!toplevel_is_unmanaged(toplevel))
+		wlr_xwayland_surface_activate(toplevel->xw, 1);
 }
 
-void xwayland_associate(struct wl_listener *listener, void *data)
+void
+xwayland_associate(struct wl_listener *listener, void *data)
 {
 	UNUSED(data);
-	struct absinthe_toplevel *toplevel = wl_container_of(listener, toplevel, xwayland_associate);
+	struct absinthe_toplevel *toplevel = wl_container_of(listener, toplevel,
+	    xw_associate);
 
-	toplevel->map.notify = absinthe_toplevel_map;
-	wl_signal_add(&toplevel->xwayland_surface->surface->events.map, &toplevel->map);
-	toplevel->unmap.notify = absinthe_toplevel_unmap;
-	wl_signal_add(&toplevel->xwayland_surface->surface->events.unmap, &toplevel->unmap);
+	LISTEN(toplevel->map, toplevel_map, toplevel->xw->surface->events.map);
+	LISTEN(toplevel->unmap, toplevel_unmap,
+	    toplevel->xw->surface->events.unmap);
 }
 
-void xwayland_dissociate(struct wl_listener *listener, void *data)
+void
+xwayland_dissociate(struct wl_listener *listener, void *data)
 {
 	UNUSED(data);
-	struct absinthe_toplevel *toplevel = wl_container_of(listener, toplevel, xwayland_dissociate);
+	struct absinthe_toplevel *toplevel = wl_container_of(listener, toplevel,
+	    xw_dissociate);
 
 	wl_list_remove(&toplevel->map.link);
 	wl_list_remove(&toplevel->unmap.link);
 }
 
-void xwayland_configure(struct wl_listener *listener, void *data)
+void
+xwayland_configure(struct wl_listener *listener, void *data)
 {
 	UNUSED(data);
-	struct absinthe_toplevel *toplevel = wl_container_of(listener, toplevel, xwayland_configure);
+	struct absinthe_toplevel *toplevel = wl_container_of(listener, toplevel,
+	    xw_configure);
 	struct wlr_xwayland_surface_configure_event *event = data;
 
-	if (!toplevel->xwayland_surface->surface || !toplevel->xwayland_surface->surface->mapped) {
-		wlr_xwayland_surface_configure(toplevel->xwayland_surface, event->x, event->y, event->width,
-					       event->height);
+	if (!toplevel->xw->surface || !toplevel->xw->surface->mapped) {
+		wlr_xwayland_surface_configure(toplevel->xw, event->x, event->y,
+		    event->width, event->height);
 		return;
 	}
 
-	if (absinthe_toplevel_is_unmanaged(toplevel)) {
-		wlr_scene_node_set_position(&toplevel->scene_tree->node, event->x, event->y);
-		wlr_xwayland_surface_configure(toplevel->xwayland_surface, event->x, event->y, event->width,
-					       event->height);
+	if (toplevel_is_unmanaged(toplevel)) {
+		wlr_scene_node_set_position(&toplevel->scene_tree->node,
+		    event->x, event->y);
+		wlr_xwayland_surface_configure(toplevel->xw, event->x, event->y,
+		    event->width, event->height);
 		return;
 	}
 }
 
-void xwayland_set_hints(struct wl_listener *listener, void *data)
+void
+xwayland_set_hints(struct wl_listener *listener, void *data)
 {
 	UNUSED(listener);
 	UNUSED(data);
