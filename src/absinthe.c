@@ -216,9 +216,9 @@ int
 main(void)
 {
 	struct absinthe_server server = { 0 };
-	int error = 0;
-	if ((error = setup(&server)))
-		return error;
+	int error = setup(&server);
+	if (error)
+		return EXIT_FAILURE;
 	wl_display_run(server.display);
 	cleanup(&server);
 	return EXIT_SUCCESS;
