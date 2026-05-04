@@ -31,7 +31,7 @@ handle_keybind(struct absinthe_server *server, xkb_keysym_t keysym)
 		break;
 	case XKB_KEY_Return:
 		if (fork() == 0)
-			execl("/bin/sh", "sh", "-c", "ghostty", NULL);
+			execl("/bin/sh", "sh", "-c", "alacritty", NULL);
 		break;
 	case XKB_KEY_r:
 		if (fork() == 0)

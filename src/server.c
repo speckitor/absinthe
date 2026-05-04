@@ -80,6 +80,8 @@ new_xdg_toplevel(struct wl_listener *listener, void *data)
 	toplevel->xdg = xdg_toplevel;
 	toplevel->xdg->base->data = toplevel;
 
+	wlr_surface_set_preferred_buffer_scale(toplevel->xdg->base->surface, 1);
+
 	toplevel->commit.notify = toplevel_commit;
 	wl_signal_add(&xdg_toplevel->base->surface->events.commit,
 	    &toplevel->commit);

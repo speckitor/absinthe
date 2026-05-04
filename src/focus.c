@@ -39,7 +39,7 @@ focus_toplevel(struct absinthe_toplevel *toplevel)
 		struct wlr_xwayland_surface *prev_xwayland_surface =
 		    wlr_xwayland_surface_try_from_wlr_surface(prev_surface);
 		if (prev_xwayland_surface)
-			toplevel_set_border_color(prev_surface->data,
+			toplevel_set_border_color(prev_xwayland_surface->data,
 			    unfocused_bc);
 #endif
 	}
