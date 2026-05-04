@@ -82,31 +82,22 @@ new_xdg_toplevel(struct wl_listener *listener, void *data)
 
 	wlr_surface_set_preferred_buffer_scale(toplevel->xdg->base->surface, 1);
 
-	toplevel->commit.notify = toplevel_commit;
-	wl_signal_add(&xdg_toplevel->base->surface->events.commit,
-	    &toplevel->commit);
-
-	toplevel->map.notify = toplevel_map;
-	wl_signal_add(&xdg_toplevel->base->surface->events.map, &toplevel->map);
-	toplevel->unmap.notify = toplevel_unmap;
-	wl_signal_add(&xdg_toplevel->base->surface->events.unmap,
-	    &toplevel->unmap);
-
-	toplevel->destroy.notify = toplevel_destroy;
-	wl_signal_add(&xdg_toplevel->events.destroy, &toplevel->destroy);
-
-	toplevel->request_move.notify = toplevel_request_move;
-	wl_signal_add(&xdg_toplevel->events.request_move,
-	    &toplevel->request_move);
-	toplevel->request_resize.notify = toplevel_request_resize;
-	wl_signal_add(&xdg_toplevel->events.request_resize,
-	    &toplevel->request_resize);
-	toplevel->request_maximize.notify = toplevel_request_maximize;
-	wl_signal_add(&xdg_toplevel->events.request_maximize,
-	    &toplevel->request_maximize);
-	toplevel->request_fullscreen.notify = toplevel_request_fullscreen;
-	wl_signal_add(&xdg_toplevel->events.request_fullscreen,
-	    &toplevel->request_fullscreen);
+	LISTEN(toplevel->commit, toplevel_commit,
+	    xdg_toplevel->base->surface->events.commit);
+	LISTEN(toplevel->map, toplevel_map,
+	    xdg_toplevel->base->surface->events.map);
+	LISTEN(toplevel->unmap, toplevel_unmap,
+	    xdg_toplevel->base->surface->events.unmap);
+	LISTEN(toplevel->destroy, toplevel_destroy,
+	    xdg_toplevel->events.destroy);
+	LISTEN(toplevel->request_move, toplevel_request_move,
+	    xdg_toplevel->events.request_move);
+	LISTEN(toplevel->request_resize, toplevel_request_resize,
+	    xdg_toplevel->events.request_resize);
+	LISTEN(toplevel->request_maximize, toplevel_request_maximize,
+	    xdg_toplevel->events.request_maximize);
+	LISTEN(toplevel->request_fullscreen, toplevel_request_fullscreen,
+	    xdg_toplevel->events.request_fullscreen);
 }
 
 void
@@ -126,12 +117,10 @@ new_xdg_popup(struct wl_listener *listener, void *data)
 	xdg_popup->base->data = wlr_scene_xdg_surface_create(parent_tree,
 	    xdg_popup->base);
 
-	popup->commit.notify = xdg_popup_commit;
-	wl_signal_add(&xdg_popup->base->surface->events.commit, &popup->commit);
-
-	popup->destroy.notify = xdg_popup_destroy;
-	wl_signal_add(&xdg_popup->base->surface->events.destroy,
-	    &popup->destroy);
+	LISTEN(popup->commit, xdg_popup_commit,
+	    xdg_popup->base->surface->events.commit);
+	LISTEN(popup->destroy, xdg_popup_destroy,
+	    xdg_popup->base->surface->events.destroy);
 }
 
 void

@@ -43,28 +43,30 @@ process_cursor_move(struct absinthe_server *server)
 static void
 apply_resize(struct absinthe_toplevel *toplevel, struct wlr_box *new_geometry)
 {
-	int32_t min_width = toplevel->xdg->current.min_width;
-	int32_t min_height = toplevel->xdg->current.min_height;
+	if (toplevel->type == TOPLEVEL_XDG) {
+		int32_t min_width = toplevel->xdg->current.min_width;
+		int32_t min_height = toplevel->xdg->current.min_height;
 
-	int32_t max_width = toplevel->xdg->current.max_width;
-	int32_t max_height = toplevel->xdg->current.max_height;
+		int32_t max_width = toplevel->xdg->current.max_width;
+		int32_t max_height = toplevel->xdg->current.max_height;
 
-	if (max_width == 0)
-		max_width = 10000;
+		if (max_width == 0)
+			max_width = 10000;
 
-	if (max_height == 0)
-		max_height = 10000;
+		if (max_height == 0)
+			max_height = 10000;
 
-	if (!(new_geometry->width >= min_width &&
-		new_geometry->width <= max_width)) {
-		new_geometry->width = toplevel->geom.width;
-		new_geometry->x = toplevel->geom.x;
-	}
+		if (!(new_geometry->width >= min_width &&
+			new_geometry->width <= max_width)) {
+			new_geometry->width = toplevel->geom.width;
+			new_geometry->x = toplevel->geom.x;
+		}
 
-	if (!(new_geometry->height >= min_height &&
-		new_geometry->height <= max_height)) {
-		new_geometry->height = toplevel->geom.height;
-		new_geometry->y = toplevel->geom.y;
+		if (!(new_geometry->height >= min_height &&
+			new_geometry->height <= max_height)) {
+			new_geometry->height = toplevel->geom.height;
+			new_geometry->y = toplevel->geom.y;
+		}
 	}
 
 	toplevel_set_size(toplevel, new_geometry->width, new_geometry->height);

@@ -5,7 +5,7 @@
 #define CURSOR_MOVE_BUTTON   BTN_LEFT
 #define CURSOR_RESIZE_BUTTON BTN_RIGHT
 
-#define TOPLEVEL_BW 1
+#define TOPLEVEL_BW	     1
 
 static const float focused_bc[4] = { 0.0, 0.0, 1.0, 1.0 };
 static const float urgent_bc[4] = { 1.0, 0.0, 0.0, 1.0 };
