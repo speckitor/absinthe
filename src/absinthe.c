@@ -104,7 +104,7 @@ setup(absn_server *server)
 	server->scene_layout = wlr_scene_attach_output_layout(server->scene,
 	    server->output_layout);
 
-	/* windows lists */
+	/* toplevels lists */
 	wl_list_init(&server->toplevels);
 	wl_list_init(&server->focus_stack);
 
