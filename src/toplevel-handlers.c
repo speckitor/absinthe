@@ -11,8 +11,7 @@ void
 toplevel_map(struct wl_listener *listener, void *data)
 {
 	UNUSED(data);
-	struct absinthe_toplevel *toplevel = wl_container_of(listener, toplevel,
-	    map);
+	absn_toplevel *toplevel = wl_container_of(listener, toplevel, map);
 
 	toplevel->scene_tree = wlr_scene_tree_create(
 	    &toplevel->server->scene->tree);
@@ -46,7 +45,7 @@ toplevel_map(struct wl_listener *listener, void *data)
 	}
 	toplevel->scene_surface->node.data = toplevel;
 
-	toplevel_update_geom(toplevel);
+	toplevel_get_geom(toplevel);
 	toplevel->bw = toplevel_is_unmanaged(toplevel) ? 0 : TOPLEVEL_BW;
 
 	for (int i = 0; i < 4; ++i) {
@@ -70,8 +69,7 @@ void
 toplevel_unmap(struct wl_listener *listener, void *data)
 {
 	UNUSED(data);
-	struct absinthe_toplevel *toplevel = wl_container_of(listener, toplevel,
-	    unmap);
+	absn_toplevel *toplevel = wl_container_of(listener, toplevel, unmap);
 
 	if (toplevel == toplevel->server->focused_toplevel) {
 		toplevel->server->focused_toplevel = NULL;
@@ -91,8 +89,7 @@ void
 toplevel_destroy(struct wl_listener *listener, void *data)
 {
 	UNUSED(data);
-	struct absinthe_toplevel *toplevel = wl_container_of(listener, toplevel,
-	    destroy);
+	absn_toplevel *toplevel = wl_container_of(listener, toplevel, destroy);
 
 #ifdef XWAYLAND
 	if (toplevel->type == TOPLEVEL_X11) {
@@ -122,7 +119,7 @@ void
 toplevel_request_move(struct wl_listener *listener, void *data)
 {
 	UNUSED(data);
-	struct absinthe_toplevel *toplevel = wl_container_of(listener, toplevel,
+	absn_toplevel *toplevel = wl_container_of(listener, toplevel,
 	    request_move);
 	if (toplevel->xdg->base->initialized)
 		wlr_xdg_surface_schedule_configure(toplevel->xdg->base);
@@ -132,7 +129,7 @@ void
 toplevel_request_resize(struct wl_listener *listener, void *data)
 {
 	UNUSED(data);
-	struct absinthe_toplevel *toplevel = wl_container_of(listener, toplevel,
+	absn_toplevel *toplevel = wl_container_of(listener, toplevel,
 	    request_resize);
 	if (toplevel->xdg->base->initialized)
 		wlr_xdg_surface_schedule_configure(toplevel->xdg->base);
@@ -142,7 +139,7 @@ void
 toplevel_request_maximize(struct wl_listener *listener, void *data)
 {
 	UNUSED(data);
-	struct absinthe_toplevel *toplevel = wl_container_of(listener, toplevel,
+	absn_toplevel *toplevel = wl_container_of(listener, toplevel,
 	    request_maximize);
 	if (toplevel->xdg->base->initialized)
 		wlr_xdg_surface_schedule_configure(toplevel->xdg->base);
@@ -152,7 +149,7 @@ void
 toplevel_request_fullscreen(struct wl_listener *listener, void *data)
 {
 	UNUSED(data);
-	struct absinthe_toplevel *toplevel = wl_container_of(listener, toplevel,
+	absn_toplevel *toplevel = wl_container_of(listener, toplevel,
 	    request_fullscreen);
 	toplevel_set_fullscreen(toplevel, toplevel->xdg->requested.fullscreen);
 }

@@ -9,7 +9,7 @@ void
 xwayland_activate(struct wl_listener *listener, void *data)
 {
 	UNUSED(data);
-	struct absinthe_toplevel *toplevel = wl_container_of(listener, toplevel,
+	absn_toplevel *toplevel = wl_container_of(listener, toplevel,
 	    xw_activate);
 
 	if (!toplevel_is_unmanaged(toplevel))
@@ -20,7 +20,7 @@ void
 xwayland_associate(struct wl_listener *listener, void *data)
 {
 	UNUSED(data);
-	struct absinthe_toplevel *toplevel = wl_container_of(listener, toplevel,
+	absn_toplevel *toplevel = wl_container_of(listener, toplevel,
 	    xw_associate);
 
 	LISTEN(toplevel->map, toplevel_map, toplevel->xw->surface->events.map);
@@ -32,7 +32,7 @@ void
 xwayland_dissociate(struct wl_listener *listener, void *data)
 {
 	UNUSED(data);
-	struct absinthe_toplevel *toplevel = wl_container_of(listener, toplevel,
+	absn_toplevel *toplevel = wl_container_of(listener, toplevel,
 	    xw_dissociate);
 
 	wl_list_remove(&toplevel->map.link);
@@ -43,7 +43,7 @@ void
 xwayland_configure(struct wl_listener *listener, void *data)
 {
 	UNUSED(data);
-	struct absinthe_toplevel *toplevel = wl_container_of(listener, toplevel,
+	absn_toplevel *toplevel = wl_container_of(listener, toplevel,
 	    xw_configure);
 	struct wlr_xwayland_surface_configure_event *event = data;
 

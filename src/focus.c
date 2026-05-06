@@ -7,12 +7,12 @@
 #include "types.h"
 
 void
-focus_toplevel(struct absinthe_toplevel *toplevel)
+focus_toplevel(absn_toplevel *toplevel)
 {
 	if (!toplevel)
 		return;
 
-	struct absinthe_server *server = toplevel->server;
+	absn_server *server = toplevel->server;
 	struct wlr_seat *seat = server->seat;
 	struct wlr_surface *prev_surface = seat->keyboard_state.focused_surface;
 	struct wlr_surface *surface;
@@ -60,10 +60,14 @@ focus_toplevel(struct absinthe_toplevel *toplevel)
 		    &keyboard->modifiers);
 }
 
-struct absinthe_toplevel *
-focus_get_topmost(struct absinthe_server *server)
+/*
+ * get first toplevel on monitor
+ * (last focused toplevel)
+ */
+absn_toplevel *
+focus_get_topmost(absn_server *server)
 {
-	struct absinthe_toplevel *toplevel;
+	absn_toplevel *toplevel;
 	wl_list_for_each(toplevel, &server->focus_stack, flink)
 	{
 		if (toplevel)
@@ -73,13 +77,13 @@ focus_get_topmost(struct absinthe_server *server)
 }
 
 void
-focus_next(struct absinthe_server *server)
+focus_next(absn_server *server)
 {
-	struct absinthe_toplevel *toplevel = focus_get_topmost(server);
+	absn_toplevel *toplevel = focus_get_topmost(server);
 	if (!toplevel)
 		return;
 
-	struct absinthe_toplevel *next;
+	absn_toplevel *next;
 	wl_list_for_each(next, &toplevel->link, link)
 	{
 		if (&next->link == &toplevel->server->toplevels)
@@ -90,13 +94,13 @@ focus_next(struct absinthe_server *server)
 }
 
 void
-focus_prev(struct absinthe_server *server)
+focus_prev(absn_server *server)
 {
-	struct absinthe_toplevel *toplevel = focus_get_topmost(server);
+	absn_toplevel *toplevel = focus_get_topmost(server);
 	if (!toplevel)
 		return;
 
-	struct absinthe_toplevel *prev;
+	absn_toplevel *prev;
 	wl_list_for_each_reverse(prev, &toplevel->link, link)
 	{
 		if (&prev->link == &toplevel->server->toplevels)

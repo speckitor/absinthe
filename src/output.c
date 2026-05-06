@@ -11,13 +11,12 @@ output_frame(struct wl_listener *listener, void *data)
 {
 	UNUSED(data);
 	struct timespec now;
-	struct absinthe_output *output = wl_container_of(listener, output,
-	    frame);
+	absn_output *output = wl_container_of(listener, output, frame);
 	struct wlr_scene *scene = output->server->scene;
 	struct wlr_scene_output *scene_output =
 	    wlr_scene_get_scene_output(scene, output->wlr);
 
-	struct absinthe_toplevel *toplevel;
+	absn_toplevel *toplevel;
 	wl_list_for_each(toplevel, &output->server->toplevels, link)
 	{
 		if (toplevel->resizing && toplevel->output == output)
@@ -34,7 +33,7 @@ skip:
 void
 output_request_state(struct wl_listener *listener, void *data)
 {
-	struct absinthe_output *output = wl_container_of(listener, output,
+	struct absn_output *output = wl_container_of(listener, output,
 	    request_state);
 	const struct wlr_output_event_request_state *event = data;
 	wlr_output_commit_state(output->wlr, event->state);
@@ -44,7 +43,7 @@ void
 output_destroy(struct wl_listener *listener, void *data)
 {
 	UNUSED(data);
-	struct absinthe_output *output = wl_container_of(listener, output,
+	struct absn_output *output = wl_container_of(listener, output,
 	    request_state);
 
 	wl_list_remove(&output->frame.link);
@@ -58,13 +57,12 @@ void
 output_layout_change(struct wl_listener *listener, void *data)
 {
 	UNUSED(data);
-	struct absinthe_server *server = wl_container_of(listener, server,
-	    layout_change);
+	absn_server *server = wl_container_of(listener, server, layout_change);
 	struct wlr_output_configuration_v1 *config =
 	    wlr_output_configuration_v1_create();
 
-	struct absinthe_toplevel *toplevel = NULL;
-	struct absinthe_output *output;
+	absn_toplevel *toplevel = NULL;
+	absn_output *output;
 	struct wlr_output_configuration_head_v1 *config_head;
 
 	wl_list_for_each(output, &server->outputs, link)
@@ -126,9 +124,9 @@ output_layout_change(struct wl_listener *listener, void *data)
 }
 
 void
-update_focused_output(struct absinthe_server *server)
+update_focused_output(absn_server *server)
 {
-	struct absinthe_output *output;
+	absn_output *output;
 	int32_t cursor_x = server->cursor->x;
 	int32_t cursor_y = server->cursor->y;
 	wl_list_for_each(output, &server->outputs, link)

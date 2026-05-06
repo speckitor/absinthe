@@ -3,11 +3,11 @@
 
 #include "types.h"
 
-void focus_toplevel(struct absinthe_toplevel *toplevel);
+void focus_toplevel(absn_toplevel *toplevel);
 
-struct absinthe_toplevel *focus_get_topmost(struct absinthe_server *server);
+absn_toplevel *focus_get_topmost(absn_server *server);
 
-void focus_next(struct absinthe_server *server);
-void focus_prev(struct absinthe_server *server);
+void focus_next(absn_server *server);
+void focus_prev(absn_server *server);
 
 #endif

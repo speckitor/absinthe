@@ -6,8 +6,13 @@
 #include "types.h"
 #include "xdg-shell-protocol.h"
 
-struct absinthe_toplevel *
-toplevel_at(struct absinthe_server *server, double lx, double ly,
+/*
+ * returns toplevel at given cursor coordinates,
+ * its surface and coordinates inside of it
+ * to process input event
+ */
+absn_toplevel *
+toplevel_at(absn_server *server, double lx, double ly,
     struct wlr_surface **surface, double *sx, double *sy)
 {
 	struct wlr_scene_node *node =
@@ -41,8 +46,13 @@ toplevel_at(struct absinthe_server *server, double lx, double ly,
 	}
 }
 
+/*
+ * if toplevel is unmanaged we should not
+ * move or resize it and just draw it
+ * where it wants
+ */
 bool
-toplevel_is_unmanaged(struct absinthe_toplevel *toplevel)
+toplevel_is_unmanaged(absn_toplevel *toplevel)
 {
 #ifdef XWAYLAND
 	if (toplevel->type == TOPLEVEL_X11)
@@ -51,8 +61,9 @@ toplevel_is_unmanaged(struct absinthe_toplevel *toplevel)
 	return false;
 }
 
+/* used only to get initial window size */
 void
-toplevel_update_geom(struct absinthe_toplevel *toplevel)
+toplevel_get_geom(absn_toplevel *toplevel)
 {
 #ifdef XWAYLAND
 	if (toplevel->type == TOPLEVEL_X11) {
@@ -67,8 +78,8 @@ toplevel_update_geom(struct absinthe_toplevel *toplevel)
 	}
 }
 
-void
-toplevel_update_borders_geom(struct absinthe_toplevel *toplevel)
+static void
+toplevel_update_borders_geom(absn_toplevel *toplevel)
 {
 	int32_t bw = toplevel->bw;
 
@@ -96,7 +107,7 @@ toplevel_update_borders_geom(struct absinthe_toplevel *toplevel)
 }
 
 void
-toplevel_set_pos(struct absinthe_toplevel *toplevel, int32_t x, int32_t y)
+toplevel_set_pos(absn_toplevel *toplevel, int32_t x, int32_t y)
 {
 	toplevel->geom.x = x;
 	toplevel->geom.y = y;
@@ -104,8 +115,7 @@ toplevel_set_pos(struct absinthe_toplevel *toplevel, int32_t x, int32_t y)
 }
 
 void
-toplevel_set_size(struct absinthe_toplevel *toplevel, int32_t width,
-    int32_t height)
+toplevel_set_size(absn_toplevel *toplevel, int32_t width, int32_t height)
 {
 	if (width <= 2 * toplevel->bw || height <= 2 * toplevel->bw ||
 	    (width == toplevel->geom.width && height == toplevel->geom.height))
@@ -129,8 +139,6 @@ toplevel_set_size(struct absinthe_toplevel *toplevel, int32_t width,
 			    height);
 		toplevel->resizing = wlr_xdg_toplevel_set_size(toplevel->xdg,
 		    width - 2 * toplevel->bw, height - 2 * toplevel->bw);
-		// clip.x = toplevel->xdg->base->geometry.x;
-		// clip.y = toplevel->xdg->base->geometry.y;
 	}
 #ifdef XWAYLAND
 	else if (toplevel->type == TOPLEVEL_X11) {
@@ -147,36 +155,37 @@ toplevel_set_size(struct absinthe_toplevel *toplevel, int32_t width,
 }
 
 void
-toplevel_set_fullscreen(struct absinthe_toplevel *toplevel, bool fullscreen)
+toplevel_set_geom(absn_toplevel *toplevel, struct wlr_box *geom)
+{
+	toplevel_set_pos(toplevel, geom->x, geom->y);
+	toplevel_set_size(toplevel, geom->width, geom->height);
+}
+
+void
+toplevel_set_fullscreen(absn_toplevel *toplevel, bool fullscreen)
 {
 	if (!toplevel || toplevel->fullscreen == fullscreen)
 		return;
 
-	struct absinthe_output *output = toplevel->server->focused_output;
+	absn_output *output = toplevel->server->focused_output;
 	toplevel->fullscreen = fullscreen;
 	wlr_xdg_toplevel_set_fullscreen(toplevel->xdg, fullscreen);
 
 	if (fullscreen) {
 		toplevel->prev_geom = toplevel->geom;
 		toplevel->bw = 0;
-		toplevel_set_size(toplevel, output->geom.width,
-		    output->geom.height);
-		toplevel_set_pos(toplevel, output->geom.x, output->geom.y);
+		toplevel_set_geom(toplevel, &output->geom);
 	} else {
 		toplevel->bw = toplevel_is_unmanaged(toplevel) ? 0 :
 								 TOPLEVEL_BW;
-		toplevel_set_size(toplevel, toplevel->prev_geom.width,
-		    toplevel->prev_geom.height);
-		toplevel_set_pos(toplevel, toplevel->prev_geom.x,
-		    toplevel->prev_geom.y);
+		toplevel_set_geom(toplevel, &toplevel->prev_geom);
 	}
 
 	toplevel_update_borders_geom(toplevel);
 }
 
 void
-toplevel_set_border_color(struct absinthe_toplevel *toplevel,
-    const float color[4])
+toplevel_set_border_color(absn_toplevel *toplevel, const float color[4])
 {
 	if (!toplevel)
 		return;

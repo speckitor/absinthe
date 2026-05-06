@@ -6,7 +6,7 @@
 #include "types.h"
 
 void
-reset_cursor_mode(struct absinthe_server *server)
+reset_cursor_mode(absn_server *server)
 {
 	server->cursor_mode = CURSOR_PASSTHROUGH;
 	wlr_cursor_set_xcursor(server->cursor, server->cursor_mgr, "default");
@@ -17,9 +17,9 @@ reset_cursor_mode(struct absinthe_server *server)
 }
 
 static void
-process_cursor_move(struct absinthe_server *server)
+process_cursor_move(absn_server *server)
 {
-	struct absinthe_toplevel *toplevel = server->focused_toplevel;
+	struct absn_toplevel *toplevel = server->focused_toplevel;
 
 	if (!toplevel)
 		return;
@@ -41,7 +41,7 @@ process_cursor_move(struct absinthe_server *server)
 }
 
 static void
-apply_resize(struct absinthe_toplevel *toplevel, struct wlr_box *new_geometry)
+apply_resize(absn_toplevel *toplevel, struct wlr_box *new_geom)
 {
 	if (toplevel->type == TOPLEVEL_XDG) {
 		int32_t min_width = toplevel->xdg->current.min_width;
@@ -56,27 +56,26 @@ apply_resize(struct absinthe_toplevel *toplevel, struct wlr_box *new_geometry)
 		if (max_height == 0)
 			max_height = 10000;
 
-		if (!(new_geometry->width >= min_width &&
-			new_geometry->width <= max_width)) {
-			new_geometry->width = toplevel->geom.width;
-			new_geometry->x = toplevel->geom.x;
+		if (!(new_geom->width >= min_width &&
+			new_geom->width <= max_width)) {
+			new_geom->width = toplevel->geom.width;
+			new_geom->x = toplevel->geom.x;
 		}
 
-		if (!(new_geometry->height >= min_height &&
-			new_geometry->height <= max_height)) {
-			new_geometry->height = toplevel->geom.height;
-			new_geometry->y = toplevel->geom.y;
+		if (!(new_geom->height >= min_height &&
+			new_geom->height <= max_height)) {
+			new_geom->height = toplevel->geom.height;
+			new_geom->y = toplevel->geom.y;
 		}
 	}
 
-	toplevel_set_size(toplevel, new_geometry->width, new_geometry->height);
-	toplevel_set_pos(toplevel, new_geometry->x, new_geometry->y);
+	toplevel_set_geom(toplevel, new_geom);
 }
 
 static void
-process_cursor_resize(struct absinthe_server *server)
+process_cursor_resize(absn_server *server)
 {
-	struct absinthe_toplevel *toplevel = server->focused_toplevel;
+	struct absn_toplevel *toplevel = server->focused_toplevel;
 
 	if (!toplevel)
 		return;
@@ -142,7 +141,7 @@ process_cursor_resize(struct absinthe_server *server)
 }
 
 void
-process_cursor_motion(struct absinthe_server *server, uint32_t time)
+process_cursor_motion(absn_server *server, uint32_t time)
 {
 	double sx, sy;
 	struct wlr_surface *surface = NULL;

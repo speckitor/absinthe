@@ -10,6 +10,6 @@ void output_request_state(struct wl_listener *listener, void *data);
 void output_destroy(struct wl_listener *listener, void *data);
 void output_layout_change(struct wl_listener *listener, void *data);
 
-void update_focused_output(struct absinthe_server *server);
+void update_focused_output(absn_server *server);
 
 #endif

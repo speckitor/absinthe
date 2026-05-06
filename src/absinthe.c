@@ -23,7 +23,7 @@
 #include "types.h"
 
 static int
-setup(struct absinthe_server *server)
+setup(absn_server *server)
 {
 	wlr_log_init(WLR_DEBUG, NULL);
 	server->display = wl_display_create();
@@ -182,7 +182,7 @@ setup(struct absinthe_server *server)
 }
 
 static void
-cleanup(struct absinthe_server *server)
+cleanup(absn_server *server)
 {
 	wl_display_destroy_clients(server->display);
 
@@ -215,9 +215,9 @@ cleanup(struct absinthe_server *server)
 int
 main(void)
 {
-	struct absinthe_server server = { 0 };
-	int error = setup(&server);
-	if (error)
+	absn_server server = { 0 };
+	int err = setup(&server);
+	if (err)
 		return EXIT_FAILURE;
 	wl_display_run(server.display);
 	cleanup(&server);

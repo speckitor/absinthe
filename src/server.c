@@ -26,8 +26,7 @@
 void
 new_output(struct wl_listener *listener, void *data)
 {
-	struct absinthe_server *server = wl_container_of(listener, server,
-	    new_output);
+	absn_server *server = wl_container_of(listener, server, new_output);
 	struct wlr_output *wlr_output = data;
 
 	wlr_output_init_render(wlr_output, server->allocator, server->renderer);
@@ -43,7 +42,7 @@ new_output(struct wl_listener *listener, void *data)
 	wlr_output_commit_state(wlr_output, &state);
 	wlr_output_state_finish(&state);
 
-	struct absinthe_output *output = calloc(1, sizeof(*output));
+	struct absn_output *output = calloc(1, sizeof(*output));
 	output->wlr = wlr_output;
 	output->server = server;
 
@@ -63,18 +62,18 @@ new_output(struct wl_listener *listener, void *data)
 	wlr_output_layout_get_box(server->output_layout, output->wlr,
 	    &output->geom);
 
-	output->mstack_size = MSTACK_SIZE;
+	output->mstack_count = MSTACK_SIZE;
 	output->mstack_width = MSTACK_WIDTH;
 }
 
 void
 new_xdg_toplevel(struct wl_listener *listener, void *data)
 {
-	struct absinthe_server *server = wl_container_of(listener, server,
+	absn_server *server = wl_container_of(listener, server,
 	    new_xdg_toplevel);
 	struct wlr_xdg_toplevel *xdg_toplevel = data;
 
-	struct absinthe_toplevel *toplevel = calloc(1, sizeof(*toplevel));
+	absn_toplevel *toplevel = calloc(1, sizeof(*toplevel));
 	toplevel->type = TOPLEVEL_XDG;
 	toplevel->server = server;
 	toplevel->xdg = xdg_toplevel;
@@ -103,16 +102,15 @@ new_xdg_toplevel(struct wl_listener *listener, void *data)
 void
 new_xdg_popup(struct wl_listener *listener, void *data)
 {
-	struct absinthe_server *server = wl_container_of(listener, server,
-	    new_xdg_popup);
+	absn_server *server = wl_container_of(listener, server, new_xdg_popup);
 	struct wlr_xdg_popup *xdg_popup = data;
 
-	struct absinthe_popup *popup = calloc(1, sizeof(*popup));
+	absn_popup *popup = calloc(1, sizeof(*popup));
 	popup->wlr = xdg_popup;
 
 	struct wlr_xdg_surface *parent = wlr_xdg_surface_try_from_wlr_surface(
 	    xdg_popup->parent);
-	struct absinthe_toplevel *parent_toplevel = parent->data;
+	absn_toplevel *parent_toplevel = parent->data;
 	struct wlr_scene_tree *parent_tree = parent_toplevel->scene_tree;
 	xdg_popup->base->data = wlr_scene_xdg_surface_create(parent_tree,
 	    xdg_popup->base);
@@ -128,7 +126,7 @@ new_xdg_decoration(struct wl_listener *listener, void *data)
 {
 	UNUSED(listener);
 	struct wlr_xdg_toplevel_decoration_v1 *deco = data;
-	struct absinthe_toplevel *toplevel = deco->toplevel->base->data;
+	absn_toplevel *toplevel = deco->toplevel->base->data;
 	toplevel->deco = deco;
 
 	LISTEN(toplevel->deco_request_mode, deco_request_mode,
@@ -142,7 +140,7 @@ new_xdg_decoration(struct wl_listener *listener, void *data)
 void
 new_layer_surface(struct wl_listener *listener, void *data)
 {
-	struct absinthe_server *server = wl_container_of(listener, server,
+	absn_server *server = wl_container_of(listener, server,
 	    new_layer_surface);
 	struct wlr_layer_surface_v1 *layer_surface = data;
 
@@ -152,7 +150,7 @@ new_layer_surface(struct wl_listener *listener, void *data)
 		return;
 	}
 
-	struct absinthe_layer_surface *layer = calloc(1, sizeof(*layer));
+	absn_layer_surface *layer = calloc(1, sizeof(*layer));
 	LISTEN(layer->commit, layer_surface_commit,
 	    layer_surface->surface->events.commit);
 	LISTEN(layer->unmap, layer_surface_unmap,
@@ -166,8 +164,7 @@ void
 xwayland_ready(struct wl_listener *listener, void *data)
 {
 	UNUSED(data);
-	struct absinthe_server *server = wl_container_of(listener, server,
-	    xw_ready);
+	absn_server *server = wl_container_of(listener, server, xw_ready);
 
 	wlr_xwayland_set_seat(server->xwayland, server->seat);
 
@@ -185,10 +182,9 @@ xwayland_ready(struct wl_listener *listener, void *data)
 void
 xwayland_new_surface(struct wl_listener *listener, void *data)
 {
-	struct absinthe_server *server = wl_container_of(listener, server,
-	    xw_new_surface);
+	absn_server *server = wl_container_of(listener, server, xw_new_surface);
 	struct wlr_xwayland_surface *surface = data;
-	struct absinthe_toplevel *toplevel = calloc(1, sizeof(*toplevel));
+	absn_toplevel *toplevel = calloc(1, sizeof(*toplevel));
 
 	toplevel->type = TOPLEVEL_X11;
 	toplevel->server = server;
@@ -218,8 +214,7 @@ xwayland_new_surface(struct wl_listener *listener, void *data)
 void
 cursor_motion(struct wl_listener *listener, void *data)
 {
-	struct absinthe_server *server = wl_container_of(listener, server,
-	    cursor_motion);
+	absn_server *server = wl_container_of(listener, server, cursor_motion);
 	struct wlr_pointer_motion_event *event = data;
 	update_focused_output(server);
 	wlr_cursor_move(server->cursor, &event->pointer->base, event->delta_x,
@@ -230,7 +225,7 @@ cursor_motion(struct wl_listener *listener, void *data)
 void
 cursor_motion_abs(struct wl_listener *listener, void *data)
 {
-	struct absinthe_server *server = wl_container_of(listener, server,
+	absn_server *server = wl_container_of(listener, server,
 	    cursor_motion_abs);
 	struct wlr_pointer_motion_absolute_event *event = data;
 	update_focused_output(server);
@@ -242,8 +237,7 @@ cursor_motion_abs(struct wl_listener *listener, void *data)
 void
 cursor_button(struct wl_listener *listener, void *data)
 {
-	struct absinthe_server *server = wl_container_of(listener, server,
-	    cursor_button);
+	absn_server *server = wl_container_of(listener, server, cursor_button);
 	struct wlr_pointer_button_event *event = data;
 	bool handled = false;
 
@@ -252,8 +246,8 @@ cursor_button(struct wl_listener *listener, void *data)
 	} else {
 		double sx, sy;
 		struct wlr_surface *surface = NULL;
-		struct absinthe_toplevel *toplevel = toplevel_at(server,
-		    server->cursor->x, server->cursor->y, &surface, &sx, &sy);
+		absn_toplevel *toplevel = toplevel_at(server, server->cursor->x,
+		    server->cursor->y, &surface, &sx, &sy);
 
 		if (!toplevel)
 			goto handle;
@@ -324,8 +318,7 @@ handle:
 void
 cursor_axis(struct wl_listener *listener, void *data)
 {
-	struct absinthe_server *server = wl_container_of(listener, server,
-	    cursor_axis);
+	absn_server *server = wl_container_of(listener, server, cursor_axis);
 	struct wlr_pointer_axis_event *event = data;
 	wlr_seat_pointer_notify_axis(server->seat, event->time_msec,
 	    event->orientation, event->delta, event->delta_discrete,
@@ -336,17 +329,16 @@ void
 cursor_frame(struct wl_listener *listener, void *data)
 {
 	UNUSED(data);
-	struct absinthe_server *server = wl_container_of(listener, server,
-	    cursor_frame);
+	absn_server *server = wl_container_of(listener, server, cursor_frame);
 	wlr_seat_pointer_notify_frame(server->seat);
 }
 
 static void
-new_keyboard(struct absinthe_server *server, struct wlr_input_device *device)
+new_keyboard(absn_server *server, struct wlr_input_device *device)
 {
 	struct wlr_keyboard *wlr_keyboard = wlr_keyboard_from_input_device(
 	    device);
-	struct absinthe_keyboard *keyboard = calloc(1, sizeof(*keyboard));
+	absn_keyboard *keyboard = calloc(1, sizeof(*keyboard));
 	keyboard->server = server;
 	keyboard->wlr = wlr_keyboard;
 
@@ -371,7 +363,7 @@ new_keyboard(struct absinthe_server *server, struct wlr_input_device *device)
 }
 
 static void
-new_pointer(struct absinthe_server *server, struct wlr_input_device *device)
+new_pointer(absn_server *server, struct wlr_input_device *device)
 {
 	wlr_cursor_attach_input_device(server->cursor, device);
 }
@@ -379,8 +371,7 @@ new_pointer(struct absinthe_server *server, struct wlr_input_device *device)
 void
 new_input(struct wl_listener *listener, void *data)
 {
-	struct absinthe_server *server = wl_container_of(listener, server,
-	    new_input);
+	absn_server *server = wl_container_of(listener, server, new_input);
 	struct wlr_input_device *device = data;
 	switch (device->type) {
 	case WLR_INPUT_DEVICE_KEYBOARD:

@@ -14,7 +14,7 @@ void
 handle_modifiers(struct wl_listener *listener, void *data)
 {
 	UNUSED(data);
-	struct absinthe_keyboard *keyboard = wl_container_of(listener, keyboard,
+	absn_keyboard *keyboard = wl_container_of(listener, keyboard,
 	    modifiers);
 
 	wlr_seat_set_keyboard(keyboard->server->seat, keyboard->wlr);
@@ -23,7 +23,7 @@ handle_modifiers(struct wl_listener *listener, void *data)
 }
 
 static bool
-handle_keybind(struct absinthe_server *server, xkb_keysym_t keysym)
+handle_keybind(absn_server *server, xkb_keysym_t keysym)
 {
 	switch (keysym) {
 	case XKB_KEY_Escape:
@@ -64,14 +64,14 @@ handle_keybind(struct absinthe_server *server, xkb_keysym_t keysym)
 		break;
 	case XKB_KEY_H:
 		if (server->focused_output) {
-			server->focused_output->mstack_size += 1;
+			server->focused_output->mstack_count += 1;
 			layout_arrange(server->focused_output);
 		}
 		break;
 	case XKB_KEY_L:
 		if (server->focused_output &&
-		    server->focused_output->mstack_size > 1) {
-			server->focused_output->mstack_size -= 1;
+		    server->focused_output->mstack_count > 1) {
+			server->focused_output->mstack_count -= 1;
 			layout_arrange(server->focused_output);
 		}
 		break;
@@ -84,8 +84,7 @@ handle_keybind(struct absinthe_server *server, xkb_keysym_t keysym)
 void
 handle_key(struct wl_listener *listener, void *data)
 {
-	struct absinthe_keyboard *keyboard = wl_container_of(listener, keyboard,
-	    key);
+	absn_keyboard *keyboard = wl_container_of(listener, keyboard, key);
 	struct wlr_keyboard_key_event *event = data;
 
 	uint32_t keycode = event->keycode + 8;
@@ -102,18 +101,19 @@ handle_key(struct wl_listener *listener, void *data)
 		}
 	}
 
-	if (!handled) {
-		wlr_seat_set_keyboard(keyboard->server->seat, keyboard->wlr);
-		wlr_seat_keyboard_notify_key(keyboard->server->seat,
-		    event->time_msec, event->keycode, event->state);
-	}
+	if (handled)
+		return;
+
+	wlr_seat_set_keyboard(keyboard->server->seat, keyboard->wlr);
+	wlr_seat_keyboard_notify_key(keyboard->server->seat, event->time_msec,
+	    event->keycode, event->state);
 }
 
 void
 handle_destroy(struct wl_listener *listener, void *data)
 {
 	UNUSED(data);
-	struct absinthe_keyboard *keyboard = wl_container_of(listener, keyboard,
+	absn_keyboard *keyboard = wl_container_of(listener, keyboard,
 	    modifiers);
 
 	wl_list_remove(&keyboard->modifiers.link);

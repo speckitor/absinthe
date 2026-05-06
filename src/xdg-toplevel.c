@@ -9,8 +9,7 @@ void
 toplevel_commit(struct wl_listener *listener, void *data)
 {
 	UNUSED(data);
-	struct absinthe_toplevel *toplevel = wl_container_of(listener, toplevel,
-	    commit);
+	absn_toplevel *toplevel = wl_container_of(listener, toplevel, commit);
 
 	if (toplevel->xdg->base->initial_commit) {
 		wlr_xdg_toplevel_set_activated(toplevel->xdg, false);

@@ -24,6 +24,7 @@
 
 #define MAX(A, B) (A) > (B) ? (A) : (B)
 #define MIN(A, B) (A) < (B) ? (A) : (B)
+/* macro for adding listener for event */
 #define LISTEN(L, C, E)                    \
 	do {                               \
 		(L).notify = (C);          \
@@ -31,12 +32,14 @@
 	} while (0);
 #define UNUSED(X) (void)(X)
 
+/* cursor mode */
 enum {
 	CURSOR_PASSTHROUGH,
 	CURSOR_MOVE,
 	CURSOR_RESIZE,
 };
 
+/* resizing corners */
 enum {
 	TOP_LEFT,
 	TOP_RIGHT,
@@ -44,12 +47,14 @@ enum {
 	BOTTOM_RIGHT,
 };
 
+/* toplevel types */
 enum {
 	TOPLEVEL_XDG,
 	TOPLEVEL_X11,
 };
 
-enum absinthe_layers {
+/* layers for wlr layer shell */
+enum {
 	LAYER_BACKGROUND,
 	LAYER_BOTTOM,
 	LAYER_TILE,
@@ -61,9 +66,10 @@ enum absinthe_layers {
 	LAYERS_COUNT,
 };
 
-struct absinthe_output;
+typedef struct absn_output absn_output;
+typedef struct absn_toplevel absn_toplevel;
 
-struct absinthe_server {
+typedef struct {
 	struct wl_display *display;
 	struct wlr_backend *backend;
 	struct wlr_renderer *renderer;
@@ -110,9 +116,9 @@ struct absinthe_server {
 
 	struct wl_list toplevels;
 	struct wl_list focus_stack;
-	struct absinthe_toplevel *focused_toplevel;
+	absn_toplevel *focused_toplevel;
 
-	struct absinthe_output *focused_output;
+	absn_output *focused_output;
 	struct wl_list outputs;
 	struct wl_listener new_output;
 	struct wlr_output_layout *output_layout;
@@ -120,11 +126,11 @@ struct absinthe_server {
 	struct wlr_output_manager_v1 *output_mgr;
 	struct wl_listener mgr_apply;
 	struct wl_listener mgr_test;
-};
+} absn_server;
 
-struct absinthe_output {
+struct absn_output {
 	struct wl_list link;
-	struct absinthe_server *server;
+	absn_server *server;
 
 	struct wlr_box geom;
 	struct wlr_box usable_area;
@@ -135,12 +141,12 @@ struct absinthe_output {
 	struct wl_listener destroy;
 
 	float mstack_width;
-	float mstack_size;
+	int mstack_count;
 };
 
-struct absinthe_layer_surface {
-	struct absinthe_server *server;
-	struct absinthe_output *output;
+typedef struct {
+	absn_server *server;
+	absn_output *output;
 
 	struct wlr_scene_tree *scene_tree;
 	struct wlr_scene_tree *scene_layer;
@@ -151,15 +157,13 @@ struct absinthe_layer_surface {
 	struct wl_listener unmap;
 	struct wl_listener commit;
 	struct wl_listener destroy;
-};
+} absn_layer_surface;
 
-struct absinthe_toplevel {
-	int type;
-
+struct absn_toplevel {
 	struct wl_list link;
-	struct wl_list flink;
-	struct absinthe_server *server;
-	struct absinthe_output *output;
+	struct wl_list flink; /* link for focus stack */
+	absn_server *server;
+	absn_output *output;
 
 	struct wlr_scene_tree *scene_tree;
 	struct wlr_scene_tree *scene_surface;
@@ -175,10 +179,12 @@ struct absinthe_toplevel {
 	struct wlr_box geom;
 	struct wlr_box prev_geom;
 
+	int type;
 	union {
 		struct wlr_xdg_toplevel *xdg;
 		struct wlr_xwayland_surface *xw;
 	};
+
 	struct wl_listener map;
 	struct wl_listener unmap;
 	struct wl_listener commit;
@@ -199,19 +205,20 @@ struct absinthe_toplevel {
 #endif
 };
 
-struct absinthe_popup {
+typedef struct {
 	struct wlr_xdg_popup *wlr;
 	struct wl_listener commit;
 	struct wl_listener destroy;
-};
+} absn_popup;
 
-struct absinthe_keyboard {
+typedef struct {
 	struct wl_list link;
-	struct absinthe_server *server;
+	absn_server *server;
+
 	struct wlr_keyboard *wlr;
 	struct wl_listener modifiers;
 	struct wl_listener key;
 	struct wl_listener destroy;
-};
+} absn_keyboard;
 
 #endif /* __TYPES_H_ */
