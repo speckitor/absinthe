@@ -7,8 +7,8 @@ proto:
 	$(WAYLAND_SCANNER) server-header ./protocols/wlr-layer-shell-unstable-v1.xml wlr-layer-shell-unstable-v1-protocol.h
 
 compile: proto
-	cc -o absinthe src/* $(CFLAGS) $(LDFLAGS)
+	$(CC) -o absinthe src/* $(CFLAGS) $(LDFLAGS)
 
 format:
-	find src/ -type f -print0 | xargs -0 clang-format -i
-	find include/ -type f -print0 | xargs -0 clang-format -i
+	find src/ -type f | xargs $(CLANG_FORMAT) -i
+	find include/ -type f | xargs $(CLANG_FORMAT) -i

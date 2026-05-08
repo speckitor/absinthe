@@ -21,12 +21,12 @@
 #include <xcb/xcb_icccm.h>
 #endif
 
-#define BTN_LEFT		0x110
-#define BTN_RIGHT		0x111
-#define BTN_MIDDLE		0x112
+#define BTN_LEFT   0x110
+#define BTN_RIGHT  0x111
+#define BTN_MIDDLE 0x112
 
-#define MAX(A, B) (A) > (B) ? (A) : (B)
-#define MIN(A, B) (A) < (B) ? (A) : (B)
+#define MAX(A, B)  (A) > (B) ? (A) : (B)
+#define MIN(A, B)  (A) < (B) ? (A) : (B)
 /* macro for adding listener for event */
 #define LISTEN(L, C, E)                    \
 	do {                               \
