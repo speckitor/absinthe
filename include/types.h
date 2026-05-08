@@ -1,7 +1,6 @@
 #ifndef __TYPES_H_
 #define __TYPES_H_
 
-#include <linux/input-event-codes.h>
 #include <wayland-server-core.h>
 #include <wlr/backend.h>
 #include <wlr/render/allocator.h>
@@ -21,6 +20,10 @@
 #include <xcb/xcb.h>
 #include <xcb/xcb_icccm.h>
 #endif
+
+#define BTN_LEFT		0x110
+#define BTN_RIGHT		0x111
+#define BTN_MIDDLE		0x112
 
 #define MAX(A, B) (A) > (B) ? (A) : (B)
 #define MIN(A, B) (A) < (B) ? (A) : (B)
