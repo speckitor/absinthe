@@ -21,7 +21,7 @@ DEVFLAGS = -g
 
 CPPFLAGS += $(XWAYLAND) -DWLR_USE_UNSTABLE -I. -I./include
 
-CFLAGS += -O2 -march=native -Wall -Wextra -Wpedantic
+CFLAGS += -O2 -march=native -Wall -Wextra
 CFLAGS += $(PKG_CFLAGS) $(WLR_CFLAGS)
 CFLAGS += $(CPPFLAGS)
 CFLAGS += $(DEVFLAGS)

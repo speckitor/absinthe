@@ -21,12 +21,13 @@ toplevel_at(absn_server *server, double lx, double ly,
 		return NULL;
 	}
 
+	struct wlr_scene_buffer *scene_buffer = NULL;
+	struct wlr_scene_surface *scene_surface = NULL;
+
 	switch (node->type) {
 	case WLR_SCENE_NODE_BUFFER:
-		struct wlr_scene_buffer *scene_buffer =
-		    wlr_scene_buffer_from_node(node);
-		struct wlr_scene_surface *scene_surface =
-		    wlr_scene_surface_try_from_buffer(scene_buffer);
+		scene_buffer = wlr_scene_buffer_from_node(node);
+		scene_surface = wlr_scene_surface_try_from_buffer(scene_buffer);
 		if (!scene_surface) {
 			return NULL;
 		}
