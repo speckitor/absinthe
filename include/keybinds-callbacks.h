@@ -1,4 +1,0 @@
-#ifndef __KEYBINDS_CALLBACKS_H
-#define __KEYBINDS_CALLBACKS_H
-
-#endif

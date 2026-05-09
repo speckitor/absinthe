@@ -5,9 +5,7 @@
 #include <wlr/util/log.h>
 #include <xkbcommon/xkbcommon.h>
 
-#include "focus.h"
-#include "layout.h"
-#include "toplevel.h"
+#include "config.h"
 #include "types.h"
 
 void
@@ -23,62 +21,18 @@ handle_modifiers(struct wl_listener *listener, void *data)
 }
 
 static bool
-handle_keybind(absn_server *server, xkb_keysym_t keysym)
+handle_keybind(absn_server *server, uint32_t mods, xkb_keysym_t keysym)
 {
-	switch (keysym) {
-	case XKB_KEY_Escape:
-		wl_display_terminate(server->display);
-		break;
-	case XKB_KEY_Return:
-		if (fork() == 0)
-			execl("/bin/sh", "sh", "-c", "alacritty", NULL);
-		break;
-	case XKB_KEY_r:
-		if (fork() == 0)
-			execl("/bin/sh", "sh", "-c", "wofi --show drun", NULL);
-		break;
-	case XKB_KEY_f:
-		if (server->focused_toplevel)
-			toplevel_set_fullscreen(server->focused_toplevel,
-			    !server->focused_toplevel->fullscreen);
-		break;
-	case XKB_KEY_j:
-		focus_next(server);
-		break;
-	case XKB_KEY_k:
-		focus_prev(server);
-		break;
-	case XKB_KEY_h:
-		if (server->focused_output &&
-		    server->focused_output->mstack_width > 0.15) {
-			server->focused_output->mstack_width -= 0.1;
-			layout_arrange(server->focused_output);
+	int nkeyb = sizeof(keybinds) / sizeof(keybinds[0]);
+	for (int i = 0; i < nkeyb; ++i) {
+		if (CLEANMASK(keybinds[i].mods) == CLEANMASK(mods) &&
+		    xkb_keysym_to_lower(keybinds[i].keysym) ==
+			xkb_keysym_to_lower(keysym)) {
+			keybinds[i].cb(server, &keybinds[i].arg);
+			return true;
 		}
-		break;
-	case XKB_KEY_l:
-		if (server->focused_output &&
-		    server->focused_output->mstack_width < 0.9) {
-			server->focused_output->mstack_width += 0.1;
-			layout_arrange(server->focused_output);
-		}
-		break;
-	case XKB_KEY_H:
-		if (server->focused_output) {
-			server->focused_output->mstack_count += 1;
-			layout_arrange(server->focused_output);
-		}
-		break;
-	case XKB_KEY_L:
-		if (server->focused_output &&
-		    server->focused_output->mstack_count > 1) {
-			server->focused_output->mstack_count -= 1;
-			layout_arrange(server->focused_output);
-		}
-		break;
-	default:
-		return false;
 	}
-	return true;
+	return false;
 }
 
 void
@@ -87,17 +41,19 @@ handle_key(struct wl_listener *listener, void *data)
 	absn_keyboard *keyboard = wl_container_of(listener, keyboard, key);
 	struct wlr_keyboard_key_event *event = data;
 
-	uint32_t keycode = event->keycode + 8;
-	uint32_t modifiers = wlr_keyboard_get_modifiers(keyboard->wlr);
+	/* translate keycode to xkbcommon */
+	uint32_t code = event->keycode + 8;
+	uint32_t mods = wlr_keyboard_get_modifiers(keyboard->wlr);
 	const xkb_keysym_t *syms;
-	int nsyms = xkb_state_key_get_syms(keyboard->wlr->xkb_state, keycode,
+	int nsyms = xkb_state_key_get_syms(keyboard->wlr->xkb_state, code,
 	    &syms);
 
 	bool handled = false;
-	if ((modifiers & WLR_MODIFIER_ALT) &&
-	    (event->state == WL_KEYBOARD_KEY_STATE_PRESSED)) {
+	if (event->state == WL_KEYBOARD_KEY_STATE_PRESSED) {
 		for (int i = 0; i < nsyms; ++i) {
-			handled = handle_keybind(keyboard->server, syms[i]);
+			handled = handle_keybind(keyboard->server, mods,
+				      syms[i]) ||
+			    handled;
 		}
 	}
 

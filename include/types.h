@@ -33,7 +33,8 @@
 		(L).notify = (C);          \
 		wl_signal_add(&(E), &(L)); \
 	} while (0);
-#define UNUSED(X) (void)(X)
+#define UNUSED(X)    (void)(X)
+#define CLEANMASK(M) (M & ~WLR_MODIFIER_CAPS)
 
 /* cursor mode */
 enum {
@@ -223,5 +224,18 @@ typedef struct {
 	struct wl_listener key;
 	struct wl_listener destroy;
 } absn_keyboard;
+
+typedef struct {
+	int i;
+	float f;
+	const void *v;
+} absn_arg;
+
+typedef struct {
+	uint32_t mods;
+	xkb_keysym_t keysym;
+	void (*cb)(absn_server *, const absn_arg *);
+	const absn_arg arg;
+} absn_keybind;
 
 #endif /* __TYPES_H_ */
