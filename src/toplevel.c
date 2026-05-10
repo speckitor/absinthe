@@ -2,6 +2,7 @@
 #include <wlr/util/log.h>
 
 #include "config.h"
+#include "layout.h"
 #include "toplevel.h"
 #include "types.h"
 #include "xdg-shell-protocol.h"
@@ -163,6 +164,24 @@ toplevel_set_geom(absn_toplevel *toplevel, struct wlr_box *geom)
 }
 
 void
+toplevel_set_floating(absn_toplevel *toplevel, bool floating)
+{
+	if (!toplevel || toplevel->floating == floating)
+		return;
+
+	toplevel->floating = floating;
+
+	if (floating)
+		wlr_scene_node_reparent(&toplevel->scene_tree->node,
+		    toplevel->server->layers[LAYER_FLOAT]);
+	else
+		wlr_scene_node_reparent(&toplevel->scene_tree->node,
+		    toplevel->server->layers[LAYER_TILE]);
+
+	layout_arrange(toplevel->output);
+}
+
+void
 toplevel_set_fullscreen(absn_toplevel *toplevel, bool fullscreen)
 {
 	if (!toplevel || toplevel->fullscreen == fullscreen)
@@ -176,10 +195,19 @@ toplevel_set_fullscreen(absn_toplevel *toplevel, bool fullscreen)
 		toplevel->prev_geom = toplevel->geom;
 		toplevel->bw = 0;
 		toplevel_set_geom(toplevel, &output->geom);
+
+		wlr_scene_node_reparent(&toplevel->scene_tree->node,
+		    toplevel->server->layers[LAYER_FULLSCREEN]);
 	} else {
 		toplevel->bw = toplevel_is_unmanaged(toplevel) ? 0 :
 								 TOPLEVEL_BW;
 		toplevel_set_geom(toplevel, &toplevel->prev_geom);
+		if (toplevel->floating)
+			wlr_scene_node_reparent(&toplevel->scene_tree->node,
+			    toplevel->server->layers[LAYER_FLOAT]);
+		else
+			wlr_scene_node_reparent(&toplevel->scene_tree->node,
+			    toplevel->server->layers[LAYER_TILE]);
 	}
 
 	toplevel_update_borders_geom(toplevel);

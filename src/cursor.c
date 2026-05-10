@@ -34,10 +34,8 @@ process_cursor_move(absn_server *server)
 	new_y = server->cursor->y - server->grab_y + server->grab_geom.y;
 	toplevel_set_pos(toplevel, new_x, new_y);
 
-	if (toplevel->tiled) {
-		toplevel->tiled = false;
-		layout_arrange(toplevel->output);
-	}
+	if (!toplevel->floating)
+		toplevel_set_floating(toplevel, true);
 }
 
 static void
@@ -86,10 +84,8 @@ process_cursor_resize(absn_server *server)
 	if (toplevel->fullscreen)
 		toplevel_set_fullscreen(toplevel, false);
 
-	if (toplevel->tiled) {
-		toplevel->tiled = false;
-		layout_arrange(toplevel->output);
-	}
+	if (!toplevel->floating)
+		toplevel_set_floating(toplevel, true);
 
 	int32_t new_x, new_y, new_width, new_height;
 	new_x = server->grab_geom.x;

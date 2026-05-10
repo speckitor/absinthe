@@ -25,13 +25,15 @@ kill_focus(absn_server *server, const absn_arg *arg)
 	if (!server->focused_output)
 		return;
 
+	absn_toplevel *focus = server->focused_toplevel;
+
 #ifdef XWAYLAND
-	if (server->focused_toplevel->type == TOPLEVEL_X11) {
-		wlr_xwayland_surface_close(server->focused_toplevel->xw);
+	if (focus->type == TOPLEVEL_X11) {
+		wlr_xwayland_surface_close(focus->xw);
 	} else
 #endif
 	{
-		wlr_xdg_toplevel_send_close(server->focused_toplevel->xdg);
+		wlr_xdg_toplevel_send_close(focus->xdg);
 	}
 }
 
@@ -39,7 +41,7 @@ void
 cycle_focus(absn_server *server, const absn_arg *arg)
 {
 	absn_toplevel *toplevel = focus_get_topmost(server);
-	if (!toplevel)
+	if (!toplevel || toplevel->fullscreen)
 		return;
 
 	absn_toplevel *new_focus;
@@ -67,8 +69,9 @@ toggle_fullscreen(absn_server *server, const absn_arg *arg)
 	UNUSED(arg);
 	if (!server->focused_toplevel)
 		return;
-	toplevel_set_fullscreen(server->focused_toplevel,
-	    !server->focused_toplevel->fullscreen);
+
+	absn_toplevel *focus = server->focused_toplevel;
+	toplevel_set_fullscreen(focus, !focus->fullscreen);
 }
 
 void
@@ -77,12 +80,14 @@ increase_master_width(absn_server *server, const absn_arg *arg)
 	if (!server->focused_output)
 		return;
 
-	if (server->focused_output->mstack_width + arg->f >= 1.0 ||
-	    server->focused_output->mstack_width + arg->f <= 0.0)
+	absn_output *focus = server->focused_output;
+
+	if (focus->mstack_width + arg->f >= 1.0 ||
+	    focus->mstack_width + arg->f <= 0.0)
 		return;
 
-	server->focused_output->mstack_width += arg->f;
-	layout_arrange(server->focused_output);
+	focus->mstack_width += arg->f;
+	layout_arrange(focus);
 }
 
 void
@@ -91,11 +96,13 @@ increase_master_count(absn_server *server, const absn_arg *arg)
 	if (!server->focused_output)
 		return;
 
-	if (server->focused_output->mstack_count + arg->i <= 0)
+	absn_output *focus = server->focused_output;
+
+	if (focus->mstack_count + arg->i <= 0)
 		return;
 
-	server->focused_output->mstack_count += arg->i;
-	layout_arrange(server->focused_output);
+	focus->mstack_count += arg->i;
+	layout_arrange(focus);
 }
 
 noreturn void

@@ -12,14 +12,13 @@ toplevel_map(struct wl_listener *listener, void *data)
 {
 	UNUSED(data);
 	absn_toplevel *toplevel = wl_container_of(listener, toplevel, map);
+	absn_server *server = toplevel->server;
 
 	toplevel->scene_tree = wlr_scene_tree_create(
-	    &toplevel->server->scene->tree);
+	    server->layers[LAYER_TILE]);
 	toplevel->scene_tree->node.data = toplevel;
 	wlr_scene_node_set_enabled(&toplevel->scene_tree->node,
 	    toplevel_is_unmanaged(toplevel));
-
-	toplevel->tiled = true;
 
 	if (toplevel->type != TOPLEVEL_X11 &&
 	    wl_resource_get_version(toplevel->xdg->resource) >=

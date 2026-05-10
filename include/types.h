@@ -55,6 +55,7 @@ enum {
 enum {
 	TOPLEVEL_XDG,
 	TOPLEVEL_X11,
+	LAYER_SURFACE,
 };
 
 /* layers for wlr layer shell */
@@ -63,11 +64,30 @@ enum {
 	LAYER_BOTTOM,
 	LAYER_TILE,
 	LAYER_FLOAT,
+	LAYER_FULLSCREEN,
+	LAYER_TOP,
+	LAYER_OVERLAY,
+	LAYERS_COUNT,
+};
+
+static const int layermap[] = {
+	LAYER_BACKGROUND,
+	LAYER_BOTTOM,
 	LAYER_TOP,
 	LAYER_FULLSCREEN,
-	LAYER_OVERLAY,
-	LAYER_LOCK,
-	LAYERS_COUNT,
+};
+
+enum {
+	LAYOUT_FLOAT,
+	LAYOUT_TILE,
+	LAYOUT_TILELEFT,
+	LAYOUT_TILETOP,
+	LAYOUT_TILEBOTTOM,
+	LAYOUT_SPIRAL,
+	LAYOUT_DWINDLE,
+	LAYOUT_MAX,
+	LAYOUT_VGRID,
+	LAYOUT_HGRID,
 };
 
 typedef struct absn_output absn_output;
@@ -81,6 +101,7 @@ typedef struct {
 	struct wlr_compositor *compositor;
 	struct wlr_scene *scene;
 	struct wlr_scene_output_layout *scene_layout;
+	struct wlr_scene_rect *bg;
 
 	struct wlr_xdg_shell *xdg_shell;
 	struct wl_listener new_xdg_toplevel;
@@ -88,7 +109,7 @@ typedef struct {
 	struct wlr_xdg_decoration_manager_v1 *xdg_deco_mgr;
 	struct wl_listener new_xdg_deco;
 
-	struct wlr_layer_shell *layer_shell;
+	struct wlr_layer_shell_v1 *layer_shell;
 	struct wl_listener new_layer_surface;
 	struct wlr_scene_tree *layers[LAYERS_COUNT];
 
@@ -132,6 +153,11 @@ typedef struct {
 	struct wl_listener mgr_test;
 } absn_server;
 
+typedef struct {
+	int layout;
+	uint32_t id;
+} absn_tag;
+
 struct absn_output {
 	struct wl_list link;
 	absn_server *server;
@@ -146,20 +172,28 @@ struct absn_output {
 
 	float mstack_width;
 	int mstack_count;
+
+	absn_tag *tags;
+	uint32_t active_tags;
+
+	struct wl_list layers[4];
 };
 
 typedef struct {
+	struct wl_list link;
+
 	absn_server *server;
 	absn_output *output;
 
+	int type; /* LAYER_SURFACE */
 	struct wlr_scene_tree *scene_tree;
-	struct wlr_scene_tree *scene_layer;
-	struct wlr_scene_tree *popups;
+	struct wlr_scene_layer_surface_v1 *scene_layer;
 
 	struct wlr_layer_surface_v1 *wlr;
 	struct wl_listener map;
 	struct wl_listener unmap;
 	struct wl_listener commit;
+	struct wl_listener new_popup;
 	struct wl_listener destroy;
 } absn_layer_surface;
 
@@ -176,7 +210,8 @@ struct absn_toplevel {
 	struct wlr_scene_rect *border[4];
 	struct wlr_xdg_toplevel_decoration_v1 *deco;
 
-	bool tiled, floating, fullscreen, maximized;
+	bool floating;
+	bool fullscreen;
 	bool urgent;
 	uint32_t resizing;
 

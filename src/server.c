@@ -53,6 +53,9 @@ new_output(struct wl_listener *listener, void *data)
 
 	wl_list_insert(&server->outputs, &output->link);
 
+	for (int i = 0; i < 4; ++i)
+		wl_list_init(&output->layers[i]);
+
 	struct wlr_output_layout_output *l_layout =
 	    wlr_output_layout_add_auto(server->output_layout, output->wlr);
 	struct wlr_scene_output *scene_output =
@@ -142,21 +145,39 @@ new_layer_surface(struct wl_listener *listener, void *data)
 {
 	absn_server *server = wl_container_of(listener, server,
 	    new_layer_surface);
-	struct wlr_layer_surface_v1 *layer_surface = data;
+	struct wlr_layer_surface_v1 *surface = data;
 
-	if (!layer_surface->output &&
-	    !(layer_surface->output = server->focused_output->wlr)) {
-		wlr_layer_surface_v1_destroy(layer_surface);
+	if (!surface->output &&
+	    !(surface->output = server->focused_output->wlr)) {
+		wlr_layer_surface_v1_destroy(surface);
 		return;
 	}
 
-	absn_layer_surface *layer = calloc(1, sizeof(*layer));
-	LISTEN(layer->commit, layer_surface_commit,
-	    layer_surface->surface->events.commit);
-	LISTEN(layer->unmap, layer_surface_unmap,
-	    layer_surface->surface->events.unmap);
-	LISTEN(layer->destroy, layer_surface_destroy,
-	    layer_surface->surface->events.destroy);
+	absn_layer_surface *layer_surface = calloc(1, sizeof(*layer_surface));
+
+	LISTEN(layer_surface->map, layer_surface_map,
+	    surface->surface->events.map);
+	LISTEN(layer_surface->unmap, layer_surface_unmap,
+	    surface->surface->events.unmap);
+	LISTEN(layer_surface->commit, layer_surface_commit,
+	    surface->surface->events.commit);
+	LISTEN(layer_surface->new_popup, layer_surface_new_popup,
+	    surface->events.new_popup);
+	LISTEN(layer_surface->destroy, layer_surface_destroy,
+	    surface->surface->events.destroy);
+
+	layer_surface->wlr = surface;
+	layer_surface->output = surface->output->data;
+
+	struct wlr_scene_tree *scene_layer =
+	    server->layers[layermap[surface->pending.layer]];
+	layer_surface->scene_layer =
+	    wlr_scene_layer_surface_v1_create(scene_layer, surface);
+	layer_surface->scene_tree = layer_surface->scene_layer->tree;
+
+	wl_list_insert(&layer_surface->output->layers[surface->pending.layer],
+	    &layer_surface->link);
+	wlr_surface_send_enter(surface->surface, surface->output);
 }
 
 #ifdef XWAYLAND

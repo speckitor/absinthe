@@ -6,6 +6,7 @@
 #include <wlr/types/wlr_export_dmabuf_v1.h>
 #include <wlr/types/wlr_ext_foreign_toplevel_list_v1.h>
 #include <wlr/types/wlr_fractional_scale_v1.h>
+#include <wlr/types/wlr_layer_shell_v1.h>
 #include <wlr/types/wlr_output_management_v1.h>
 #include <wlr/types/wlr_presentation_time.h>
 #include <wlr/types/wlr_screencopy_v1.h>
@@ -17,6 +18,7 @@
 #include <wlr/types/wlr_xdg_output_v1.h>
 #include <wlr/util/log.h>
 
+#include "config.h"
 #include "output.h"
 #include "seat.h"
 #include "server.h"
@@ -56,6 +58,7 @@ setup(absn_server *server)
 		    wlr_linux_dmabuf_v1_create_with_renderer(server->display, 5,
 			server->renderer));
 	}
+	server->bg = wlr_scene_rect_create(&server->scene->tree, 0, 0, bgcolor);
 
 	server->allocator = wlr_allocator_autocreate(server->backend,
 	    server->renderer);
@@ -87,6 +90,10 @@ setup(absn_server *server)
 	LISTEN(server->new_xdg_deco, new_xdg_decoration,
 	    server->xdg_deco_mgr->events.new_toplevel_decoration);
 
+	/* toplevels lists */
+	wl_list_init(&server->toplevels);
+	wl_list_init(&server->focus_stack);
+
 	/* output */
 	wl_list_init(&server->outputs);
 	LISTEN(server->new_output, new_output,
@@ -103,10 +110,6 @@ setup(absn_server *server)
 
 	server->scene_layout = wlr_scene_attach_output_layout(server->scene,
 	    server->output_layout);
-
-	/* toplevels lists */
-	wl_list_init(&server->toplevels);
-	wl_list_init(&server->focus_stack);
 
 	/* xdg_shell */
 	server->xdg_shell = wlr_xdg_shell_create(server->display, 6);
@@ -142,6 +145,10 @@ setup(absn_server *server)
 	    server->seat->pointer_state.events.focus_change);
 	LISTEN(server->request_set_selection, request_cursor,
 	    server->seat->events.request_set_selection);
+
+	server->layer_shell = wlr_layer_shell_v1_create(server->display, 1);
+	for (int i = 0; i < LAYERS_COUNT; ++i)
+		server->layers[i] = wlr_scene_tree_create(&server->scene->tree);
 
 	unsetenv("DISPLAY");
 #ifdef XWAYLAND
@@ -202,6 +209,8 @@ cleanup(absn_server *server)
 	wl_list_remove(&server->request_set_selection.link);
 
 	wl_list_remove(&server->new_output.link);
+
+	wl_list_remove(&server->new_layer_surface.link);
 
 	wlr_scene_node_destroy(&server->scene->tree.node);
 	wlr_xcursor_manager_destroy(server->cursor_mgr);

@@ -12,6 +12,7 @@ output_frame(struct wl_listener *listener, void *data)
 	UNUSED(data);
 	struct timespec now;
 	absn_output *output = wl_container_of(listener, output, frame);
+
 	struct wlr_scene *scene = output->server->scene;
 	struct wlr_scene_output *scene_output =
 	    wlr_scene_get_scene_output(scene, output->wlr);
@@ -85,6 +86,14 @@ output_layout_change(struct wl_listener *listener, void *data)
 			wlr_output_layout_add_auto(server->output_layout,
 			    toplevel->output->wlr);
 	}
+
+	struct wlr_box layout_geom;
+	wlr_output_layout_get_box(server->output_layout, NULL, &layout_geom);
+
+	wlr_scene_node_set_position(&server->bg->node, layout_geom.x,
+	    layout_geom.y);
+	wlr_scene_rect_set_size(server->bg, layout_geom.width,
+	    layout_geom.height);
 
 	wl_list_for_each(output, &server->outputs, link)
 	{

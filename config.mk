@@ -4,7 +4,7 @@ XLIBS = xcb xcb-icccm
 # tools
 PKG_CONFIG ?= pkg-config
 CC ?= clang
-CLANG_FORMAT=clang-format22
+CLANG_FORMAT ?= clang-format22
 
 PKGS = wayland-server xkbcommon libinput $(XLIBS)
 
