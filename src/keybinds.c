@@ -77,32 +77,68 @@ toggle_fullscreen(absn_server *server, const absn_arg *arg)
 void
 increase_master_width(absn_server *server, const absn_arg *arg)
 {
-	if (!server->focused_output)
+	absn_workspace *workspace = server->focused_output->workspace;
+
+	if (workspace->size + arg->f >= 1.0 ||
+	    workspace->size + arg->f <= 0.0)
 		return;
 
-	absn_output *focus = server->focused_output;
-
-	if (focus->mstack_width + arg->f >= 1.0 ||
-	    focus->mstack_width + arg->f <= 0.0)
-		return;
-
-	focus->mstack_width += arg->f;
-	layout_arrange(focus);
+	workspace->size += arg->f;
+	layout_arrange(workspace->output);
 }
 
 void
 increase_master_count(absn_server *server, const absn_arg *arg)
 {
-	if (!server->focused_output)
+	absn_workspace *workspace = server->focused_output->workspace;
+
+	if (workspace->count + arg->i <= 0)
 		return;
 
-	absn_output *focus = server->focused_output;
+	workspace->count += arg->i;
+	layout_arrange(workspace->output);
+}
 
-	if (focus->mstack_count + arg->i <= 0)
+void
+switch_workspace(absn_server *server, const absn_arg *arg)
+{
+	int i;
+	for (i = 0; i < server->workspaces_count; ++i) {
+		if (arg->v == server->workspaces[i].name)
+			break; /* found it */
+	}
+
+	if (&server->workspaces[i] == server->focused_output->workspace)
 		return;
 
-	focus->mstack_count += arg->i;
-	layout_arrange(focus);
+	if (!server->workspaces[i].output) {
+		server->workspaces[i].output = server->focused_output;
+	} else if (server->focused_output == server->workspaces[i].output) {
+		server->focused_output->workspace = &server->workspaces[i];
+	} else {
+		server->focused_output = server->workspaces[i].output;
+
+		struct wlr_box *geom = &server->focused_output->geom;
+
+		int32_t new_x = geom->x + (geom->width / 2);
+		int32_t new_y = geom->y + (geom->height / 2);
+
+		wlr_cursor_warp(server->cursor, NULL, new_x, new_y);
+	}
+	server->focused_output->workspace = &server->workspaces[i];
+
+	absn_toplevel *focus = NULL;
+	absn_toplevel *toplevel;
+	wl_list_for_each(toplevel, &server->toplevels, link)
+	{
+		if (toplevel && toplevel->workspace == &server->workspaces[i]) {
+			focus = toplevel; /* found it */
+			break;
+		}
+	}
+
+	focus_toplevel(focus);
+	layout_arrange(server->focused_output);
 }
 
 noreturn void

@@ -55,6 +55,7 @@ toplevel_map(struct wl_listener *listener, void *data)
 
 	update_focused_output(toplevel->server);
 	toplevel->output = toplevel->server->focused_output;
+	toplevel->workspace = toplevel->output->workspace;
 	toplevel->fullscreen = false;
 
 	wl_list_insert(&toplevel->server->toplevels, &toplevel->link);

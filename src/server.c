@@ -46,6 +46,16 @@ new_output(struct wl_listener *listener, void *data)
 	output->wlr = wlr_output;
 	output->server = server;
 
+	for (int i = 0; i < server->workspaces_count; ++i) {
+		if (!server->workspaces[i].output) {
+			server->workspaces[i].output = output;
+			output->workspace = &server->workspaces[i];
+			output->workspace->count = STACK_COUNT;
+			output->workspace->count = STACK_SIZE;
+			break;
+		}
+	}
+
 	LISTEN(output->frame, output_frame, wlr_output->events.frame);
 	LISTEN(output->request_state, output_request_state,
 	    wlr_output->events.request_state);
@@ -64,9 +74,6 @@ new_output(struct wl_listener *listener, void *data)
 	    scene_output);
 	wlr_output_layout_get_box(server->output_layout, output->wlr,
 	    &output->geom);
-
-	output->mstack_count = MSTACK_SIZE;
-	output->mstack_width = MSTACK_WIDTH;
 }
 
 void

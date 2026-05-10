@@ -146,9 +146,20 @@ setup(absn_server *server)
 	LISTEN(server->request_set_selection, request_cursor,
 	    server->seat->events.request_set_selection);
 
+	/* layer shell */
 	server->layer_shell = wlr_layer_shell_v1_create(server->display, 1);
 	for (int i = 0; i < LAYERS_COUNT; ++i)
 		server->layers[i] = wlr_scene_tree_create(&server->scene->tree);
+
+	/* workspaces */
+	int workspaces_count = sizeof(workspaces) / sizeof(workspaces[0]);
+	server->workspaces_count = workspaces_count;
+	server->workspaces = calloc(workspaces_count, sizeof(absn_workspace));
+	for (int i = 0; i < workspaces_count; ++i) {
+		server->workspaces[i].name = workspaces[i];
+		server->workspaces[i].count = STACK_COUNT;
+		server->workspaces[i].size = STACK_SIZE;
+	}
 
 	unsetenv("DISPLAY");
 #ifdef XWAYLAND

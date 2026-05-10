@@ -78,8 +78,8 @@ static const int layermap[] = {
 };
 
 enum {
-	LAYOUT_FLOAT,
 	LAYOUT_TILE,
+	LAYOUT_FLOAT,
 	LAYOUT_TILELEFT,
 	LAYOUT_TILETOP,
 	LAYOUT_TILEBOTTOM,
@@ -92,6 +92,14 @@ enum {
 
 typedef struct absn_output absn_output;
 typedef struct absn_toplevel absn_toplevel;
+
+typedef struct {
+	int layout;
+	const char *name;
+	absn_output *output;
+	int count;
+	float size;
+} absn_workspace;
 
 typedef struct {
 	struct wl_display *display;
@@ -151,16 +159,16 @@ typedef struct {
 	struct wlr_output_manager_v1 *output_mgr;
 	struct wl_listener mgr_apply;
 	struct wl_listener mgr_test;
-} absn_server;
 
-typedef struct {
-	int layout;
-	uint32_t id;
-} absn_tag;
+	int workspaces_count;
+	absn_workspace *workspaces;
+} absn_server;
 
 struct absn_output {
 	struct wl_list link;
 	absn_server *server;
+
+	absn_workspace *workspace;
 
 	struct wlr_box geom;
 	struct wlr_box usable_area;
@@ -169,12 +177,6 @@ struct absn_output {
 	struct wl_listener frame;
 	struct wl_listener request_state;
 	struct wl_listener destroy;
-
-	float mstack_width;
-	int mstack_count;
-
-	absn_tag *tags;
-	uint32_t active_tags;
 
 	struct wl_list layers[4];
 };
@@ -200,8 +202,10 @@ typedef struct {
 struct absn_toplevel {
 	struct wl_list link;
 	struct wl_list flink; /* link for focus stack */
+	uint32_t tag;
 	absn_server *server;
 	absn_output *output;
+	absn_workspace *workspace;
 
 	struct wlr_scene_tree *scene_tree;
 	struct wlr_scene_tree *scene_surface;
