@@ -118,7 +118,7 @@ setup(absn_server *server)
 	LISTEN(server->new_xdg_popup, new_xdg_popup,
 	    server->xdg_shell->events.new_popup);
 
-	/* cursor setup */
+	/* cursor */
 	server->cursor = wlr_cursor_create();
 	wlr_cursor_attach_output_layout(server->cursor, server->output_layout);
 

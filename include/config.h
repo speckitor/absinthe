@@ -16,8 +16,8 @@ static const float focused_bc[4] = { 0.0, 0.0, 1.0, 1.0 };
 static const float urgent_bc[4] = { 1.0, 0.0, 0.0, 1.0 };
 static const float unfocused_bc[4] = { 0.28, 0.28, 0.28, 1.0 };
 
-#define STACK_SIZE  0.5
 #define STACK_COUNT 1
+#define STACK_SIZE  0.5
 
 #define OUTPUT_GAP  10
 #define LAYOUT_GAP  5

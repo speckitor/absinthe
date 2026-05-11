@@ -1,3 +1,5 @@
+#include <wlr/util/log.h>
+
 #include "config.h"
 #include "toplevel.h"
 #include "types.h"
@@ -50,11 +52,15 @@ layout_arrange(struct absn_output *output)
 	int32_t total_lg;
 
 	int mcount = output->workspace->count;
-	int msize = output->workspace->size;
+	float msize = output->workspace->size;
+
 	int32_t main_stack_width = (toplevels_count <= mcount) ?
 	    output->geom.width - 2 * og :
 	    msize * (output->geom.width - 2 * og);
+
 	int32_t w = output->geom.width - main_stack_width - 2 * og - lg;
+
+	wlr_log(WLR_ERROR, "%d, %d", main_stack_width, w);
 
 	int32_t pure_h;
 	int32_t h;
@@ -130,7 +136,7 @@ layout_arrange(struct absn_output *output)
 			    og;
 			new_geom.y = output->geom.y + dy;
 			new_geom.width = w;
-			new_geom.height = h;
+			new_geom.height = cur_h;
 
 			toplevel_set_geom(toplevel, &new_geom);
 

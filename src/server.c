@@ -50,8 +50,6 @@ new_output(struct wl_listener *listener, void *data)
 		if (!server->workspaces[i].output) {
 			server->workspaces[i].output = output;
 			output->workspace = &server->workspaces[i];
-			output->workspace->count = STACK_COUNT;
-			output->workspace->count = STACK_SIZE;
 			break;
 		}
 	}

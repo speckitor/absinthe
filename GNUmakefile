@@ -8,10 +8,10 @@ OBJ_FILES = $(SRC_FILES:src/%.c=build/%.o)
 all: proto $(TARGET)
 
 xdg-shell-protocol.h:
-	$(WAYLAND_SCANNER) server-header $(WAYLAND_PROTOCOLS)/stable/xdg-shell/xdg-shell.xml xdg-shell-protocol.h
+	$(WAYLAND_SCANNER) server-header $(WAYLAND_PROTOCOLS)/stable/xdg-shell/xdg-shell.xml $@
 
 wlr-layer-shell-unstable-v1-protocol.h:
-	$(WAYLAND_SCANNER) server-header ./protocols/wlr-layer-shell-unstable-v1.xml wlr-layer-shell-unstable-v1-protocol.h
+	$(WAYLAND_SCANNER) server-header ./protocols/wlr-layer-shell-unstable-v1.xml $@
 
 proto: xdg-shell-protocol.h wlr-layer-shell-unstable-v1-protocol.h
 
