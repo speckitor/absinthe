@@ -7,6 +7,17 @@
 #include "types.h"
 
 void
+unfocus_toplevel(absn_toplevel *toplevel)
+{
+	if (!toplevel)
+		return;
+
+	if (toplevel->type == TOPLEVEL_XDG)
+		wlr_xdg_toplevel_set_activated(toplevel->xdg, false);
+	toplevel_set_border_color(toplevel, unfocused_bc);
+}
+
+void
 focus_toplevel(absn_toplevel *toplevel)
 {
 	if (!toplevel)
@@ -26,23 +37,8 @@ focus_toplevel(absn_toplevel *toplevel)
 	if (surface == prev_surface)
 		return;
 
-	if (prev_surface) {
-		struct wlr_xdg_toplevel *prev_toplevel =
-		    wlr_xdg_toplevel_try_from_wlr_surface(prev_surface);
-		if (prev_toplevel) {
-			wlr_xdg_toplevel_set_activated(prev_toplevel, false);
-			toplevel_set_border_color(prev_toplevel->base->data,
-			    unfocused_bc);
-		}
-
-#ifdef XWAYLAND
-		struct wlr_xwayland_surface *prev_xwayland_surface =
-		    wlr_xwayland_surface_try_from_wlr_surface(prev_surface);
-		if (prev_xwayland_surface)
-			toplevel_set_border_color(prev_xwayland_surface->data,
-			    unfocused_bc);
-#endif
-	}
+	if (prev_surface)
+		unfocus_toplevel(prev_surface->data);
 
 	toplevel->server->focused_toplevel = toplevel;
 
@@ -70,42 +66,8 @@ focus_get_topmost(absn_server *server)
 	absn_toplevel *toplevel;
 	wl_list_for_each(toplevel, &server->focus_stack, flink)
 	{
-		if (toplevel)
+		if (toplevel && toplevel->workspace == server->focused_output->workspace)
 			return toplevel;
 	}
 	return NULL;
-}
-
-void
-focus_next(absn_server *server)
-{
-	absn_toplevel *toplevel = focus_get_topmost(server);
-	if (!toplevel)
-		return;
-
-	absn_toplevel *next;
-	wl_list_for_each(next, &toplevel->link, link)
-	{
-		if (&next->link == &toplevel->server->toplevels)
-			continue;
-		break;
-	}
-	focus_toplevel(next);
-}
-
-void
-focus_prev(absn_server *server)
-{
-	absn_toplevel *toplevel = focus_get_topmost(server);
-	if (!toplevel)
-		return;
-
-	absn_toplevel *prev;
-	wl_list_for_each_reverse(prev, &toplevel->link, link)
-	{
-		if (&prev->link == &toplevel->server->toplevels)
-			continue;
-		break;
-	}
-	focus_toplevel(prev);
 }

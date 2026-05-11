@@ -50,7 +50,12 @@ static const absn_keybind keybinds[] = {
 	{ ALT, XKB_KEY_3, switch_workspace, { .v = "3" } },
 	{ ALT, XKB_KEY_4, switch_workspace, { .v = "4" } },
 	{ ALT, XKB_KEY_5, switch_workspace, { .v = "5" } },
-	{ ALT, XKB_KEY_E, quit, { 0 } },
+	{ ALT | SHIFT, XKB_KEY_exclam, focus_move_to_workspace, { .v = "1" } },
+	{ ALT | SHIFT, XKB_KEY_2, focus_move_to_workspace, { .v = "2" } },
+	{ ALT | SHIFT, XKB_KEY_3, focus_move_to_workspace, { .v = "3" } },
+	{ ALT | SHIFT, XKB_KEY_4, focus_move_to_workspace, { .v = "4" } },
+	{ ALT | SHIFT, XKB_KEY_5, focus_move_to_workspace, { .v = "5" } },
+	{ ALT, XKB_KEY_Escape, quit, { 0 } },
 };
 
 #endif

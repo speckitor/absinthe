@@ -86,6 +86,7 @@ new_xdg_toplevel(struct wl_listener *listener, void *data)
 	toplevel->server = server;
 	toplevel->xdg = xdg_toplevel;
 	toplevel->xdg->base->data = toplevel;
+	toplevel->xdg->base->surface->data = toplevel;
 
 	wlr_surface_set_preferred_buffer_scale(toplevel->xdg->base->surface, 1);
 

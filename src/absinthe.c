@@ -159,6 +159,7 @@ setup(absn_server *server)
 		server->workspaces[i].name = workspaces[i];
 		server->workspaces[i].count = STACK_COUNT;
 		server->workspaces[i].size = STACK_SIZE;
+		server->workspaces[i].output = NULL;
 	}
 
 	unsetenv("DISPLAY");

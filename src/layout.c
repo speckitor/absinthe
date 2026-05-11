@@ -57,10 +57,7 @@ layout_arrange(struct absn_output *output)
 	int32_t main_stack_width = (toplevels_count <= mcount) ?
 	    output->geom.width - 2 * og :
 	    msize * (output->geom.width - 2 * og);
-
 	int32_t w = output->geom.width - main_stack_width - 2 * og - lg;
-
-	wlr_log(WLR_ERROR, "%d, %d", main_stack_width, w);
 
 	int32_t pure_h;
 	int32_t h;
@@ -100,8 +97,8 @@ layout_arrange(struct absn_output *output)
 
 	wl_list_for_each(toplevel, &output->server->toplevels, link)
 	{
-		if (toplevel->workspace != output->workspace || toplevel->floating ||
-		    toplevel->fullscreen)
+		if (toplevel->workspace != output->workspace ||
+		    toplevel->floating || toplevel->fullscreen)
 			continue;
 
 		if (i < mcount) {

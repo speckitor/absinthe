@@ -50,14 +50,16 @@ cycle_focus(absn_server *server, const absn_arg *arg)
 		{
 			if (&new_focus->link == &toplevel->server->toplevels)
 				continue;
-			break;
+			if (toplevel->workspace == new_focus->workspace)
+				break;
 		}
 	} else {
 		wl_list_for_each_reverse(new_focus, &toplevel->link, link)
 		{
 			if (&new_focus->link == &toplevel->server->toplevels)
 				continue;
-			break;
+			if (toplevel->workspace == new_focus->workspace)
+				break;
 		}
 	}
 	focus_toplevel(new_focus);
@@ -79,8 +81,7 @@ increase_master_width(absn_server *server, const absn_arg *arg)
 {
 	absn_workspace *workspace = server->focused_output->workspace;
 
-	if (workspace->size + arg->f >= 1.0 ||
-	    workspace->size + arg->f <= 0.0)
+	if (workspace->size + arg->f >= 1.0 || workspace->size + arg->f <= 0.0)
 		return;
 
 	workspace->size += arg->f;
@@ -137,8 +138,51 @@ switch_workspace(absn_server *server, const absn_arg *arg)
 		}
 	}
 
-	focus_toplevel(focus);
+	unfocus_toplevel(server->focused_toplevel);
+	if (focus) {
+		/* crazy way to make it focus client if it was focused before */
+		struct wlr_surface *surface;
+#ifdef XWAYLAND
+		if (focus->type == TOPLEVEL_X11)
+			surface = focus->xw->surface;
+		else
+#endif
+			surface = focus->xdg->base->surface;
+		
+		if (surface == server->seat->keyboard_state.focused_surface)
+			server->seat->keyboard_state.focused_surface = NULL;
+
+		focus_toplevel(focus);
+	}
+
 	layout_arrange(server->focused_output);
+}
+
+void
+focus_move_to_workspace(absn_server *server, const absn_arg *arg)
+{
+	if (!server->focused_toplevel)
+		return;
+
+	int i;
+	for (i = 0; i < server->workspaces_count; ++i) {
+		if (arg->v == server->workspaces[i].name)
+			break; /* found it */
+	}
+
+	if (&server->workspaces[i] == server->focused_toplevel->workspace)
+		return;
+
+	if (!server->workspaces[i].output)
+		server->workspaces[i].output = server->focused_output;
+	server->focused_toplevel->output = server->workspaces[i].output;
+
+	server->focused_toplevel->workspace = &server->workspaces[i];
+
+	focus_toplevel(focus_get_topmost(server));
+
+	layout_arrange(server->focused_output);
+	layout_arrange(server->focused_toplevel->output);
 }
 
 noreturn void
