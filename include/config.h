@@ -58,6 +58,7 @@ static const absn_keybind keybinds[] = {
 	{ ALT | SHIFT, XKB_KEY_l, increase_master_width, { .f = +0.05 } },
 
 	{ ALT, XKB_KEY_t, set_layout, { .i = LAYOUT_TILE } },
+	{ ALT, XKB_KEY_r, set_layout, { .i = LAYOUT_TILELEFT } },
 	{ ALT, XKB_KEY_m, set_layout, { .i = LAYOUT_MONOCLE } },
 
 	{ ALT, XKB_KEY_1, switch_workspace, { .v = "1" } },
