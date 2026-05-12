@@ -4,21 +4,19 @@
 #include "toplevel.h"
 #include "types.h"
 
-void
-layout_arrange(struct absn_output *output)
+/* returns number of toplevels on workspace */
+static int
+prepare_output(struct absn_output *output)
 {
-	if (!output)
-		return;
-
-	struct absn_toplevel *toplevel;
-	int toplevels_count = 0;
+	int res = 0;
+	absn_toplevel *toplevel;
 	wl_list_for_each(toplevel, &output->server->toplevels, link)
 	{
-		if (toplevel->workspace == output->workspace &&
-		    !toplevel->floating && !toplevel->fullscreen) {
-			toplevels_count++;
+		if (toplevel->workspace == output->workspace) {
 			wlr_scene_node_set_enabled(&toplevel->scene_tree->node,
 			    true);
+			if (!toplevel->floating && !toplevel->fullscreen)
+				res++;
 		} else if (toplevel->output == output &&
 		    toplevel->workspace != output->workspace) {
 			wlr_scene_node_set_enabled(&toplevel->scene_tree->node,
@@ -26,12 +24,21 @@ layout_arrange(struct absn_output *output)
 		}
 	}
 
+	return res;
+}
+
+static void
+tile(struct absn_output *output)
+{
+	int toplevels_count = prepare_output(output);
+
 	if (toplevels_count < 1)
 		return;
 
 	int32_t og = OUTPUT_GAP;
 	struct wlr_box new_geom;
 
+	absn_toplevel *toplevel;
 	if (toplevels_count == 1) {
 		wl_list_for_each(toplevel, &output->server->toplevels, link)
 		{
@@ -141,5 +148,52 @@ layout_arrange(struct absn_output *output)
 		}
 
 		i++;
+	}
+}
+
+static void
+monocle(struct absn_output *output)
+{
+	int toplevels_count = prepare_output(output);
+
+	if (toplevels_count < 1)
+		return;
+
+	int32_t og = OUTPUT_GAP;
+
+	struct wlr_box new_geom = {
+		.x = output->geom.x + og,
+		.y = output->geom.y + og,
+		.width = output->geom.width - 2 * og,
+		.height = output->geom.height - 2 * og,
+	};
+
+	absn_toplevel *toplevel;
+	wl_list_for_each(toplevel, &output->server->toplevels, link)
+	{
+		if (toplevel->workspace != output->workspace ||
+		    toplevel->floating || toplevel->fullscreen)
+			continue;
+
+		toplevel_set_geom(toplevel, &new_geom);
+	}
+}
+
+void
+layout_arrange(struct absn_output *output)
+{
+	if (!output)
+		return;
+
+	switch (output->workspace->layout) {
+	case LAYOUT_TILE:
+		tile(output);
+		break;
+	case LAYOUT_MONOCLE:
+		monocle(output);	
+		break;
+	default: /* currently not implemented layouts */
+		tile(output);
+		break;
 	}
 }

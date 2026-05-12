@@ -66,7 +66,8 @@ focus_get_topmost(absn_server *server)
 	absn_toplevel *toplevel;
 	wl_list_for_each(toplevel, &server->focus_stack, flink)
 	{
-		if (toplevel && toplevel->workspace == server->focused_output->workspace)
+		if (toplevel &&
+		    toplevel->workspace == server->focused_output->workspace)
 			return toplevel;
 	}
 	return NULL;

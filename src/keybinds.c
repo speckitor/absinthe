@@ -132,8 +132,15 @@ switch_workspace(absn_server *server, const absn_arg *arg)
 	absn_toplevel *toplevel;
 	wl_list_for_each(toplevel, &server->toplevels, link)
 	{
-		if (toplevel && toplevel->workspace == &server->workspaces[i]) {
+		if (!focus && toplevel && toplevel->workspace == &server->workspaces[i]) {
 			focus = toplevel; /* found it */
+		}
+
+		if (toplevel && toplevel->workspace == &server->workspaces[i] &&
+				toplevel->fullscreen)
+		{
+			/* overwrite if there is a fullscreen window */
+			focus = toplevel;
 			break;
 		}
 	}
@@ -148,7 +155,7 @@ switch_workspace(absn_server *server, const absn_arg *arg)
 		else
 #endif
 			surface = focus->xdg->base->surface;
-		
+
 		if (surface == server->seat->keyboard_state.focused_surface)
 			server->seat->keyboard_state.focused_surface = NULL;
 
@@ -159,10 +166,13 @@ switch_workspace(absn_server *server, const absn_arg *arg)
 }
 
 void
-focus_move_to_workspace(absn_server *server, const absn_arg *arg)
+move_focus_to_workspace(absn_server *server, const absn_arg *arg)
 {
 	if (!server->focused_toplevel)
 		return;
+
+	if (server->focused_toplevel->fullscreen)
+		toplevel_set_fullscreen(server->focused_toplevel, false);
 
 	int i;
 	for (i = 0; i < server->workspaces_count; ++i) {
@@ -183,6 +193,13 @@ focus_move_to_workspace(absn_server *server, const absn_arg *arg)
 
 	layout_arrange(server->focused_output);
 	layout_arrange(server->focused_toplevel->output);
+}
+
+void
+set_layout(absn_server *server, const absn_arg *arg)
+{
+	server->focused_output->workspace->layout = arg->i;
+	layout_arrange(server->focused_output);
 }
 
 noreturn void

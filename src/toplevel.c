@@ -211,6 +211,8 @@ toplevel_set_fullscreen(absn_toplevel *toplevel, bool fullscreen)
 	}
 
 	toplevel_update_borders_geom(toplevel);
+
+	layout_arrange(toplevel->output);
 }
 
 void

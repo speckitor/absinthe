@@ -156,6 +156,7 @@ setup(absn_server *server)
 	server->workspaces_count = workspaces_count;
 	server->workspaces = calloc(workspaces_count, sizeof(absn_workspace));
 	for (int i = 0; i < workspaces_count; ++i) {
+		server->workspaces[i].layout = LAYOUT_TILE;
 		server->workspaces[i].name = workspaces[i];
 		server->workspaces[i].count = STACK_COUNT;
 		server->workspaces[i].size = STACK_SIZE;
