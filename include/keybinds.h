@@ -6,7 +6,10 @@
 void run(absn_server *server, const absn_arg *arg);
 
 void kill_focus(absn_server *server, const absn_arg *arg);
+
 void cycle_focus(absn_server *server, const absn_arg *arg);
+void swap_focus(absn_server *server, const absn_arg *arg);
+
 void toggle_fullscreen(absn_server *server, const absn_arg *arg);
 
 void increase_master_width(absn_server *server, const absn_arg *arg);

@@ -5,6 +5,7 @@
 
 #include "focus.h"
 #include "layout.h"
+#include "output.h"
 #include "toplevel.h"
 #include "types.h"
 
@@ -40,7 +41,7 @@ kill_focus(absn_server *server, const absn_arg *arg)
 void
 cycle_focus(absn_server *server, const absn_arg *arg)
 {
-	absn_toplevel *toplevel = focus_get_topmost(server);
+	absn_toplevel *toplevel = server->focused_toplevel;
 	if (!toplevel || toplevel->fullscreen)
 		return;
 
@@ -48,21 +49,49 @@ cycle_focus(absn_server *server, const absn_arg *arg)
 	if (arg->i > 0) {
 		wl_list_for_each(new_focus, &toplevel->link, link)
 		{
-			if (&new_focus->link == &toplevel->server->toplevels)
-				continue;
 			if (toplevel->workspace == new_focus->workspace)
 				break;
 		}
 	} else {
 		wl_list_for_each_reverse(new_focus, &toplevel->link, link)
 		{
-			if (&new_focus->link == &toplevel->server->toplevels)
-				continue;
 			if (toplevel->workspace == new_focus->workspace)
 				break;
 		}
 	}
 	focus_toplevel(new_focus);
+}
+
+void
+swap_focus(absn_server *server, const absn_arg *arg)
+{
+
+	absn_toplevel *toplevel = server->focused_toplevel;
+	if (!toplevel || toplevel->fullscreen || toplevel->floating)
+		return;
+
+	absn_toplevel *swapped;
+	if (arg->i > 0) {
+		wl_list_for_each(swapped, &toplevel->link, link)
+		{
+			if (toplevel->workspace == swapped->workspace)
+				break;
+		}
+
+		wl_list_remove(&toplevel->link);
+		wl_list_insert(&swapped->link, &toplevel->link);
+	} else {
+		wl_list_for_each_reverse(swapped, &toplevel->link, link)
+		{
+			if (toplevel->workspace == swapped->workspace)
+				break;
+		}
+
+		wl_list_remove(&swapped->link);
+		wl_list_insert(&toplevel->link, &swapped->link);
+	}
+
+	layout_arrange(swapped->output);
 }
 
 void
