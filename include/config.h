@@ -12,7 +12,7 @@
 
 static const float bgcolor[4] = { 0.0, 0.0, 0.0, 1.0 };
 
-static const float focused_bc[4] = { 0.0, 0.0, 1.0, 1.0 };
+static const float focused_bc[4] = { 1.0, 0.4, 0.6, 1.0 };
 static const float urgent_bc[4] = { 1.0, 0.0, 0.0, 1.0 };
 static const float unfocused_bc[4] = { 0.28, 0.28, 0.28, 1.0 };
 

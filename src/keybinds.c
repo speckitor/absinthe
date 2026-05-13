@@ -41,7 +41,7 @@ kill_focus(absn_server *server, const absn_arg *arg)
 void
 cycle_focus(absn_server *server, const absn_arg *arg)
 {
-	absn_toplevel *toplevel = server->focused_toplevel;
+	absn_toplevel *toplevel = focus_get_topmost(server);
 	if (!toplevel || toplevel->fullscreen)
 		return;
 
@@ -66,32 +66,45 @@ void
 swap_focus(absn_server *server, const absn_arg *arg)
 {
 
-	absn_toplevel *toplevel = server->focused_toplevel;
+	absn_toplevel *toplevel = focus_get_topmost(server);
 	if (!toplevel || toplevel->fullscreen || toplevel->floating)
 		return;
 
-	absn_toplevel *swapped;
+	absn_toplevel *swap;
 	if (arg->i > 0) {
-		wl_list_for_each(swapped, &toplevel->link, link)
+		if (server->toplevels.prev == &toplevel->link) {
+			wl_list_remove(&toplevel->link);
+			wl_list_insert(&server->toplevels, &toplevel->link);
+			goto arrange;
+		}
+
+		wl_list_for_each(swap, &toplevel->link, link)
 		{
-			if (toplevel->workspace == swapped->workspace)
+			if (toplevel->workspace == swap->workspace)
 				break;
 		}
 
 		wl_list_remove(&toplevel->link);
-		wl_list_insert(&swapped->link, &toplevel->link);
+		wl_list_insert(&swap->link, &toplevel->link);
 	} else {
-		wl_list_for_each_reverse(swapped, &toplevel->link, link)
+		if (server->toplevels.next == &toplevel->link) {
+			wl_list_remove(&toplevel->link);
+			wl_list_insert(server->toplevels.prev, &toplevel->link);
+			goto arrange;
+		}
+
+		wl_list_for_each_reverse(swap, &toplevel->link, link)
 		{
-			if (toplevel->workspace == swapped->workspace)
+			if (toplevel->workspace == swap->workspace)
 				break;
 		}
 
-		wl_list_remove(&swapped->link);
-		wl_list_insert(&toplevel->link, &swapped->link);
+		wl_list_remove(&swap->link);
+		wl_list_insert(&toplevel->link, &swap->link);
 	}
 
-	layout_arrange(swapped->output);
+arrange:
+	layout_arrange(toplevel->output);
 }
 
 void
