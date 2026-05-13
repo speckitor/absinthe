@@ -23,7 +23,7 @@ void
 kill_focus(absn_server *server, const absn_arg *arg)
 {
 	UNUSED(arg);
-	if (!server->focused_output)
+	if (!server->focused_toplevel)
 		return;
 
 	absn_toplevel *focus = server->focused_toplevel;
