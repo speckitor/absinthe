@@ -44,6 +44,7 @@ static const absn_keybind keybinds[] = {
     {ALT | SHIFT, XKB_KEY_k, swap_focus, {.i = -1}},
 
     {ALT, XKB_KEY_f, toggle_fullscreen, {0}},
+    {ALT, XKB_KEY_v, toggle_floating, {0}},
 
     {ALT, XKB_KEY_h, increase_master_count, {.i = +1}},
     {ALT, XKB_KEY_l, increase_master_count, {.i = -1}},

@@ -10,6 +10,9 @@ void toplevel_commit(struct wl_listener *listener, void *data)
     UNUSED(data);
     absn_toplevel *toplevel = wl_container_of(listener, toplevel, commit);
 
+    if (toplevel->xdg->base->current.configure_serial < toplevel->resizing)
+        return;
+
     if (toplevel->xdg->base->initial_commit) {
         wlr_xdg_toplevel_set_activated(toplevel->xdg, false);
 
@@ -21,12 +24,6 @@ void toplevel_commit(struct wl_listener *listener, void *data)
         return;
     }
 
-    bool resizing = toplevel->resizing && toplevel->resizing <= toplevel->xdg->base->current.configure_serial;
-
-    /* remove pending resize */
-    if (resizing)
-        toplevel->resizing = 0;
-
     struct wlr_box clip = {
         .x = toplevel->xdg->base->geometry.x,
         .y = toplevel->xdg->base->geometry.y,
@@ -34,4 +31,6 @@ void toplevel_commit(struct wl_listener *listener, void *data)
         .height = toplevel->geom.height - toplevel->bw,
     };
     wlr_scene_subsurface_tree_set_clip(&toplevel->scene_surface->node, &clip);
+
+    toplevel->resizing = 0;
 }

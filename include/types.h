@@ -177,7 +177,7 @@ struct absn_output {
     struct wl_listener request_state;
     struct wl_listener destroy;
 
-    struct wl_list layers[4];
+    struct wl_list layer_surfaces;
 };
 
 typedef struct {

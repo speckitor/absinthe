@@ -70,7 +70,8 @@ void swap_focus(absn_server *server, const absn_arg *arg)
     absn_toplevel *first = NULL;
     absn_toplevel *last = NULL;
 
-    wl_list_for_each(temp, &server->toplevels, link) {
+    wl_list_for_each(temp, &server->toplevels, link)
+    {
         if (temp->workspace == toplevel->workspace)
             last = temp;
         if (!first && temp->workspace == toplevel->workspace)
@@ -127,6 +128,16 @@ void toggle_fullscreen(absn_server *server, const absn_arg *arg)
     toplevel_set_fullscreen(focus, !focus->fullscreen);
 }
 
+void toggle_floating(absn_server *server, const absn_arg *arg)
+{
+    UNUSED(arg);
+    if (!server->focused_toplevel)
+        return;
+
+    absn_toplevel *focus = server->focused_toplevel;
+    toplevel_set_floating(focus, !focus->floating);
+}
+
 void increase_master_width(absn_server *server, const absn_arg *arg)
 {
     absn_workspace *workspace = server->focused_output->workspace;
@@ -160,6 +171,17 @@ void switch_workspace(absn_server *server, const absn_arg *arg)
     if (&server->workspaces[i] == server->focused_output->workspace)
         return;
 
+    int toplevels_count = 0;
+    absn_toplevel *toplevel;
+    wl_list_for_each(toplevel, &server->toplevels, link)
+    {
+        if (toplevel->workspace == server->focused_output->workspace)
+            toplevels_count++;
+    }
+
+    if (toplevels_count == 0)
+        server->focused_output->workspace->output = NULL;
+
     if (!server->workspaces[i].output) {
         server->workspaces[i].output = server->focused_output;
     } else if (server->focused_output == server->workspaces[i].output) {
@@ -177,7 +199,6 @@ void switch_workspace(absn_server *server, const absn_arg *arg)
     server->focused_output->workspace = &server->workspaces[i];
 
     absn_toplevel *focus = NULL;
-    absn_toplevel *toplevel;
     wl_list_for_each(toplevel, &server->toplevels, link)
     {
         if (!focus && toplevel && toplevel->workspace == &server->workspaces[i]) {
@@ -193,7 +214,7 @@ void switch_workspace(absn_server *server, const absn_arg *arg)
 
     unfocus_toplevel(server->focused_toplevel);
     if (focus) {
-        /* crazy way to make it focus client if it was focused before */
+        /* crazy way to make toplevel focus properly if it was focused before */
         struct wlr_surface *surface;
 #ifdef XWAYLAND
         if (focus->type == TOPLEVEL_X11)

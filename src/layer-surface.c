@@ -1,3 +1,7 @@
+#include <wlr/types/wlr_layer_shell_v1.h>
+
+#include "focus.h"
+#include "layer.h"
 #include "types.h"
 
 void layer_surface_map(struct wl_listener *listener, void *data)
@@ -8,14 +12,22 @@ void layer_surface_map(struct wl_listener *listener, void *data)
 
 void layer_surface_unmap(struct wl_listener *listener, void *data)
 {
-    UNUSED(listener);
     UNUSED(data);
+    absn_layer_surface *layer_surface = wl_container_of(listener, layer_surface, unmap);
+
+    if (layer_surface->wlr->surface == layer_surface->server->seat->keyboard_state.focused_surface)
+        focus_toplevel(focus_get_topmost(layer_surface->server));
 }
 
 void layer_surface_commit(struct wl_listener *listener, void *data)
 {
-    UNUSED(listener);
     UNUSED(data);
+    absn_layer_surface *layer_surface = wl_container_of(listener, layer_surface, commit);
+    struct wlr_layer_surface_v1 *surface = layer_surface->wlr;
+
+    wlr_layer_surface_v1_configure(surface, surface->pending.desired_width, surface->pending.desired_height);
+
+    layer_arrange(layer_surface->output);
 }
 
 void layer_surface_new_popup(struct wl_listener *listener, void *data)

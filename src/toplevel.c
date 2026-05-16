@@ -114,22 +114,23 @@ void toplevel_set_size(absn_toplevel *toplevel, int32_t width, int32_t height)
 
     toplevel_update_borders_geom(toplevel);
 
+    int32_t bw = toplevel->bw;
+
     struct wlr_box clip = {
         .x = 0,
         .y = 0,
-        .width = width - toplevel->bw,
-        .height = height - toplevel->bw,
+        .width = width - bw,
+        .height = height - bw,
     };
 
     if (toplevel->type == TOPLEVEL_XDG) {
         if (wl_resource_get_version(toplevel->xdg->resource) >= XDG_TOPLEVEL_CONFIGURE_BOUNDS_SINCE_VERSION)
             wlr_xdg_toplevel_set_bounds(toplevel->xdg, width, height);
-        toplevel->resizing =
-            wlr_xdg_toplevel_set_size(toplevel->xdg, width - 2 * toplevel->bw, height - 2 * toplevel->bw);
+        toplevel->resizing = wlr_xdg_toplevel_set_size(toplevel->xdg, width - 2 * bw, height - 2 * bw);
     }
 #ifdef XWAYLAND
     else if (toplevel->type == TOPLEVEL_X11) {
-        wlr_xwayland_surface_configure(toplevel->xw, toplevel->geom.x, toplevel->geom.y, width - 2 * toplevel->bw,
+        wlr_xwayland_surface_configure(toplevel->xw, toplevel->geom.x, toplevel->geom.y, width - 2 * bw,
                                        height - 2 * toplevel->bw);
         /* manually update position */
         toplevel_set_pos(toplevel, toplevel->geom.x, toplevel->geom.y);

@@ -59,13 +59,13 @@ void new_output(struct wl_listener *listener, void *data)
 
     wl_list_insert(&server->outputs, &output->link);
 
-    for (int i = 0; i < 4; ++i)
-        wl_list_init(&output->layers[i]);
+    wl_list_init(&output->layer_surfaces);
 
     struct wlr_output_layout_output *l_layout = wlr_output_layout_add_auto(server->output_layout, output->wlr);
     struct wlr_scene_output *scene_output = wlr_scene_output_create(server->scene, wlr_output);
     wlr_scene_output_layout_add_output(server->scene_layout, l_layout, scene_output);
     wlr_output_layout_get_box(server->output_layout, output->wlr, &output->geom);
+    output->usable_area = output->geom;
 }
 
 void new_xdg_toplevel(struct wl_listener *listener, void *data)
@@ -148,7 +148,7 @@ void new_layer_surface(struct wl_listener *listener, void *data)
     layer_surface->scene_layer = wlr_scene_layer_surface_v1_create(scene_layer, surface);
     layer_surface->scene_tree = layer_surface->scene_layer->tree;
 
-    wl_list_insert(&layer_surface->output->layers[surface->pending.layer], &layer_surface->link);
+    wl_list_insert(&layer_surface->output->layer_surfaces, &layer_surface->link);
     wlr_surface_send_enter(surface->surface, surface->output);
 }
 

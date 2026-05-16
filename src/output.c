@@ -14,7 +14,6 @@ void output_frame(struct wl_listener *listener, void *data)
 
     struct wlr_scene *scene = output->server->scene;
     struct wlr_scene_output *scene_output = wlr_scene_get_scene_output(scene, output->wlr);
-
     absn_toplevel *toplevel;
     wl_list_for_each(toplevel, &output->server->toplevels, link)
     {
@@ -23,7 +22,6 @@ void output_frame(struct wl_listener *listener, void *data)
     }
 
     wlr_scene_output_commit(scene_output, NULL);
-
 skip:
     clock_gettime(CLOCK_MONOTONIC, &now);
     wlr_scene_output_send_frame_done(scene_output, &now);
@@ -89,6 +87,7 @@ void output_layout_change(struct wl_listener *listener, void *data)
         config_head = wlr_output_configuration_head_v1_create(config, output->wlr);
 
         wlr_output_layout_get_box(server->output_layout, output->wlr, &output->geom);
+        output->usable_area = output->geom;
 
         if ((toplevel = focus_get_topmost(server)) && toplevel->fullscreen)
             toplevel_set_size(toplevel, output->geom.width, output->geom.height);
