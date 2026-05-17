@@ -15,11 +15,15 @@ void toplevel_map(struct wl_listener *listener, void *data)
 
     toplevel->scene_tree = wlr_scene_tree_create(server->layers[LAYER_TILE]);
     toplevel->scene_tree->node.data = toplevel;
-    wlr_scene_node_set_enabled(&toplevel->scene_tree->node, toplevel_is_unmanaged(toplevel));
+    wlr_scene_node_set_enabled(&toplevel->scene_tree->node,
+                               toplevel_is_unmanaged(toplevel));
 
     if (toplevel->type != TOPLEVEL_X11 &&
-        wl_resource_get_version(toplevel->xdg->resource) >= XDG_TOPLEVEL_STATE_TILED_RIGHT_SINCE_VERSION) {
-        wlr_xdg_toplevel_set_tiled(toplevel->xdg, WLR_EDGE_TOP | WLR_EDGE_BOTTOM | WLR_EDGE_LEFT | WLR_EDGE_RIGHT);
+        wl_resource_get_version(toplevel->xdg->resource) >=
+            XDG_TOPLEVEL_STATE_TILED_RIGHT_SINCE_VERSION) {
+        wlr_xdg_toplevel_set_tiled(toplevel->xdg,
+                                   WLR_EDGE_TOP | WLR_EDGE_BOTTOM |
+                                       WLR_EDGE_LEFT | WLR_EDGE_RIGHT);
     } else {
         wlr_xdg_toplevel_set_maximized(toplevel->xdg, true);
     }
@@ -28,11 +32,13 @@ void toplevel_map(struct wl_listener *listener, void *data)
 
 #ifdef XWAYLAND
     if (toplevel->type == TOPLEVEL_X11) {
-        toplevel->scene_surface = wlr_scene_subsurface_tree_create(toplevel->scene_tree, toplevel->xw->surface);
+        toplevel->scene_surface = wlr_scene_subsurface_tree_create(
+            toplevel->scene_tree, toplevel->xw->surface);
     } else
 #endif
     {
-        toplevel->scene_surface = wlr_scene_xdg_surface_create(toplevel->scene_tree, toplevel->xdg->base);
+        toplevel->scene_surface = wlr_scene_xdg_surface_create(
+            toplevel->scene_tree, toplevel->xdg->base);
     }
     toplevel->scene_surface->node.data = toplevel;
 
@@ -40,7 +46,8 @@ void toplevel_map(struct wl_listener *listener, void *data)
     toplevel->bw = toplevel_is_unmanaged(toplevel) ? 0 : TOPLEVEL_BW;
 
     for (int i = 0; i < 4; ++i) {
-        toplevel->border[i] = wlr_scene_rect_create(toplevel->scene_tree, 0, 0, unfocused_bc);
+        toplevel->border[i] =
+            wlr_scene_rect_create(toplevel->scene_tree, 0, 0, unfocused_bc);
         toplevel->border[i]->node.data = toplevel;
     }
 
@@ -64,6 +71,10 @@ void toplevel_unmap(struct wl_listener *listener, void *data)
     if (toplevel == toplevel->server->focused_toplevel) {
         toplevel->server->focused_toplevel = NULL;
         toplevel->server->seat->keyboard_state.focused_surface = NULL;
+    }
+
+    if (toplevel == toplevel->server->exclusive_focus) {
+        toplevel->server->exclusive_focus = NULL;
     }
 
     wl_list_remove(&toplevel->link);
@@ -108,29 +119,35 @@ void toplevel_request_move(struct wl_listener *listener, void *data)
 {
     UNUSED(data);
     absn_toplevel *toplevel = wl_container_of(listener, toplevel, request_move);
-    if (toplevel->xdg->base->initialized)
+    if (toplevel->xdg->base->initialized) {
         wlr_xdg_surface_schedule_configure(toplevel->xdg->base);
+    }
 }
 
 void toplevel_request_resize(struct wl_listener *listener, void *data)
 {
     UNUSED(data);
-    absn_toplevel *toplevel = wl_container_of(listener, toplevel, request_resize);
-    if (toplevel->xdg->base->initialized)
+    absn_toplevel *toplevel =
+        wl_container_of(listener, toplevel, request_resize);
+    if (toplevel->xdg->base->initialized) {
         wlr_xdg_surface_schedule_configure(toplevel->xdg->base);
+    }
 }
 
 void toplevel_request_maximize(struct wl_listener *listener, void *data)
 {
     UNUSED(data);
-    absn_toplevel *toplevel = wl_container_of(listener, toplevel, request_maximize);
-    if (toplevel->xdg->base->initialized)
+    absn_toplevel *toplevel =
+        wl_container_of(listener, toplevel, request_maximize);
+    if (toplevel->xdg->base->initialized) {
         wlr_xdg_surface_schedule_configure(toplevel->xdg->base);
+    }
 }
 
 void toplevel_request_fullscreen(struct wl_listener *listener, void *data)
 {
     UNUSED(data);
-    absn_toplevel *toplevel = wl_container_of(listener, toplevel, request_fullscreen);
+    absn_toplevel *toplevel =
+        wl_container_of(listener, toplevel, request_fullscreen);
     toplevel_set_fullscreen(toplevel, toplevel->xdg->requested.fullscreen);
 }

@@ -18,8 +18,9 @@ static void process_cursor_move(absn_server *server)
 {
     struct absn_toplevel *toplevel = server->focused_toplevel;
 
-    if (!toplevel)
+    if (!toplevel) {
         return;
+    }
 
     if (toplevel->fullscreen) {
         toplevel->prev_geom = toplevel->geom;
@@ -31,8 +32,9 @@ static void process_cursor_move(absn_server *server)
     new_y = server->cursor->y - server->grab_y + server->grab_geom.y;
     toplevel_set_pos(toplevel, new_x, new_y);
 
-    if (!toplevel->floating)
+    if (!toplevel->floating) {
         toplevel_set_floating(toplevel, true);
+    }
 }
 
 static void apply_resize(absn_toplevel *toplevel, struct wlr_box *new_geom)
@@ -44,18 +46,21 @@ static void apply_resize(absn_toplevel *toplevel, struct wlr_box *new_geom)
         int32_t max_width = toplevel->xdg->current.max_width;
         int32_t max_height = toplevel->xdg->current.max_height;
 
-        if (max_width == 0)
+        if (max_width == 0) {
             max_width = 10000;
+        }
 
-        if (max_height == 0)
+        if (max_height == 0) {
             max_height = 10000;
+        }
 
         if (!(new_geom->width >= min_width && new_geom->width <= max_width)) {
             new_geom->width = toplevel->geom.width;
             new_geom->x = toplevel->geom.x;
         }
 
-        if (!(new_geom->height >= min_height && new_geom->height <= max_height)) {
+        if (!(new_geom->height >= min_height &&
+              new_geom->height <= max_height)) {
             new_geom->height = toplevel->geom.height;
             new_geom->y = toplevel->geom.y;
         }
@@ -68,17 +73,21 @@ static void process_cursor_resize(absn_server *server)
 {
     struct absn_toplevel *toplevel = server->focused_toplevel;
 
-    if (!toplevel)
+    if (!toplevel) {
         return;
+    }
 
-    if (toplevel->resizing)
+    if (toplevel->resizing) {
         return;
+    }
 
-    if (toplevel->fullscreen)
+    if (toplevel->fullscreen) {
         toplevel_set_fullscreen(toplevel, false);
+    }
 
-    if (!toplevel->floating)
+    if (!toplevel->floating) {
         toplevel_set_floating(toplevel, true);
+    }
 
     int32_t new_x, new_y, new_width, new_height;
     new_x = server->grab_geom.x;
@@ -89,8 +98,9 @@ static void process_cursor_resize(absn_server *server)
     int32_t dx = server->cursor->x - server->grab_x;
     int32_t dy = server->cursor->y - server->grab_y;
 
-    if (dx == 0 && dy == 0)
+    if (dx == 0 && dy == 0) {
         return;
+    }
 
     switch (server->resize_corner) {
     case TOP_LEFT:
@@ -133,7 +143,8 @@ void process_cursor_motion(absn_server *server, uint32_t time)
 {
     double sx, sy;
     struct wlr_surface *surface = NULL;
-    toplevel_at(server, server->cursor->x, server->cursor->y, &surface, &sx, &sy);
+    toplevel_at(server, server->cursor->x, server->cursor->y, &surface, &sx,
+                &sy);
     struct wlr_seat *seat = server->seat;
 
     if (server->cursor_mode == CURSOR_MOVE) {

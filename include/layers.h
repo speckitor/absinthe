@@ -4,6 +4,6 @@
 #include "output.h"
 #include "types.h"
 
-void layer_arrange(absn_output *output);
+void layers_arrange(absn_output *output);
 
 #endif

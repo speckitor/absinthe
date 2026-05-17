@@ -10,15 +10,17 @@ void toplevel_commit(struct wl_listener *listener, void *data)
     UNUSED(data);
     absn_toplevel *toplevel = wl_container_of(listener, toplevel, commit);
 
-    if (toplevel->xdg->base->current.configure_serial < toplevel->resizing)
+    if (toplevel->xdg->base->current.configure_serial < toplevel->resizing) {
         return;
+    }
 
     if (toplevel->xdg->base->initial_commit) {
         wlr_xdg_toplevel_set_activated(toplevel->xdg, false);
 
         /* forse server side decoration mode */
-        if (toplevel->deco)
+        if (toplevel->deco) {
             deco_request_mode(&toplevel->deco_request_mode, toplevel->deco);
+        }
         /* let client set initial size */
         toplevel->resizing = wlr_xdg_toplevel_set_size(toplevel->xdg, 0, 0);
         return;

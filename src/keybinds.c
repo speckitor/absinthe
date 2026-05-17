@@ -21,8 +21,9 @@ void run(absn_server *server, const absn_arg *arg)
 void kill_focus(absn_server *server, const absn_arg *arg)
 {
     UNUSED(arg);
-    if (!server->focused_toplevel)
+    if (!server->focused_toplevel) {
         return;
+    }
 
     absn_toplevel *focus = server->focused_toplevel;
 
@@ -39,21 +40,24 @@ void kill_focus(absn_server *server, const absn_arg *arg)
 void cycle_focus(absn_server *server, const absn_arg *arg)
 {
     absn_toplevel *toplevel = focus_get_topmost(server);
-    if (!toplevel || toplevel->fullscreen)
+    if (!toplevel || toplevel->fullscreen) {
         return;
+    }
 
     absn_toplevel *new_focus;
     if (arg->i > 0) {
         wl_list_for_each(new_focus, &toplevel->link, link)
         {
-            if (toplevel->workspace == new_focus->workspace)
+            if (toplevel->workspace == new_focus->workspace) {
                 break;
+            }
         }
     } else {
         wl_list_for_each_reverse(new_focus, &toplevel->link, link)
         {
-            if (toplevel->workspace == new_focus->workspace)
+            if (toplevel->workspace == new_focus->workspace) {
                 break;
+            }
         }
     }
     focus_toplevel(new_focus);
@@ -63,8 +67,9 @@ void swap_focus(absn_server *server, const absn_arg *arg)
 {
 
     absn_toplevel *toplevel = focus_get_topmost(server);
-    if (!toplevel || toplevel->fullscreen || toplevel->floating)
+    if (!toplevel || toplevel->fullscreen || toplevel->floating) {
         return;
+    }
 
     absn_toplevel *temp = NULL;
     absn_toplevel *first = NULL;
@@ -72,14 +77,17 @@ void swap_focus(absn_server *server, const absn_arg *arg)
 
     wl_list_for_each(temp, &server->toplevels, link)
     {
-        if (temp->workspace == toplevel->workspace)
+        if (temp->workspace == toplevel->workspace) {
             last = temp;
-        if (!first && temp->workspace == toplevel->workspace)
+        }
+        if (!first && temp->workspace == toplevel->workspace) {
             first = temp;
+        }
     }
 
-    if (first == last)
+    if (first == last) {
         return;
+    }
 
     absn_toplevel *swap = NULL;
     if (arg->i > 0) {
@@ -91,8 +99,9 @@ void swap_focus(absn_server *server, const absn_arg *arg)
 
         wl_list_for_each(swap, &toplevel->link, link)
         {
-            if (toplevel->workspace == swap->workspace)
+            if (toplevel->workspace == swap->workspace) {
                 break;
+            }
         }
 
         wl_list_remove(&toplevel->link);
@@ -106,8 +115,9 @@ void swap_focus(absn_server *server, const absn_arg *arg)
 
         wl_list_for_each_reverse(swap, &toplevel->link, link)
         {
-            if (toplevel->workspace == swap->workspace)
+            if (toplevel->workspace == swap->workspace) {
                 break;
+            }
         }
 
         wl_list_remove(&swap->link);
@@ -121,8 +131,9 @@ arrange:
 void toggle_fullscreen(absn_server *server, const absn_arg *arg)
 {
     UNUSED(arg);
-    if (!server->focused_toplevel)
+    if (!server->focused_toplevel) {
         return;
+    }
 
     absn_toplevel *focus = server->focused_toplevel;
     toplevel_set_fullscreen(focus, !focus->fullscreen);
@@ -131,19 +142,30 @@ void toggle_fullscreen(absn_server *server, const absn_arg *arg)
 void toggle_floating(absn_server *server, const absn_arg *arg)
 {
     UNUSED(arg);
-    if (!server->focused_toplevel)
+    if (!server->focused_toplevel) {
         return;
+    }
 
     absn_toplevel *focus = server->focused_toplevel;
     toplevel_set_floating(focus, !focus->floating);
+
+    if (focus->floating) {
+        int32_t new_x = focus->output->geom.x +
+                        (focus->output->geom.width / 2 - focus->geom.width / 2);
+        int32_t new_y =
+            focus->output->geom.y +
+            (focus->output->geom.height / 2 - focus->geom.height / 2);
+        toplevel_set_pos(focus, new_x, new_y);
+    }
 }
 
 void increase_master_width(absn_server *server, const absn_arg *arg)
 {
     absn_workspace *workspace = server->focused_output->workspace;
 
-    if (workspace->size + arg->f >= 1.0 || workspace->size + arg->f <= 0.0)
+    if (workspace->size + arg->f >= 1.0 || workspace->size + arg->f <= 0.0) {
         return;
+    }
 
     workspace->size += arg->f;
     layout_arrange(workspace->output);
@@ -153,8 +175,9 @@ void increase_master_count(absn_server *server, const absn_arg *arg)
 {
     absn_workspace *workspace = server->focused_output->workspace;
 
-    if (workspace->count + arg->i <= 0)
+    if (workspace->count + arg->i <= 0) {
         return;
+    }
 
     workspace->count += arg->i;
     layout_arrange(workspace->output);
@@ -164,23 +187,27 @@ void switch_workspace(absn_server *server, const absn_arg *arg)
 {
     int i;
     for (i = 0; i < server->workspaces_count; ++i) {
-        if (arg->v == server->workspaces[i].name)
+        if (arg->v == server->workspaces[i].name) {
             break; /* found it */
+        }
     }
 
-    if (&server->workspaces[i] == server->focused_output->workspace)
+    if (&server->workspaces[i] == server->focused_output->workspace) {
         return;
+    }
 
     int toplevels_count = 0;
     absn_toplevel *toplevel;
     wl_list_for_each(toplevel, &server->toplevels, link)
     {
-        if (toplevel->workspace == server->focused_output->workspace)
+        if (toplevel->workspace == server->focused_output->workspace) {
             toplevels_count++;
+        }
     }
 
-    if (toplevels_count == 0)
+    if (toplevels_count == 0) {
         server->focused_output->workspace->output = NULL;
+    }
 
     if (!server->workspaces[i].output) {
         server->workspaces[i].output = server->focused_output;
@@ -201,11 +228,13 @@ void switch_workspace(absn_server *server, const absn_arg *arg)
     absn_toplevel *focus = NULL;
     wl_list_for_each(toplevel, &server->toplevels, link)
     {
-        if (!focus && toplevel && toplevel->workspace == &server->workspaces[i]) {
+        if (!focus && toplevel &&
+            toplevel->workspace == &server->workspaces[i]) {
             focus = toplevel; /* found it */
         }
 
-        if (toplevel && toplevel->workspace == &server->workspaces[i] && toplevel->fullscreen) {
+        if (toplevel && toplevel->workspace == &server->workspaces[i] &&
+            toplevel->fullscreen) {
             /* overwrite if there is a fullscreen window */
             focus = toplevel;
             break;
@@ -217,14 +246,15 @@ void switch_workspace(absn_server *server, const absn_arg *arg)
         /* crazy way to make toplevel focus properly if it was focused before */
         struct wlr_surface *surface;
 #ifdef XWAYLAND
-        if (focus->type == TOPLEVEL_X11)
+        if (focus->type == TOPLEVEL_X11) {
             surface = focus->xw->surface;
-        else
+        } else
 #endif
             surface = focus->xdg->base->surface;
 
-        if (surface == server->seat->keyboard_state.focused_surface)
+        if (surface == server->seat->keyboard_state.focused_surface) {
             server->seat->keyboard_state.focused_surface = NULL;
+        }
 
         focus_toplevel(focus);
     }
@@ -234,23 +264,28 @@ void switch_workspace(absn_server *server, const absn_arg *arg)
 
 void move_focus_to_workspace(absn_server *server, const absn_arg *arg)
 {
-    if (!server->focused_toplevel)
+    if (!server->focused_toplevel) {
         return;
+    }
 
-    if (server->focused_toplevel->fullscreen)
+    if (server->focused_toplevel->fullscreen) {
         toplevel_set_fullscreen(server->focused_toplevel, false);
+    }
 
     int i;
     for (i = 0; i < server->workspaces_count; ++i) {
-        if (arg->v == server->workspaces[i].name)
+        if (arg->v == server->workspaces[i].name) {
             break; /* found it */
+        }
     }
 
-    if (&server->workspaces[i] == server->focused_toplevel->workspace)
+    if (&server->workspaces[i] == server->focused_toplevel->workspace) {
         return;
+    }
 
-    if (!server->workspaces[i].output)
+    if (!server->workspaces[i].output) {
         server->workspaces[i].output = server->focused_output;
+    }
     server->focused_toplevel->output = server->workspaces[i].output;
 
     server->focused_toplevel->workspace = &server->workspaces[i];

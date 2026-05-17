@@ -28,10 +28,10 @@
 #define MAX(A, B) (A) > (B) ? (A) : (B)
 #define MIN(A, B) (A) < (B) ? (A) : (B)
 /* macro for adding listener for event */
-#define LISTEN(L, C, E)                                                                                                \
-    do {                                                                                                               \
-        (L).notify = (C);                                                                                              \
-        wl_signal_add(&(E), &(L));                                                                                     \
+#define LISTEN(L, C, E)                                                        \
+    do {                                                                       \
+        (L).notify = (C);                                                      \
+        wl_signal_add(&(E), &(L));                                             \
     } while (0);
 #define UNUSED(X) (void)(X)
 #define CLEANMASK(M) (M & ~WLR_MODIFIER_CAPS)
@@ -74,7 +74,7 @@ static const int layermap[] = {
     LAYER_BACKGROUND,
     LAYER_BOTTOM,
     LAYER_TOP,
-    LAYER_FULLSCREEN,
+    LAYER_OVERLAY,
 };
 
 enum {
@@ -150,6 +150,8 @@ typedef struct {
     struct wl_list focus_stack;
     absn_toplevel *focused_toplevel;
 
+    void *exclusive_focus;
+
     absn_output *focused_output;
     struct wl_list outputs;
     struct wl_listener new_output;
@@ -177,7 +179,7 @@ struct absn_output {
     struct wl_listener request_state;
     struct wl_listener destroy;
 
-    struct wl_list layer_surfaces;
+    struct wl_list layers[4];
 };
 
 typedef struct {
@@ -186,9 +188,10 @@ typedef struct {
     absn_server *server;
     absn_output *output;
 
-    int type; /* LAYER_SURFACE */
+    bool mapped;
     struct wlr_scene_tree *scene_tree;
     struct wlr_scene_layer_surface_v1 *scene_layer;
+    struct wlr_scene_tree *popups;
 
     struct wlr_layer_surface_v1 *wlr;
     struct wl_listener map;
@@ -249,8 +252,11 @@ struct absn_toplevel {
 
 typedef struct {
     struct wlr_xdg_popup *wlr;
+
+    int parent_type;
+    void *parent;
+
     struct wl_listener commit;
-    struct wl_listener destroy;
 } absn_popup;
 
 typedef struct {

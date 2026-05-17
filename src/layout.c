@@ -14,9 +14,11 @@ static int prepare_output(struct absn_output *output)
     {
         if (toplevel->workspace == output->workspace) {
             wlr_scene_node_set_enabled(&toplevel->scene_tree->node, true);
-            if (!toplevel->floating && !toplevel->fullscreen)
+            if (!toplevel->floating && !toplevel->fullscreen) {
                 res++;
-        } else if (toplevel->output == output && toplevel->workspace != output->workspace) {
+            }
+        } else if (toplevel->output == output &&
+                   toplevel->workspace != output->workspace) {
             wlr_scene_node_set_enabled(&toplevel->scene_tree->node, false);
         }
     }
@@ -28,8 +30,9 @@ static void tile(struct absn_output *output)
 {
     int toplevels_count = prepare_output(output);
 
-    if (toplevels_count < 1)
+    if (toplevels_count < 1) {
         return;
+    }
 
     int32_t og = OUTPUT_GAP;
     struct wlr_box new_geom;
@@ -38,11 +41,15 @@ static void tile(struct absn_output *output)
     if (toplevels_count == 1) {
         wl_list_for_each(toplevel, &output->server->toplevels, link)
         {
-            if (toplevel->workspace == output->workspace && !toplevel->floating && !toplevel->fullscreen)
+            if (toplevel->workspace == output->workspace &&
+                !toplevel->floating && !toplevel->fullscreen) {
                 break;
+            }
         }
-        new_geom.x = output->usable_area.x + og, new_geom.y = output->usable_area.y + og,
-        new_geom.width = output->usable_area.width - 2 * og, new_geom.height = output->usable_area.height - 2 * og,
+        new_geom.x = output->usable_area.x + og,
+        new_geom.y = output->usable_area.y + og,
+        new_geom.width = output->usable_area.width - 2 * og,
+        new_geom.height = output->usable_area.height - 2 * og,
 
         toplevel_set_geom(toplevel, &new_geom);
         return;
@@ -55,7 +62,9 @@ static void tile(struct absn_output *output)
     float msize = output->workspace->size;
 
     int32_t main_stack_width =
-        (toplevels_count <= mcount) ? output->usable_area.width - 2 * og : msize * (output->usable_area.width - 2 * og);
+        (toplevels_count <= mcount)
+            ? output->usable_area.width - 2 * og
+            : msize * (output->usable_area.width - 2 * og);
     int32_t w = output->usable_area.width - main_stack_width - 2 * og - lg;
 
     int32_t pure_h;
@@ -74,8 +83,10 @@ static void tile(struct absn_output *output)
 
         wl_list_for_each(toplevel, &output->server->toplevels, link)
         {
-            if (toplevel->workspace != output->workspace || toplevel->floating || toplevel->fullscreen)
+            if (toplevel->workspace != output->workspace ||
+                toplevel->floating || toplevel->fullscreen) {
                 continue;
+            }
 
             cur_h = h + (i < r ? 1 : 0);
 
@@ -95,8 +106,10 @@ static void tile(struct absn_output *output)
 
     wl_list_for_each(toplevel, &output->server->toplevels, link)
     {
-        if (toplevel->workspace != output->workspace || toplevel->floating || toplevel->fullscreen)
+        if (toplevel->workspace != output->workspace || toplevel->floating ||
+            toplevel->fullscreen) {
             continue;
+        }
 
         if (i < mcount) {
             total_lg = (mcount - 1) * lg;
@@ -115,8 +128,9 @@ static void tile(struct absn_output *output)
 
             dy += cur_h + lg;
         } else {
-            if (i == mcount)
+            if (i == mcount) {
                 dy = og;
+            }
 
             int32_t stack_count = toplevels_count - mcount;
             total_lg = (stack_count - 1) * lg;
@@ -144,8 +158,9 @@ static void tile_left(struct absn_output *output)
 {
     int toplevels_count = prepare_output(output);
 
-    if (toplevels_count < 1)
+    if (toplevels_count < 1) {
         return;
+    }
 
     int32_t og = OUTPUT_GAP;
     struct wlr_box new_geom;
@@ -154,11 +169,15 @@ static void tile_left(struct absn_output *output)
     if (toplevels_count == 1) {
         wl_list_for_each(toplevel, &output->server->toplevels, link)
         {
-            if (toplevel->workspace == output->workspace && !toplevel->floating && !toplevel->fullscreen)
+            if (toplevel->workspace == output->workspace &&
+                !toplevel->floating && !toplevel->fullscreen) {
                 break;
+            }
         }
-        new_geom.x = output->usable_area.x + og, new_geom.y = output->usable_area.y + og,
-        new_geom.width = output->usable_area.width - 2 * og, new_geom.height = output->usable_area.height - 2 * og,
+        new_geom.x = output->usable_area.x + og,
+        new_geom.y = output->usable_area.y + og,
+        new_geom.width = output->usable_area.width - 2 * og,
+        new_geom.height = output->usable_area.height - 2 * og,
 
         toplevel_set_geom(toplevel, &new_geom);
         return;
@@ -171,7 +190,9 @@ static void tile_left(struct absn_output *output)
     float msize = output->workspace->size;
 
     int32_t main_stack_width =
-        (toplevels_count <= mcount) ? output->usable_area.width - 2 * og : msize * (output->usable_area.width - 2 * og);
+        (toplevels_count <= mcount)
+            ? output->usable_area.width - 2 * og
+            : msize * (output->usable_area.width - 2 * og);
     int32_t w = output->usable_area.width - main_stack_width - 2 * og - lg;
 
     int32_t pure_h;
@@ -190,8 +211,10 @@ static void tile_left(struct absn_output *output)
 
         wl_list_for_each(toplevel, &output->server->toplevels, link)
         {
-            if (toplevel->workspace != output->workspace || toplevel->floating || toplevel->fullscreen)
+            if (toplevel->workspace != output->workspace ||
+                toplevel->floating || toplevel->fullscreen) {
                 continue;
+            }
 
             cur_h = h + (i < r ? 1 : 0);
 
@@ -211,8 +234,10 @@ static void tile_left(struct absn_output *output)
 
     wl_list_for_each(toplevel, &output->server->toplevels, link)
     {
-        if (toplevel->workspace != output->workspace || toplevel->floating || toplevel->fullscreen)
+        if (toplevel->workspace != output->workspace || toplevel->floating ||
+            toplevel->fullscreen) {
             continue;
+        }
 
         if (i < mcount) {
             total_lg = (mcount - 1) * lg;
@@ -222,7 +247,8 @@ static void tile_left(struct absn_output *output)
 
             cur_h = h + (i < r ? 1 : 0);
 
-            new_geom.x = output->usable_area.x + output->usable_area.width - og - main_stack_width;
+            new_geom.x = output->usable_area.x + output->usable_area.width -
+                         og - main_stack_width;
             new_geom.y = output->usable_area.y + dy;
             new_geom.width = main_stack_width;
             new_geom.height = cur_h;
@@ -231,8 +257,9 @@ static void tile_left(struct absn_output *output)
 
             dy += cur_h + lg;
         } else {
-            if (i == mcount)
+            if (i == mcount) {
                 dy = og;
+            }
 
             int32_t stack_count = toplevels_count - mcount;
             total_lg = (stack_count - 1) * lg;
@@ -260,8 +287,9 @@ static void monocle(struct absn_output *output)
 {
     int toplevels_count = prepare_output(output);
 
-    if (toplevels_count < 1)
+    if (toplevels_count < 1) {
         return;
+    }
 
     int32_t og = OUTPUT_GAP;
 
@@ -275,8 +303,10 @@ static void monocle(struct absn_output *output)
     absn_toplevel *toplevel;
     wl_list_for_each(toplevel, &output->server->toplevels, link)
     {
-        if (toplevel->workspace != output->workspace || toplevel->floating || toplevel->fullscreen)
+        if (toplevel->workspace != output->workspace || toplevel->floating ||
+            toplevel->fullscreen) {
             continue;
+        }
 
         toplevel_set_geom(toplevel, &new_geom);
     }
@@ -284,8 +314,9 @@ static void monocle(struct absn_output *output)
 
 void layout_arrange(struct absn_output *output)
 {
-    if (!output)
+    if (!output) {
         return;
+    }
 
     switch (output->workspace->layout) {
     case LAYOUT_TILE:

@@ -3,7 +3,8 @@
 
 #include "types.h"
 
-absn_toplevel *toplevel_at(absn_server *server, double lx, double ly, struct wlr_surface **surface, double *sx,
+absn_toplevel *toplevel_at(absn_server *server, double lx, double ly,
+                           struct wlr_surface **surface, double *sx,
                            double *sy);
 
 bool toplevel_is_unmanaged(absn_toplevel *toplevel);

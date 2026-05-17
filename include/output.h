@@ -11,5 +11,6 @@ void output_destroy(struct wl_listener *listener, void *data);
 void output_layout_change(struct wl_listener *listener, void *data);
 
 void update_focused_output(absn_server *server);
+void output_arrange(absn_output *output);
 
 #endif

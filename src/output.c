@@ -17,8 +17,9 @@ void output_frame(struct wl_listener *listener, void *data)
     absn_toplevel *toplevel;
     wl_list_for_each(toplevel, &output->server->toplevels, link)
     {
-        if (toplevel->resizing && toplevel->output == output)
+        if (toplevel->resizing && toplevel->output == output) {
             goto skip;
+        }
     }
 
     wlr_scene_output_commit(scene_output, NULL);
@@ -29,7 +30,8 @@ skip:
 
 void output_request_state(struct wl_listener *listener, void *data)
 {
-    struct absn_output *output = wl_container_of(listener, output, request_state);
+    struct absn_output *output =
+        wl_container_of(listener, output, request_state);
     const struct wlr_output_event_request_state *event = data;
     wlr_output_commit_state(output->wlr, event->state);
 }
@@ -37,7 +39,8 @@ void output_request_state(struct wl_listener *listener, void *data)
 void output_destroy(struct wl_listener *listener, void *data)
 {
     UNUSED(data);
-    struct absn_output *output = wl_container_of(listener, output, request_state);
+    struct absn_output *output =
+        wl_container_of(listener, output, request_state);
 
     wl_list_remove(&output->frame.link);
     wl_list_remove(&output->request_state.link);
@@ -50,7 +53,8 @@ void output_layout_change(struct wl_listener *listener, void *data)
 {
     UNUSED(data);
     absn_server *server = wl_container_of(listener, server, layout_change);
-    struct wlr_output_configuration_v1 *config = wlr_output_configuration_v1_create();
+    struct wlr_output_configuration_v1 *config =
+        wlr_output_configuration_v1_create();
 
     absn_toplevel *toplevel = NULL;
     absn_output *output;
@@ -58,45 +62,57 @@ void output_layout_change(struct wl_listener *listener, void *data)
 
     wl_list_for_each(output, &server->outputs, link)
     {
-        if (output->wlr->enabled)
+        if (output->wlr->enabled) {
             continue;
-        config_head = wlr_output_configuration_head_v1_create(config, output->wlr);
+        }
+        config_head =
+            wlr_output_configuration_head_v1_create(config, output->wlr);
         config_head->state.enabled = 0;
         wlr_output_layout_remove(server->output_layout, output->wlr);
 
         // closemon(m);
-        // m->m = m->w = (struct wlr_box){0};
+        output->geom = output->usable_area = (struct wlr_box){0};
     }
 
     wl_list_for_each(output, &server->outputs, link)
     {
-        if (output->wlr->enabled && !wlr_output_layout_get(server->output_layout, output->wlr))
-            wlr_output_layout_add_auto(server->output_layout, toplevel->output->wlr);
+        if (output->wlr->enabled &&
+            !wlr_output_layout_get(server->output_layout, output->wlr)) {
+            wlr_output_layout_add_auto(server->output_layout,
+                                       toplevel->output->wlr);
+        }
     }
 
     struct wlr_box layout_geom;
     wlr_output_layout_get_box(server->output_layout, NULL, &layout_geom);
 
-    wlr_scene_node_set_position(&server->bg->node, layout_geom.x, layout_geom.y);
+    wlr_scene_node_set_position(&server->bg->node, layout_geom.x,
+                                layout_geom.y);
     wlr_scene_rect_set_size(server->bg, layout_geom.width, layout_geom.height);
 
     wl_list_for_each(output, &server->outputs, link)
     {
-        if (!output->wlr->enabled)
+        if (!output->wlr->enabled) {
             continue;
-        config_head = wlr_output_configuration_head_v1_create(config, output->wlr);
+        }
+        config_head =
+            wlr_output_configuration_head_v1_create(config, output->wlr);
 
-        wlr_output_layout_get_box(server->output_layout, output->wlr, &output->geom);
+        wlr_output_layout_get_box(server->output_layout, output->wlr,
+                                  &output->geom);
         output->usable_area = output->geom;
 
-        if ((toplevel = focus_get_topmost(server)) && toplevel->fullscreen)
-            toplevel_set_size(toplevel, output->geom.width, output->geom.height);
+        if ((toplevel = focus_get_topmost(server)) && toplevel->fullscreen) {
+            toplevel_set_size(toplevel, output->geom.width,
+                              output->geom.height);
+        }
 
         config_head->state.x = output->geom.x;
         config_head->state.y = output->geom.y;
 
-        if (!server->focused_output)
+        if (!server->focused_output) {
             server->focused_output = output;
+        }
     }
 
     if (server->focused_output && server->focused_output->wlr->enabled) {
@@ -121,11 +137,43 @@ void update_focused_output(absn_server *server)
     int32_t cursor_y = server->cursor->y;
     wl_list_for_each(output, &server->outputs, link)
     {
-        bool cursor_in_output_x = cursor_x >= output->geom.x && cursor_x <= output->geom.x + output->geom.width;
-        bool cursor_in_output_y = cursor_y >= output->geom.y && cursor_y <= output->geom.y + output->geom.height;
+        bool cursor_in_output_x =
+            cursor_x >= output->geom.x &&
+            cursor_x <= output->geom.x + output->geom.width;
+        bool cursor_in_output_y =
+            cursor_y >= output->geom.y &&
+            cursor_y <= output->geom.y + output->geom.height;
         if (cursor_in_output_x && cursor_in_output_y) {
             server->focused_output = output;
             break;
         }
+    }
+}
+
+void output_arrange(absn_output *output)
+{
+    if (!output->wlr->enabled) {
+        return;
+    }
+    absn_server *server = output->server;
+    bool enabled;
+    absn_toplevel *toplevel;
+    wl_list_for_each(toplevel, &server->toplevels, link)
+    {
+        if (toplevel->output == output) {
+            enabled = output->workspace == toplevel->workspace;
+            wlr_scene_node_set_enabled(&toplevel->scene_tree->node, enabled);
+        }
+    }
+
+    wl_list_for_each(toplevel, &server->toplevels, link)
+    {
+        if (toplevel->output != output ||
+            toplevel->scene_tree->node.parent ==
+                server->layers[LAYER_FULLSCREEN]) {
+            continue;
+        }
+        wlr_scene_node_reparent(&toplevel->scene_tree->node,
+                                toplevel->scene_tree->node.parent);
     }
 }
