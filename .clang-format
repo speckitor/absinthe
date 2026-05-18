@@ -2,6 +2,7 @@ BasedOnStyle: LLVM
 IndentWidth: 4
 TabWidth: 4
 UseTab: Never
+ColumnLimit: 200
 AllowShortFunctionsOnASingleLine: false
 SortIncludes: true
 InsertBraces: true

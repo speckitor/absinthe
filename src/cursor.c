@@ -59,8 +59,7 @@ static void apply_resize(absn_toplevel *toplevel, struct wlr_box *new_geom)
             new_geom->x = toplevel->geom.x;
         }
 
-        if (!(new_geom->height >= min_height &&
-              new_geom->height <= max_height)) {
+        if (!(new_geom->height >= min_height && new_geom->height <= max_height)) {
             new_geom->height = toplevel->geom.height;
             new_geom->y = toplevel->geom.y;
         }
@@ -143,8 +142,7 @@ void process_cursor_motion(absn_server *server, uint32_t time)
 {
     double sx, sy;
     struct wlr_surface *surface = NULL;
-    toplevel_at(server, server->cursor->x, server->cursor->y, &surface, &sx,
-                &sy);
+    toplevel_at(server, server->cursor->x, server->cursor->y, &surface, &sx, &sy);
     struct wlr_seat *seat = server->seat;
 
     if (server->cursor_mode == CURSOR_MOVE) {

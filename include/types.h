@@ -28,10 +28,10 @@
 #define MAX(A, B) (A) > (B) ? (A) : (B)
 #define MIN(A, B) (A) < (B) ? (A) : (B)
 /* macro for adding listener for event */
-#define LISTEN(L, C, E)                                                        \
-    do {                                                                       \
-        (L).notify = (C);                                                      \
-        wl_signal_add(&(E), &(L));                                             \
+#define LISTEN(L, C, E)                                                                                                                                                                                \
+    do {                                                                                                                                                                                               \
+        (L).notify = (C);                                                                                                                                                                              \
+        wl_signal_add(&(E), &(L));                                                                                                                                                                     \
     } while (0);
 #define UNUSED(X) (void)(X)
 #define CLEANMASK(M) (M & ~WLR_MODIFIER_CAPS)
@@ -117,8 +117,8 @@ typedef struct {
     struct wl_listener new_xdg_deco;
 
     struct wlr_layer_shell_v1 *layer_shell;
-    struct wl_listener new_layer_surface;
     struct wlr_scene_tree *layers[LAYERS_COUNT];
+    struct wl_listener new_layer_surface;
 
 #ifdef XWAYLAND
     struct wlr_xwayland *xwayland;
@@ -194,7 +194,6 @@ typedef struct {
     struct wlr_scene_tree *popups;
 
     struct wlr_layer_surface_v1 *wlr;
-    struct wl_listener map;
     struct wl_listener unmap;
     struct wl_listener commit;
     struct wl_listener new_popup;
