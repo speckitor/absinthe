@@ -1,49 +1,10 @@
 #include <wayland-server-core.h>
-#include <wlr/util/log.h>
 
 #include "config.h"
 #include "layout.h"
 #include "toplevel.h"
 #include "types.h"
 #include "xdg-shell-protocol.h"
-
-/*
- * returns toplevel at given cursor coordinates,
- * its surface and coordinates inside of it
- * to process input event
- */
-absn_toplevel *toplevel_at(absn_server *server, double lx, double ly, struct wlr_surface **surface, double *sx, double *sy)
-{
-    struct wlr_scene_node *node = wlr_scene_node_at(&server->scene->tree.node, lx, ly, sx, sy);
-    if (!node) {
-        return NULL;
-    }
-
-    struct wlr_scene_buffer *scene_buffer = NULL;
-    struct wlr_scene_surface *scene_surface = NULL;
-
-    switch (node->type) {
-    case WLR_SCENE_NODE_BUFFER:
-        scene_buffer = wlr_scene_buffer_from_node(node);
-        scene_surface = wlr_scene_surface_try_from_buffer(scene_buffer);
-        if (!scene_surface) {
-            return NULL;
-        }
-
-        *surface = scene_surface->surface;
-        struct wlr_scene_tree *tree = node->parent;
-        while (tree && !tree->node.data) {
-            tree = tree->node.parent;
-        }
-        return tree->node.data;
-        break;
-    case WLR_SCENE_NODE_RECT:
-        return node->data;
-        break;
-    default:
-        return NULL;
-    }
-}
 
 /*
  * if toplevel is unmanaged we should not

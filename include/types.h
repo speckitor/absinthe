@@ -183,6 +183,7 @@ struct absn_output {
 };
 
 typedef struct {
+    int type;
     struct wl_list link;
 
     absn_server *server;
@@ -201,6 +202,8 @@ typedef struct {
 } absn_layer_surface;
 
 struct absn_toplevel {
+    int type;
+
     struct wl_list link;
     struct wl_list flink; /* link for focus stack */
     uint32_t tag;
@@ -223,7 +226,6 @@ struct absn_toplevel {
     struct wlr_box geom;
     struct wlr_box prev_geom;
 
-    int type;
     union {
         struct wlr_xdg_toplevel *xdg;
         struct wlr_xwayland_surface *xw;

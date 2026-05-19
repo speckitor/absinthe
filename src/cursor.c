@@ -1,9 +1,50 @@
 #include <wayland-server-core.h>
-#include <wlr/util/log.h>
 
+#include "cursor.h"
 #include "layout.h"
 #include "toplevel.h"
 #include "types.h"
+
+/*
+ * returns surface at given cursor coordinates
+ * and coordinates inside of it to process input event
+ */
+void client_from_coords(absn_server *server, double x, double y, struct wlr_surface **rsurface, absn_toplevel **rtoplevel, absn_layer_surface **rlayer_surface, double *rx, double *ry)
+{
+    struct wlr_scene_node *pnode = NULL, *node = NULL;
+    struct wlr_scene_buffer *buffer = NULL;
+    struct wlr_surface *surface = NULL;
+
+    absn_layer_surface *layer_surface = NULL;
+    absn_toplevel *toplevel = NULL;
+
+    for (int i = LAYERS_COUNT - 1; i > 0; --i) {
+        node = wlr_scene_node_at(&server->layers[i]->node, x, y, rx, ry);
+        if (!node) {
+            continue;
+        }
+
+        if (node->type == WLR_SCENE_NODE_BUFFER) {
+            buffer = wlr_scene_buffer_from_node(node);
+            surface = wlr_scene_surface_try_from_buffer(buffer)->surface;
+        }
+
+        for (pnode = node; pnode && !toplevel; pnode = &pnode->parent->node)
+            toplevel = pnode->data;
+
+        if (toplevel && toplevel->type == LAYER_SURFACE) {
+            toplevel = NULL;
+            layer_surface = pnode->data;
+        }
+    }
+
+    if (rsurface)
+        *rsurface = surface;
+    if (rtoplevel)
+        *rtoplevel = toplevel;
+    if (rlayer_surface)
+        *rlayer_surface = layer_surface;
+}
 
 void reset_cursor_mode(absn_server *server)
 {
@@ -140,9 +181,9 @@ static void process_cursor_resize(absn_server *server)
 
 void process_cursor_motion(absn_server *server, uint32_t time)
 {
-    double sx, sy;
+    double x, y;
     struct wlr_surface *surface = NULL;
-    toplevel_at(server, server->cursor->x, server->cursor->y, &surface, &sx, &sy);
+    client_from_coords(server, server->cursor->x, server->cursor->y, &surface, NULL, NULL, &x, &y);
     struct wlr_seat *seat = server->seat;
 
     if (server->cursor_mode == CURSOR_MOVE) {
@@ -154,8 +195,8 @@ void process_cursor_motion(absn_server *server, uint32_t time)
     }
 
     if (surface) {
-        wlr_seat_pointer_notify_enter(seat, surface, sx, sy);
-        wlr_seat_pointer_notify_motion(seat, time, sx, sy);
+        wlr_seat_pointer_notify_enter(seat, surface, x, y);
+        wlr_seat_pointer_notify_motion(seat, time, x, y);
     } else {
         wlr_seat_pointer_clear_focus(seat);
     }

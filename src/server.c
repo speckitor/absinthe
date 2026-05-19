@@ -1,8 +1,8 @@
 #include <assert.h>
 #include <stdlib.h>
+
 #include <wlr/types/wlr_layer_shell_v1.h>
 #include <wlr/types/wlr_xcursor_manager.h>
-#include <wlr/util/log.h>
 
 #include "config.h"
 #include "cursor.h"
@@ -143,6 +143,7 @@ void new_layer_surface(struct wl_listener *listener, void *data)
     }
 
     absn_layer_surface *layer_surface = calloc(1, sizeof(*layer_surface));
+    layer_surface->type = LAYER_SURFACE;
     layer_surface->server = server;
     layer_surface->wlr = surface;
     layer_surface->output = surface->output->data;
@@ -227,9 +228,15 @@ void cursor_button(struct wl_listener *listener, void *data)
     if (event->state == WL_POINTER_BUTTON_STATE_RELEASED) {
         reset_cursor_mode(server);
     } else {
-        double sx, sy;
+        double x, y;
         struct wlr_surface *surface = NULL;
-        absn_toplevel *toplevel = toplevel_at(server, server->cursor->x, server->cursor->y, &surface, &sx, &sy);
+        absn_toplevel *toplevel;
+        absn_layer_surface *layer_surface;
+        client_from_coords(server, server->cursor->x, server->cursor->y, &surface, &toplevel, &layer_surface, &x, &y);
+
+        if (server->exclusive_focus) {
+            goto handle;
+        }
 
         if (!toplevel) {
             goto handle;
@@ -252,10 +259,10 @@ void cursor_button(struct wl_listener *listener, void *data)
         server->grab_x = server->cursor->x;
         server->grab_y = server->cursor->y;
 
-        int32_t lx, ly;
-        wlr_scene_node_coords(&toplevel->scene_tree->node, &lx, &ly);
-        server->grab_geom.x = lx;
-        server->grab_geom.y = ly;
+        int32_t nx, ny;
+        wlr_scene_node_coords(&toplevel->scene_tree->node, &nx, &ny);
+        server->grab_geom.x = nx;
+        server->grab_geom.y = ny;
         server->grab_geom.width = toplevel->geom.width;
         server->grab_geom.height = toplevel->geom.height;
 
@@ -266,13 +273,13 @@ void cursor_button(struct wl_listener *listener, void *data)
         int32_t width = toplevel->xdg->base->geometry.width;
         int32_t height = toplevel->xdg->base->geometry.height;
 
-        if (server->grab_x > (lx + width / 2) && server->grab_y > (ly + height / 2)) {
+        if (server->grab_x > (x + width / 2) && server->grab_y > (y + height / 2)) {
             server->resize_corner = BOTTOM_RIGHT;
             wlr_cursor_set_xcursor(server->cursor, server->cursor_mgr, "se-resize");
-        } else if (server->grab_x < (lx + width / 2) && server->grab_y > (ly + height / 2)) {
+        } else if (server->grab_x < (x + width / 2) && server->grab_y > (y + height / 2)) {
             server->resize_corner = BOTTOM_LEFT;
             wlr_cursor_set_xcursor(server->cursor, server->cursor_mgr, "sw-resize");
-        } else if (server->grab_x > (lx + width / 2) && server->grab_y < (ly + height / 2)) {
+        } else if (server->grab_x > (x + width / 2) && server->grab_y < (y + height / 2)) {
             server->resize_corner = TOP_RIGHT;
             wlr_cursor_set_xcursor(server->cursor, server->cursor_mgr, "ne-resize");
         } else {
