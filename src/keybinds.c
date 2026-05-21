@@ -202,7 +202,7 @@ void switch_workspace(absn_server *server, const absn_arg *arg)
         }
     }
 
-    if (toplevels_count == 0) {
+    if (toplevels_count == 0 && server->focused_output == server->workspaces[i].output) {
         server->focused_output->workspace->output = NULL;
     }
 

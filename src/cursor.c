@@ -76,6 +76,11 @@ static void process_cursor_move(absn_server *server)
     if (!toplevel->floating) {
         toplevel_set_floating(toplevel, true);
     }
+
+    if (toplevel->output != server->focused_output) {
+        toplevel->output = server->focused_output;
+        toplevel->workspace = toplevel->output->workspace;
+    }
 }
 
 static void apply_resize(absn_toplevel *toplevel, struct wlr_box *new_geom)
