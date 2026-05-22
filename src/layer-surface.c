@@ -1,4 +1,5 @@
 #include <wlr/types/wlr_layer_shell_v1.h>
+#include <stdlib.h>
 
 #include "focus.h"
 #include "layers.h"

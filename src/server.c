@@ -259,10 +259,10 @@ void cursor_button(struct wl_listener *listener, void *data)
         server->grab_x = server->cursor->x;
         server->grab_y = server->cursor->y;
 
-        int32_t nx, ny;
-        wlr_scene_node_coords(&toplevel->scene_tree->node, &nx, &ny);
-        server->grab_geom.x = nx;
-        server->grab_geom.y = ny;
+        int32_t tx, ty;
+        wlr_scene_node_coords(&toplevel->scene_tree->node, &tx, &ty);
+        server->grab_geom.x = tx;
+        server->grab_geom.y = ty;
         server->grab_geom.width = toplevel->geom.width;
         server->grab_geom.height = toplevel->geom.height;
 
@@ -273,13 +273,13 @@ void cursor_button(struct wl_listener *listener, void *data)
         int32_t width = toplevel->xdg->base->geometry.width;
         int32_t height = toplevel->xdg->base->geometry.height;
 
-        if (server->grab_x > (x + width / 2) && server->grab_y > (y + height / 2)) {
+        if (server->grab_x > (tx + width / 2) && server->grab_y > (ty + height / 2)) {
             server->resize_corner = BOTTOM_RIGHT;
             wlr_cursor_set_xcursor(server->cursor, server->cursor_mgr, "se-resize");
-        } else if (server->grab_x < (x + width / 2) && server->grab_y > (y + height / 2)) {
+        } else if (server->grab_x < (tx + width / 2) && server->grab_y > (ty + height / 2)) {
             server->resize_corner = BOTTOM_LEFT;
             wlr_cursor_set_xcursor(server->cursor, server->cursor_mgr, "sw-resize");
-        } else if (server->grab_x > (x + width / 2) && server->grab_y < (y + height / 2)) {
+        } else if (server->grab_x > (tx + width / 2) && server->grab_y < (ty + height / 2)) {
             server->resize_corner = TOP_RIGHT;
             wlr_cursor_set_xcursor(server->cursor, server->cursor_mgr, "ne-resize");
         } else {

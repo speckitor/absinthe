@@ -1,6 +1,7 @@
 #include <wayland-server-core.h>
 
 #include "config.h"
+#include "layers.h"
 #include "layout.h"
 #include "toplevel.h"
 #include "types.h"
@@ -96,7 +97,7 @@ void toplevel_set_size(absn_toplevel *toplevel, int32_t width, int32_t height)
         wlr_xwayland_surface_configure(toplevel->xw, toplevel->geom.x, toplevel->geom.y, width - 2 * bw, height - 2 * toplevel->bw);
         /* manually update position */
         toplevel_set_pos(toplevel, toplevel->geom.x, toplevel->geom.y);
-    }
+    } else
 #endif
 
     wlr_scene_subsurface_tree_set_clip(&toplevel->scene_surface->node, &clip);
@@ -133,7 +134,9 @@ void toplevel_set_fullscreen(absn_toplevel *toplevel, bool fullscreen)
 
     absn_output *output = toplevel->server->focused_output;
     toplevel->fullscreen = fullscreen;
-    wlr_xdg_toplevel_set_fullscreen(toplevel->xdg, fullscreen);
+    if (toplevel->type == TOPLEVEL_XDG) {
+        wlr_xdg_toplevel_set_fullscreen(toplevel->xdg, fullscreen);
+    }
 
     if (fullscreen) {
         toplevel->prev_geom = toplevel->geom;
@@ -154,6 +157,7 @@ void toplevel_set_fullscreen(absn_toplevel *toplevel, bool fullscreen)
     toplevel_update_borders_geom(toplevel);
 
     layout_arrange(toplevel->output);
+    layers_arrange(toplevel->output);
 }
 
 void toplevel_set_border_color(absn_toplevel *toplevel, const float color[4])
@@ -161,6 +165,7 @@ void toplevel_set_border_color(absn_toplevel *toplevel, const float color[4])
     if (!toplevel) {
         return;
     }
+
     for (int i = 0; i < 4; ++i) {
         wlr_scene_rect_set_color(toplevel->border[i], color);
     }

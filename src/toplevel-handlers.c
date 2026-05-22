@@ -23,8 +23,6 @@ void toplevel_map(struct wl_listener *listener, void *data)
         wlr_xdg_toplevel_set_maximized(toplevel->xdg, true);
     }
 
-    toplevel->bw = toplevel_is_unmanaged(toplevel) ? 0 : TOPLEVEL_BW;
-
 #ifdef XWAYLAND
     if (toplevel->type == TOPLEVEL_X11) {
         toplevel->scene_surface = wlr_scene_subsurface_tree_create(toplevel->scene_tree, toplevel->xw->surface);
@@ -37,6 +35,12 @@ void toplevel_map(struct wl_listener *listener, void *data)
 
     toplevel_get_geom(toplevel);
     toplevel->bw = toplevel_is_unmanaged(toplevel) ? 0 : TOPLEVEL_BW;
+
+#ifdef XWAYLAND
+    if (toplevel->type == TOPLEVEL_X11) {
+        toplevel->xw->surface->data = toplevel;
+    }
+#endif
 
     for (int i = 0; i < 4; ++i) {
         toplevel->border[i] = wlr_scene_rect_create(toplevel->scene_tree, 0, 0, unfocused_bc);

@@ -1,3 +1,5 @@
+#include <stdlib.h>
+
 #include "types.h"
 
 void xdg_popup_commit(struct wl_listener *listener, void *data)
