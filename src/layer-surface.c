@@ -1,5 +1,5 @@
-#include <wlr/types/wlr_layer_shell_v1.h>
 #include <stdlib.h>
+#include <wlr/types/wlr_layer_shell_v1.h>
 
 #include "focus.h"
 #include "layers.h"
@@ -54,6 +54,7 @@ void layer_surface_commit(struct wl_listener *listener, void *data)
     }
 
     layers_arrange(layer_surface->output);
+    wlr_surface_send_enter(surface->surface, surface->output);
 }
 
 void layer_surface_new_popup(struct wl_listener *listener, void *data)

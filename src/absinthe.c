@@ -50,7 +50,8 @@ static int setup(absn_server *server)
     server->scene = wlr_scene_create();
     if (wlr_renderer_get_texture_formats(server->renderer, WLR_BUFFER_CAP_DMABUF)) {
         wlr_drm_create(server->display, server->renderer);
-        wlr_scene_set_linux_dmabuf_v1(server->scene, wlr_linux_dmabuf_v1_create_with_renderer(server->display, 5, server->renderer));
+        wlr_scene_set_linux_dmabuf_v1(server->scene,
+                                      wlr_linux_dmabuf_v1_create_with_renderer(server->display, 5, server->renderer));
     }
     server->bg = wlr_scene_rect_create(&server->scene->tree, 0, 0, bgcolor);
 
@@ -74,7 +75,8 @@ static int setup(absn_server *server)
     wlr_export_dmabuf_manager_v1_create(server->display);
     wlr_ext_foreign_toplevel_list_v1_create(server->display, 1);
 
-    wlr_server_decoration_manager_set_default_mode(wlr_server_decoration_manager_create(server->display), WLR_SERVER_DECORATION_MANAGER_MODE_SERVER);
+    wlr_server_decoration_manager_set_default_mode(wlr_server_decoration_manager_create(server->display),
+                                                   WLR_SERVER_DECORATION_MANAGER_MODE_SERVER);
     server->xdg_deco_mgr = wlr_xdg_decoration_manager_v1_create(server->display);
     LISTEN(server->new_xdg_deco, new_xdg_decoration, server->xdg_deco_mgr->events.new_toplevel_decoration);
 

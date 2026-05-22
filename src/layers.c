@@ -19,7 +19,8 @@ static void layer_arrange(absn_output *output, struct wl_list *list, struct wlr_
         }
 
         wlr_scene_layer_surface_v1_configure(layer_surface->scene_layer, &output->geom, usable_area);
-        wlr_scene_node_set_position(&layer_surface->popups->node, layer_surface->scene_tree->node.x, layer_surface->scene_tree->node.y);
+        wlr_scene_node_set_position(&layer_surface->popups->node, layer_surface->scene_tree->node.x,
+                                    layer_surface->scene_tree->node.y);
     }
 }
 
@@ -64,7 +65,8 @@ void layers_arrange(absn_output *output)
             output->server->exclusive_focus = layer_surface;
             struct wlr_keyboard *keyboard = wlr_seat_get_keyboard(output->server->seat);
             if (keyboard) {
-                wlr_seat_keyboard_notify_enter(output->server->seat, layer_surface->wlr->surface, keyboard->keycodes, keyboard->num_keycodes, &keyboard->modifiers);
+                wlr_seat_keyboard_notify_enter(output->server->seat, layer_surface->wlr->surface, keyboard->keycodes,
+                                               keyboard->num_keycodes, &keyboard->modifiers);
             }
             return;
         }

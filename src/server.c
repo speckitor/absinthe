@@ -156,7 +156,8 @@ void new_layer_surface(struct wl_listener *listener, void *data)
     struct wlr_scene_tree *scene_layer = server->layers[layermap[surface->pending.layer]];
     layer_surface->scene_layer = wlr_scene_layer_surface_v1_create(scene_layer, surface);
     layer_surface->scene_tree = layer_surface->scene_layer->tree;
-    layer_surface->popups = wlr_scene_tree_create(surface->current.layer < ZWLR_LAYER_SHELL_V1_LAYER_TOP ? server->layers[LAYER_TOP] : scene_layer);
+    layer_surface->popups = wlr_scene_tree_create(
+        surface->current.layer < ZWLR_LAYER_SHELL_V1_LAYER_TOP ? server->layers[LAYER_TOP] : scene_layer);
 
     wl_list_insert(&layer_surface->output->layers[surface->pending.layer], &layer_surface->link);
     wlr_surface_send_enter(surface->surface, surface->output);
@@ -300,7 +301,8 @@ void cursor_axis(struct wl_listener *listener, void *data)
 {
     absn_server *server = wl_container_of(listener, server, cursor_axis);
     struct wlr_pointer_axis_event *event = data;
-    wlr_seat_pointer_notify_axis(server->seat, event->time_msec, event->orientation, event->delta, event->delta_discrete, event->source, event->relative_direction);
+    wlr_seat_pointer_notify_axis(server->seat, event->time_msec, event->orientation, event->delta,
+                                 event->delta_discrete, event->source, event->relative_direction);
 }
 
 void cursor_frame(struct wl_listener *listener, void *data)

@@ -9,7 +9,8 @@
  * returns surface at given cursor coordinates
  * and coordinates inside of it to process input event
  */
-void client_from_coords(absn_server *server, double x, double y, struct wlr_surface **rsurface, absn_toplevel **rtoplevel, absn_layer_surface **rlayer_surface, double *rx, double *ry)
+void client_from_coords(absn_server *server, double x, double y, struct wlr_surface **rsurface,
+                        absn_toplevel **rtoplevel, absn_layer_surface **rlayer_surface, double *rx, double *ry)
 {
     struct wlr_scene_node *pnode = NULL, *node = NULL;
     struct wlr_scene_buffer *buffer = NULL;

@@ -1,5 +1,5 @@
-#include <stdnoreturn.h>
 #include <stdlib.h>
+#include <stdnoreturn.h>
 #include <unistd.h>
 #include <wayland-server-core.h>
 #include <wlr/util/log.h>

@@ -28,10 +28,10 @@
 #define MAX(A, B) (A) > (B) ? (A) : (B)
 #define MIN(A, B) (A) < (B) ? (A) : (B)
 /* macro for adding listener for event */
-#define LISTEN(L, C, E)                                                                                                                                                                                \
-    do {                                                                                                                                                                                               \
-        (L).notify = (C);                                                                                                                                                                              \
-        wl_signal_add(&(E), &(L));                                                                                                                                                                     \
+#define LISTEN(L, C, E)                                                                                                \
+    do {                                                                                                               \
+        (L).notify = (C);                                                                                              \
+        wl_signal_add(&(E), &(L));                                                                                     \
     } while (0);
 #define UNUSED(X) (void)(X)
 #define CLEANMASK(M) (M & ~WLR_MODIFIER_CAPS)
@@ -51,7 +51,7 @@ enum {
     BOTTOM_RIGHT,
 };
 
-/* toplevel types */
+/* client types */
 enum {
     TOPLEVEL_XDG,
     TOPLEVEL_X11,
@@ -217,6 +217,8 @@ struct absn_toplevel {
     int32_t bw;
     struct wlr_scene_rect *border[4];
     struct wlr_xdg_toplevel_decoration_v1 *deco;
+
+    bool can_be_tiled;
 
     bool floating;
     bool fullscreen;

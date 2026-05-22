@@ -21,7 +21,8 @@ static bool handle_keybind(absn_server *server, uint32_t mods, xkb_keysym_t keys
 {
     int nkeyb = sizeof(keybinds) / sizeof(keybinds[0]);
     for (int i = 0; i < nkeyb; ++i) {
-        if (CLEANMASK(keybinds[i].mods) == CLEANMASK(mods) && xkb_keysym_to_lower(keybinds[i].keysym) == xkb_keysym_to_lower(keysym)) {
+        if (CLEANMASK(keybinds[i].mods) == CLEANMASK(mods) &&
+            xkb_keysym_to_lower(keybinds[i].keysym) == xkb_keysym_to_lower(keysym)) {
             keybinds[i].cb(server, &keybinds[i].arg);
             return true;
         }

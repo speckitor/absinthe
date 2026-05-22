@@ -22,6 +22,14 @@ bool toplevel_is_unmanaged(absn_toplevel *toplevel)
     return false;
 }
 
+bool toplevel_wants_focus(absn_toplevel *toplevel)
+{
+#ifdef XWAYLAND
+    return toplevel_is_unmanaged(toplevel) && wlr_xwayland_surface_override_redirect_wants_focus(toplevel->xw) &&
+           wlr_xwayland_surface_icccm_input_model(toplevel->xw) != WLR_ICCCM_INPUT_MODEL_NONE;
+#endif
+}
+
 /* used only to get initial window size */
 void toplevel_get_geom(absn_toplevel *toplevel)
 {
@@ -69,7 +77,8 @@ void toplevel_set_pos(absn_toplevel *toplevel, int32_t x, int32_t y)
 
 void toplevel_set_size(absn_toplevel *toplevel, int32_t width, int32_t height)
 {
-    if (width <= 2 * toplevel->bw || height <= 2 * toplevel->bw || (width == toplevel->geom.width && height == toplevel->geom.height)) {
+    if (width <= 2 * toplevel->bw || height <= 2 * toplevel->bw ||
+        (width == toplevel->geom.width && height == toplevel->geom.height)) {
         return;
     }
     toplevel->geom.width = width;
@@ -94,13 +103,14 @@ void toplevel_set_size(absn_toplevel *toplevel, int32_t width, int32_t height)
     }
 #ifdef XWAYLAND
     else if (toplevel->type == TOPLEVEL_X11) {
-        wlr_xwayland_surface_configure(toplevel->xw, toplevel->geom.x, toplevel->geom.y, width - 2 * bw, height - 2 * toplevel->bw);
+        wlr_xwayland_surface_configure(toplevel->xw, toplevel->geom.x, toplevel->geom.y, width - 2 * bw,
+                                       height - 2 * toplevel->bw);
         /* manually update position */
         toplevel_set_pos(toplevel, toplevel->geom.x, toplevel->geom.y);
-    } else
+    }
 #endif
 
-    wlr_scene_subsurface_tree_set_clip(&toplevel->scene_surface->node, &clip);
+        wlr_scene_subsurface_tree_set_clip(&toplevel->scene_surface->node, &clip);
 }
 
 void toplevel_set_geom(absn_toplevel *toplevel, struct wlr_box *geom)
@@ -112,6 +122,10 @@ void toplevel_set_geom(absn_toplevel *toplevel, struct wlr_box *geom)
 void toplevel_set_floating(absn_toplevel *toplevel, bool floating)
 {
     if (!toplevel || toplevel->floating == floating) {
+        return;
+    }
+
+    if (floating && !toplevel->can_be_tiled) {
         return;
     }
 

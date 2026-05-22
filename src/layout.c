@@ -44,7 +44,8 @@ static void tile(struct absn_output *output)
                 break;
             }
         }
-        new_geom.x = output->usable_area.x + og, new_geom.y = output->usable_area.y + og, new_geom.width = output->usable_area.width - 2 * og, new_geom.height = output->usable_area.height - 2 * og,
+        new_geom.x = output->usable_area.x + og, new_geom.y = output->usable_area.y + og,
+        new_geom.width = output->usable_area.width - 2 * og, new_geom.height = output->usable_area.height - 2 * og,
 
         toplevel_set_geom(toplevel, &new_geom);
         return;
@@ -56,7 +57,8 @@ static void tile(struct absn_output *output)
     int mcount = output->workspace->count;
     float msize = output->workspace->size;
 
-    int32_t main_stack_width = (toplevels_count <= mcount) ? output->usable_area.width - 2 * og : msize * (output->usable_area.width - 2 * og);
+    int32_t main_stack_width =
+        (toplevels_count <= mcount) ? output->usable_area.width - 2 * og : msize * (output->usable_area.width - 2 * og);
     int32_t w = output->usable_area.width - main_stack_width - 2 * og - lg;
 
     int32_t pure_h;
@@ -163,7 +165,8 @@ static void tile_left(struct absn_output *output)
                 break;
             }
         }
-        new_geom.x = output->usable_area.x + og, new_geom.y = output->usable_area.y + og, new_geom.width = output->usable_area.width - 2 * og, new_geom.height = output->usable_area.height - 2 * og,
+        new_geom.x = output->usable_area.x + og, new_geom.y = output->usable_area.y + og,
+        new_geom.width = output->usable_area.width - 2 * og, new_geom.height = output->usable_area.height - 2 * og,
 
         toplevel_set_geom(toplevel, &new_geom);
         return;
@@ -175,7 +178,8 @@ static void tile_left(struct absn_output *output)
     int mcount = output->workspace->count;
     float msize = output->workspace->size;
 
-    int32_t main_stack_width = (toplevels_count <= mcount) ? output->usable_area.width - 2 * og : msize * (output->usable_area.width - 2 * og);
+    int32_t main_stack_width =
+        (toplevels_count <= mcount) ? output->usable_area.width - 2 * og : msize * (output->usable_area.width - 2 * og);
     int32_t w = output->usable_area.width - main_stack_width - 2 * og - lg;
 
     int32_t pure_h;

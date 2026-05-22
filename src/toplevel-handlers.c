@@ -17,10 +17,20 @@ void toplevel_map(struct wl_listener *listener, void *data)
     toplevel->scene_tree->node.data = toplevel;
     wlr_scene_node_set_enabled(&toplevel->scene_tree->node, toplevel_is_unmanaged(toplevel));
 
-    if (toplevel->type != TOPLEVEL_X11 && wl_resource_get_version(toplevel->xdg->resource) >= XDG_TOPLEVEL_STATE_TILED_RIGHT_SINCE_VERSION) {
+    update_focused_output(toplevel->server);
+    toplevel->output = toplevel->server->focused_output;
+    toplevel->workspace = toplevel->output->workspace;
+    toplevel->fullscreen = false;
+
+#ifdef XWAYLAND
+    if (toplevel->type == TOPLEVEL_X11) {
+        toplevel->xw->surface->data = toplevel;
+    }
+#endif
+
+    if (toplevel->type != TOPLEVEL_X11 &&
+        wl_resource_get_version(toplevel->xdg->resource) >= XDG_TOPLEVEL_STATE_TILED_RIGHT_SINCE_VERSION) {
         wlr_xdg_toplevel_set_tiled(toplevel->xdg, WLR_EDGE_TOP | WLR_EDGE_BOTTOM | WLR_EDGE_LEFT | WLR_EDGE_RIGHT);
-    } else {
-        wlr_xdg_toplevel_set_maximized(toplevel->xdg, true);
     }
 
 #ifdef XWAYLAND
@@ -36,27 +46,42 @@ void toplevel_map(struct wl_listener *listener, void *data)
     toplevel_get_geom(toplevel);
     toplevel->bw = toplevel_is_unmanaged(toplevel) ? 0 : TOPLEVEL_BW;
 
-#ifdef XWAYLAND
-    if (toplevel->type == TOPLEVEL_X11) {
-        toplevel->xw->surface->data = toplevel;
+    if (toplevel_is_unmanaged(toplevel)) {
+        toplevel_set_floating(toplevel, true);
+        toplevel_set_size(toplevel, toplevel->geom.width, toplevel->geom.height);
+        if (toplevel_wants_focus(toplevel)) {
+            focus_toplevel(toplevel);
+            server->exclusive_focus = toplevel;
+        }
+        goto unset_fullscreen;
     }
-#endif
 
     for (int i = 0; i < 4; ++i) {
         toplevel->border[i] = wlr_scene_rect_create(toplevel->scene_tree, 0, 0, unfocused_bc);
         toplevel->border[i]->node.data = toplevel;
     }
 
-    update_focused_output(toplevel->server);
-    toplevel->output = toplevel->server->focused_output;
-    toplevel->workspace = toplevel->output->workspace;
-    toplevel->fullscreen = false;
-
     wl_list_insert(&toplevel->server->toplevels, &toplevel->link);
     wl_list_insert(&toplevel->server->focus_stack, &toplevel->flink);
 
-    layout_arrange(toplevel->output);
     focus_toplevel(focus_get_topmost(toplevel->server));
+
+    if (toplevel->type == TOPLEVEL_XDG && toplevel->xdg->parent) {
+        toplevel->floating = 1;
+    } else if (toplevel->type == TOPLEVEL_X11 && toplevel->xw->parent) {
+        toplevel->floating = 1;
+    }
+
+unset_fullscreen:
+    absn_toplevel *t;
+    wl_list_for_each(t, &server->toplevels, link)
+    {
+        if (t->workspace == toplevel->workspace && t->fullscreen) {
+            toplevel_set_fullscreen(t, false);
+        }
+    }
+
+    layout_arrange(toplevel->output);
 }
 
 void toplevel_unmap(struct wl_listener *listener, void *data)
@@ -73,8 +98,10 @@ void toplevel_unmap(struct wl_listener *listener, void *data)
         toplevel->server->exclusive_focus = NULL;
     }
 
-    wl_list_remove(&toplevel->link);
-    wl_list_remove(&toplevel->flink);
+    if (!toplevel_is_unmanaged(toplevel)) {
+        wl_list_remove(&toplevel->link);
+        wl_list_remove(&toplevel->flink);
+    }
 
     layout_arrange(toplevel->output);
     focus_toplevel(focus_get_topmost(toplevel->server));

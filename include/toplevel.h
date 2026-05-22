@@ -4,6 +4,7 @@
 #include "types.h"
 
 bool toplevel_is_unmanaged(absn_toplevel *toplevel);
+bool toplevel_wants_focus(absn_toplevel *toplevel);
 
 void toplevel_get_geom(absn_toplevel *toplevel);
 

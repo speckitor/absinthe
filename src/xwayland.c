@@ -1,5 +1,6 @@
 #ifdef XWAYLAND
 
+#include "config.h"
 #include "xwayland.h"
 #include "toplevel-handlers.h"
 #include "toplevel.h"
@@ -53,7 +54,16 @@ void xwayland_configure(struct wl_listener *listener, void *data)
 
 void xwayland_set_hints(struct wl_listener *listener, void *data)
 {
-    UNUSED(listener);
     UNUSED(data);
+    absn_toplevel *toplevel = wl_container_of(listener, toplevel, xw_set_hints);
+    if (toplevel == toplevel->server->focused_toplevel || !toplevel->xw->hints) {
+        return;
+    }
+
+    toplevel->urgent = xcb_icccm_wm_hints_get_urgency(toplevel->xw->hints);
+    struct wlr_surface *surface = toplevel->xw->surface;
+    if (toplevel->urgent && surface && surface->mapped) {
+        toplevel_set_border_color(toplevel, urgent_bc);
+    }
 }
 #endif
