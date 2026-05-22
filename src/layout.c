@@ -1,6 +1,7 @@
 #include <wlr/util/log.h>
 
 #include "config.h"
+#include "layers.h"
 #include "output.h"
 #include "toplevel.h"
 #include "types.h"

@@ -2,6 +2,7 @@
 #include <wayland-server-core.h>
 #include <wlr/util/log.h>
 
+#include "toplevel.h"
 #include "types.h"
 #include "xdg-decoration.h"
 
@@ -9,10 +10,7 @@ void toplevel_commit(struct wl_listener *listener, void *data)
 {
     UNUSED(data);
     absn_toplevel *toplevel = wl_container_of(listener, toplevel, commit);
-
-    if (toplevel->xdg->base->current.configure_serial < toplevel->resizing) {
-        return;
-    }
+    struct wlr_surface *surface = toplevel->xdg->base->surface;
 
     if (toplevel->xdg->base->initial_commit) {
         wlr_xdg_toplevel_set_activated(toplevel->xdg, false);
@@ -22,7 +20,7 @@ void toplevel_commit(struct wl_listener *listener, void *data)
             deco_request_mode(&toplevel->deco_request_mode, toplevel->deco);
         }
         /* let client set initial size */
-        toplevel->resizing = wlr_xdg_toplevel_set_size(toplevel->xdg, 0, 0);
+        // wlr_xdg_toplevel_set_size(toplevel->xdg, 0, 0);
         return;
     }
 
@@ -33,6 +31,4 @@ void toplevel_commit(struct wl_listener *listener, void *data)
         .height = toplevel->geom.height - toplevel->bw,
     };
     wlr_scene_subsurface_tree_set_clip(&toplevel->scene_surface->node, &clip);
-
-    toplevel->resizing = 0;
 }

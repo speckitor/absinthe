@@ -48,7 +48,7 @@ void toplevel_get_geom(absn_toplevel *toplevel)
     }
 }
 
-static void toplevel_update_borders_geom(absn_toplevel *toplevel)
+void toplevel_update_borders_geom(absn_toplevel *toplevel)
 {
     int32_t bw = toplevel->bw;
 
@@ -83,6 +83,28 @@ void toplevel_set_pos(absn_toplevel *toplevel, int32_t x, int32_t y)
     wlr_scene_node_set_position(&toplevel->scene_tree->node, x, y);
 }
 
+static struct wlr_scene_buffer *find_buffer(struct wlr_scene_tree *tree)
+{
+    struct wlr_scene_node *node;
+
+    wl_list_for_each(node, &tree->children, link) {
+
+        if (node->type == WLR_SCENE_NODE_BUFFER) {
+            return wlr_scene_buffer_from_node(node);
+        }
+
+        if (node->type == WLR_SCENE_NODE_TREE) {
+            struct wlr_scene_buffer *buffer =
+                find_buffer(wlr_scene_tree_from_node(node));
+
+            if (buffer) {
+                return buffer;
+            }
+        }
+    }
+
+    return NULL;
+}
 void toplevel_set_size(absn_toplevel *toplevel, int32_t width, int32_t height)
 {
     if (width <= 2 * toplevel->bw || height <= 2 * toplevel->bw ||
@@ -92,24 +114,18 @@ void toplevel_set_size(absn_toplevel *toplevel, int32_t width, int32_t height)
     toplevel->geom.width = width;
     toplevel->geom.height = height;
 
-    toplevel_update_borders_geom(toplevel);
+    struct wlr_scene_buffer *buffer = find_buffer(toplevel->scene_tree);
+    if (buffer) {
+        wlr_scene_buffer_set_dest_size(buffer, width, height);
+    }
 
     int32_t bw = toplevel->bw;
-
-    struct wlr_box clip = {
-        .x = 0,
-        .y = 0,
-        .width = width - bw,
-        .height = height - bw,
-    };
-
     if (toplevel->type == TOPLEVEL_XDG) {
         if (wl_resource_get_version(toplevel->xdg->resource) >=
             XDG_TOPLEVEL_CONFIGURE_BOUNDS_SINCE_VERSION) {
             wlr_xdg_toplevel_set_bounds(toplevel->xdg, width, height);
         }
-        toplevel->resizing = wlr_xdg_toplevel_set_size(
-            toplevel->xdg, width - 2 * bw, height - 2 * bw);
+        wlr_xdg_toplevel_set_size(toplevel->xdg, width - 2 * bw, height - 2 * bw);
     }
 #ifdef XWAYLAND
     else if (toplevel->type == TOPLEVEL_X11) {
@@ -121,22 +137,27 @@ void toplevel_set_size(absn_toplevel *toplevel, int32_t width, int32_t height)
     }
 #endif
 
+    struct wlr_box clip = {
+        .x = 0,
+        .y = 0,
+        .width = width - 2 * bw,
+        .height = height - 2 * bw,
+    };
+
     wlr_scene_subsurface_tree_set_clip(&toplevel->scene_surface->node, &clip);
+
+    toplevel_update_borders_geom(toplevel);
 }
 
 void toplevel_set_geom(absn_toplevel *toplevel, struct wlr_box *geom)
 {
-    toplevel_set_pos(toplevel, geom->x, geom->y);
     toplevel_set_size(toplevel, geom->width, geom->height);
+    toplevel_set_pos(toplevel, geom->x, geom->y);
 }
 
 void toplevel_set_floating(absn_toplevel *toplevel, bool floating)
 {
     if (!toplevel || toplevel->floating == floating) {
-        return;
-    }
-
-    if (floating && !toplevel->can_be_tiled) {
         return;
     }
 
@@ -175,6 +196,7 @@ void toplevel_set_fullscreen(absn_toplevel *toplevel, bool fullscreen)
     } else {
         toplevel->bw = toplevel_is_unmanaged(toplevel) ? 0 : TOPLEVEL_BW;
         toplevel_set_geom(toplevel, &toplevel->prev_geom);
+
         if (toplevel->floating) {
             wlr_scene_node_reparent(&toplevel->scene_tree->node,
                                     toplevel->server->layers[LAYER_FLOAT]);

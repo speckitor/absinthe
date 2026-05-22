@@ -218,12 +218,9 @@ struct absn_toplevel {
     struct wlr_scene_rect *border[4];
     struct wlr_xdg_toplevel_decoration_v1 *deco;
 
-    bool can_be_tiled;
-
     bool floating;
     bool fullscreen;
     bool urgent;
-    uint32_t resizing;
 
     struct wlr_box geom;
     struct wlr_box prev_geom;

@@ -64,8 +64,7 @@ void toplevel_map(struct wl_listener *listener, void *data)
     }
 
     for (int i = 0; i < 4; ++i) {
-        toplevel->border[i] =
-            wlr_scene_rect_create(toplevel->scene_tree, 0, 0, unfocused_bc);
+        toplevel->border[i] = wlr_scene_rect_create(toplevel->scene_tree, 0, 0, unfocused_bc);
         toplevel->border[i]->node.data = toplevel;
     }
 

@@ -127,10 +127,6 @@ static void process_cursor_resize(absn_server *server)
         return;
     }
 
-    if (toplevel->resizing) {
-        return;
-    }
-
     if (toplevel->fullscreen) {
         toplevel_set_fullscreen(toplevel, false);
     }

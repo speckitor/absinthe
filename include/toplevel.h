@@ -15,4 +15,5 @@ void toplevel_set_floating(absn_toplevel *toplevel, bool floating);
 void toplevel_set_fullscreen(absn_toplevel *toplevel, bool fullscreen);
 void toplevel_set_border_color(absn_toplevel *toplevel, const float color[4]);
 
+void toplevel_update_borders_geom(absn_toplevel *toplevel);
 #endif
