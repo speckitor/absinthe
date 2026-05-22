@@ -55,7 +55,9 @@ void focus_toplevel(absn_toplevel *toplevel)
     toplevel_set_border_color(toplevel, focused_bc);
 
     if (keyboard) {
-        wlr_seat_keyboard_notify_enter(seat, surface, keyboard->keycodes, keyboard->num_keycodes, &keyboard->modifiers);
+        wlr_seat_keyboard_notify_enter(seat, surface, keyboard->keycodes,
+                                       keyboard->num_keycodes,
+                                       &keyboard->modifiers);
     }
 }
 
@@ -68,7 +70,8 @@ absn_toplevel *focus_get_topmost(absn_server *server)
     absn_toplevel *toplevel;
     wl_list_for_each(toplevel, &server->focus_stack, flink)
     {
-        if (toplevel && toplevel->workspace == server->focused_output->workspace) {
+        if (toplevel &&
+            toplevel->workspace == server->focused_output->workspace) {
             return toplevel;
         }
     }

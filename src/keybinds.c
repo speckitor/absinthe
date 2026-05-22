@@ -151,8 +151,11 @@ void toggle_floating(absn_server *server, const absn_arg *arg)
     toplevel_set_floating(focus, !focus->floating);
 
     if (focus->floating) {
-        int32_t new_x = focus->output->geom.x + (focus->output->geom.width / 2 - focus->geom.width / 2);
-        int32_t new_y = focus->output->geom.y + (focus->output->geom.height / 2 - focus->geom.height / 2);
+        int32_t new_x = focus->output->geom.x +
+                        (focus->output->geom.width / 2 - focus->geom.width / 2);
+        int32_t new_y =
+            focus->output->geom.y +
+            (focus->output->geom.height / 2 - focus->geom.height / 2);
         toplevel_set_pos(focus, new_x, new_y);
     }
 }
@@ -203,7 +206,8 @@ void switch_workspace(absn_server *server, const absn_arg *arg)
         }
     }
 
-    if (toplevels_count == 0 && server->focused_output == server->workspaces[i].output) {
+    if (toplevels_count == 0 &&
+        server->focused_output == server->workspaces[i].output) {
         server->focused_output->workspace->output = NULL;
     }
 
@@ -226,11 +230,13 @@ void switch_workspace(absn_server *server, const absn_arg *arg)
     absn_toplevel *focus = NULL;
     wl_list_for_each(toplevel, &server->toplevels, link)
     {
-        if (!focus && toplevel && toplevel->workspace == &server->workspaces[i]) {
+        if (!focus && toplevel &&
+            toplevel->workspace == &server->workspaces[i]) {
             focus = toplevel; /* found it */
         }
 
-        if (toplevel && toplevel->workspace == &server->workspaces[i] && toplevel->fullscreen) {
+        if (toplevel && toplevel->workspace == &server->workspaces[i] &&
+            toplevel->fullscreen) {
             /* overwrite if there is a fullscreen window */
             focus = toplevel;
             break;

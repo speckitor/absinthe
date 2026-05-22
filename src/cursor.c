@@ -9,8 +9,11 @@
  * returns surface at given cursor coordinates
  * and coordinates inside of it to process input event
  */
-void client_from_coords(absn_server *server, double x, double y, struct wlr_surface **rsurface,
-                        absn_toplevel **rtoplevel, absn_layer_surface **rlayer_surface, double *rx, double *ry)
+void client_from_coords(absn_server *server, double x, double y,
+                        struct wlr_surface **rsurface,
+                        absn_toplevel **rtoplevel,
+                        absn_layer_surface **rlayer_surface, double *rx,
+                        double *ry)
 {
     struct wlr_scene_node *pnode = NULL, *node = NULL;
     struct wlr_scene_buffer *buffer = NULL;
@@ -106,7 +109,8 @@ static void apply_resize(absn_toplevel *toplevel, struct wlr_box *new_geom)
             new_geom->x = toplevel->geom.x;
         }
 
-        if (!(new_geom->height >= min_height && new_geom->height <= max_height)) {
+        if (!(new_geom->height >= min_height &&
+              new_geom->height <= max_height)) {
             new_geom->height = toplevel->geom.height;
             new_geom->y = toplevel->geom.y;
         }
@@ -189,7 +193,8 @@ void process_cursor_motion(absn_server *server, uint32_t time)
 {
     double x, y;
     struct wlr_surface *surface = NULL;
-    client_from_coords(server, server->cursor->x, server->cursor->y, &surface, NULL, NULL, &x, &y);
+    client_from_coords(server, server->cursor->x, server->cursor->y, &surface,
+                       NULL, NULL, &x, &y);
     struct wlr_seat *seat = server->seat;
 
     if (server->cursor_mode == CURSOR_MOVE) {

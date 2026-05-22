@@ -5,9 +5,11 @@
 void deco_request_mode(struct wl_listener *listener, void *data)
 {
     UNUSED(data);
-    absn_toplevel *toplevel = wl_container_of(listener, toplevel, deco_request_mode);
+    absn_toplevel *toplevel =
+        wl_container_of(listener, toplevel, deco_request_mode);
     if (toplevel->xdg->base->initialized) {
-        wlr_xdg_toplevel_decoration_v1_set_mode(toplevel->deco, WLR_XDG_TOPLEVEL_DECORATION_V1_MODE_SERVER_SIDE);
+        wlr_xdg_toplevel_decoration_v1_set_mode(
+            toplevel->deco, WLR_XDG_TOPLEVEL_DECORATION_V1_MODE_SERVER_SIDE);
     }
 }
 

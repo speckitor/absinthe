@@ -28,10 +28,10 @@
 #define MAX(A, B) (A) > (B) ? (A) : (B)
 #define MIN(A, B) (A) < (B) ? (A) : (B)
 /* macro for adding listener for event */
-#define LISTEN(L, C, E)                                                                                                \
-    do {                                                                                                               \
-        (L).notify = (C);                                                                                              \
-        wl_signal_add(&(E), &(L));                                                                                     \
+#define LISTEN(L, C, E)                                                        \
+    do {                                                                       \
+        (L).notify = (C);                                                      \
+        wl_signal_add(&(E), &(L));                                             \
     } while (0);
 #define UNUSED(X) (void)(X)
 #define CLEANMASK(M) (M & ~WLR_MODIFIER_CAPS)
